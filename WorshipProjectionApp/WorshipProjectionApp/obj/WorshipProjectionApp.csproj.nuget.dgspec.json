@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\Tiago.Rosario\\source\\repos\\WorshipProjectionApp\\WorshipProjectionApp\\WorshipProjectionApp.csproj": {}
+    "C:\\Users\\Tiago.Rosario\\Documents\\GitHub\\WorshipProject\\WorshipProjectionApp\\WorshipProjectionApp\\WorshipProjectionApp.csproj": {}
   },
   "projects": {
-    "C:\\Users\\Tiago.Rosario\\source\\repos\\WorshipProjectionApp\\WorshipProjectionApp\\WorshipProjectionApp.csproj": {
+    "C:\\Users\\Tiago.Rosario\\Documents\\GitHub\\WorshipProject\\WorshipProjectionApp\\WorshipProjectionApp\\WorshipProjectionApp.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\Tiago.Rosario\\source\\repos\\WorshipProjectionApp\\WorshipProjectionApp\\WorshipProjectionApp.csproj",
+        "projectUniqueName": "C:\\Users\\Tiago.Rosario\\Documents\\GitHub\\WorshipProject\\WorshipProjectionApp\\WorshipProjectionApp\\WorshipProjectionApp.csproj",
         "projectName": "WorshipProjectionApp",
-        "projectPath": "C:\\Users\\Tiago.Rosario\\source\\repos\\WorshipProjectionApp\\WorshipProjectionApp\\WorshipProjectionApp.csproj",
+        "projectPath": "C:\\Users\\Tiago.Rosario\\Documents\\GitHub\\WorshipProject\\WorshipProjectionApp\\WorshipProjectionApp\\WorshipProjectionApp.csproj",
         "packagesPath": "C:\\Users\\Tiago.Rosario\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\Tiago.Rosario\\source\\repos\\WorshipProjectionApp\\WorshipProjectionApp\\obj\\",
+        "outputPath": "C:\\Users\\Tiago.Rosario\\Documents\\GitHub\\WorshipProject\\WorshipProjectionApp\\WorshipProjectionApp\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"

@@ -3,44 +3,48 @@ using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using System.Text.Json;
 using WorshipProjectionApp.Models;
 using WorshipProjectionApp.Services;
-using System.Text.Json;
 using LayoutSettings = WorshipProjectionApp.Models.LayoutSettings;
 
 namespace WorshipProjectionApp;
 
 public partial class MainWindow : Window
 {
+    private static readonly string AutoSavePath = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "autosave_schedule.json");
+    private ProjectionSettings _projectionSettings = ProjectionSettings.Load();
+    private LayoutSettings _layoutSettings = LayoutSettings.Load();
+
+    public ObservableCollection<ScheduleItem> ScheduleItems { get; set; } = new();
+    public ObservableCollection<Song> FilteredSongs { get; set; } = new();
     public ObservableCollection<WorshipTeamMember> TeamCatalog { get; set; } = new();
     public ObservableCollection<WorshipTeamMember> ActiveTeam { get; set; } = new();
-    private ProjectionSettings _projectionSettings = ProjectionSettings.Load();
-    private static readonly string AutoSavePath = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "autosave_schedule.json");
-    public ObservableCollection<ScheduleItem> ScheduleItems { get; set; } = new();
+
     private ProjectionWindow? _projectionWindow;
     private string? _currentBackgroundPath;
     private bool _isBlackout;
     private readonly DatabaseService _dbService = new();
     private List<Song> _allSongs = new();
-    public ObservableCollection<Song> FilteredSongs { get; set; } = new();
     private readonly BibleService _bibleService = new();
-    private LayoutSettings _layoutSettings = LayoutSettings.Load();
 
     public MainWindow()
     {
         InitializeComponent();
         LoadSampleData();
         RestoreLastSession();
-        LstSongs.ItemsSource = FilteredSongs;
-        LstSchedule.ItemsSource = ScheduleItems; // Ligação necessária para os itens aparecerem
-        this.KeyDown += MainWindow_KeyDown;
-        ApplyLayout(_layoutSettings);
         LoadTeamData();
+
+        LstSongs.ItemsSource = FilteredSongs;
+        LstSchedule.ItemsSource = ScheduleItems;
         LstActiveTeam.ItemsSource = ActiveTeam;
         CmbPresetMembers.ItemsSource = TeamCatalog;
         if (TeamCatalog.Count > 0) CmbPresetMembers.SelectedIndex = 0;
-    }
 
+        ApplyLayout(_layoutSettings);
+
+        this.KeyDown += MainWindow_KeyDown;
+    }
 
     private void LoadSampleData()
     {
@@ -60,6 +64,114 @@ public partial class MainWindow : Window
         UpdateSongFilter(string.Empty);
     }
 
+    private void LoadTeamData()
+    {
+        var catalog = WorshipTeamCatalog.LoadCatalog();
+        TeamCatalog.Clear();
+        foreach (var c in catalog) TeamCatalog.Add(c);
+
+        if (ActiveTeam.Count == 0 && TeamCatalog.Count >= 2)
+        {
+            ActiveTeam.Add(new WorshipTeamMember { Name = TeamCatalog[0].Name, Role = TeamCatalog[0].Role, Microphone = TeamCatalog[0].Microphone, InEarReturn = TeamCatalog[0].InEarReturn });
+            ActiveTeam.Add(new WorshipTeamMember { Name = TeamCatalog[1].Name, Role = TeamCatalog[1].Role, Microphone = TeamCatalog[1].Microphone, InEarReturn = TeamCatalog[1].InEarReturn });
+        }
+    }
+
+    private void BtnAddTeamMember_Click(object sender, RoutedEventArgs e)
+    {
+        if (CmbPresetMembers.SelectedItem is WorshipTeamMember member)
+        {
+            if (!ActiveTeam.Any(m => m.Name.Equals(member.Name, StringComparison.OrdinalIgnoreCase)))
+            {
+                ActiveTeam.Add(new WorshipTeamMember
+                {
+                    Name = member.Name,
+                    Microphone = member.Microphone,
+                    InEarReturn = member.InEarReturn,
+                    Role = member.Role
+                });
+            }
+        }
+    }
+
+    private void BtnEditTeamMember_Click(object sender, RoutedEventArgs e)
+    {
+        // Previne que o evento suba e seja capturado pelo ListBox
+        e.Handled = true;
+
+        WorshipTeamMember? member = null;
+
+        if (sender is FrameworkElement element)
+        {
+            member = element.DataContext as WorshipTeamMember;
+        }
+
+        if (member == null) return;
+
+        var editDialog = new EditTeamMemberWindow(member)
+        {
+            Owner = this
+        };
+
+        if (editDialog.ShowDialog() == true)
+        {
+            if (editDialog.IsDeleted)
+            {
+                ActiveTeam.Remove(member);
+            }
+            else
+            {
+                int index = ActiveTeam.IndexOf(member);
+                if (index >= 0)
+                {
+                    // Substitui a instância para notificar o ListBox da atualização
+                    ActiveTeam[index] = new WorshipTeamMember
+                    {
+                        Name = editDialog.Member.Name,
+                        Role = editDialog.Member.Role,
+                        Microphone = editDialog.Member.Microphone,
+                        InEarReturn = editDialog.Member.InEarReturn
+                    };
+                }
+            }
+        }
+    }
+
+    private void BtnOpenLayoutConfig_Click(object sender, RoutedEventArgs e)
+    {
+        var dlg = new LayoutConfigWindow(_layoutSettings) { Owner = this };
+        if (dlg.ShowDialog() == true)
+        {
+            _layoutSettings = dlg.ResultSettings;
+            ApplyLayout(_layoutSettings);
+        }
+    }
+
+    private void ApplyLayout(LayoutSettings settings)
+    {
+        if (MainColumnsGrid == null) return;
+
+        var panelMap = new Dictionary<PanelType, FrameworkElement>
+        {
+            { PanelType.Resources,   PanelResources },
+            { PanelType.Schedule,    PanelSchedule },
+            { PanelType.Slides,      PanelSlides },
+            { PanelType.Live,        PanelLive },
+            { PanelType.WorshipTeam, PanelWorshipTeam }
+        };
+
+        foreach (var config in settings.Panels)
+        {
+            if (panelMap.TryGetValue(config.Type, out var element))
+            {
+                Grid.SetRow(element, Math.Clamp(config.Row, 0, 3));
+                Grid.SetColumn(element, Math.Clamp(config.Column, 0, 3));
+                Grid.SetRowSpan(element, Math.Clamp(config.RowSpan, 1, 4));
+                Grid.SetColumnSpan(element, Math.Clamp(config.ColumnSpan, 1, 4));
+            }
+        }
+    }
+
     private void BtnOpenSettings_Click(object sender, RoutedEventArgs e)
     {
         var settingsDialog = new SettingsWindow(_projectionSettings)
@@ -74,90 +186,15 @@ public partial class MainWindow : Window
         }
     }
 
-    private void LoadTeamData()
-    {
-        var catalog = WorshipTeamCatalog.LoadCatalog();
-        TeamCatalog.Clear();
-        foreach (var c in catalog) TeamCatalog.Add(c);
-
-        // Carrega os 2 primeiros como exemplo ativo se estiver vazio
-        if (ActiveTeam.Count == 0 && TeamCatalog.Count >= 2)
-        {
-            ActiveTeam.Add(TeamCatalog[0]);
-            ActiveTeam.Add(TeamCatalog[1]);
-        }
-    }
-
-    private void BtnAddTeamMember_Click(object sender, RoutedEventArgs e)
-    {
-        if (CmbPresetMembers.SelectedItem is WorshipTeamMember member)
-        {
-            // Se ainda não estiver na lista ativa do dia, adiciona
-            if (!ActiveTeam.Any(m => m.Name.Equals(member.Name, StringComparison.OrdinalIgnoreCase)))
-            {
-                ActiveTeam.Add(new WorshipTeamMember
-                {
-                    Name = member.Name,
-                    Microphone = member.Microphone,
-                    InEarReturn = member.InEarReturn,
-                    Role = member.Role
-                });
-            }
-        }
-    }
-
-    private void BtnRemoveTeamMember_Click(object sender, RoutedEventArgs e)
-    {
-        if (sender is System.Windows.Forms.Button btn && btn.DataContext is WorshipTeamMember member)
-        {
-            ActiveTeam.Remove(member);
-        }
-    }
-
     private void SaveCurrentSession()
     {
         try
         {
-            var options = new System.Text.Json.JsonSerializerOptions { WriteIndented = true };
-            string json = System.Text.Json.JsonSerializer.Serialize(ScheduleItems, options);
+            var options = new JsonSerializerOptions { WriteIndented = true };
+            string json = JsonSerializer.Serialize(ScheduleItems, options);
             System.IO.File.WriteAllText(AutoSavePath, json);
         }
         catch { }
-    }
-
-    private void BtnOpenLayoutConfig_Click(object sender, RoutedEventArgs e)
-    {
-        var dlg = new LayoutConfigWindow(_layoutSettings) { Owner = this };
-        if (dlg.ShowDialog() == true)
-        {
-            _layoutSettings = dlg.ResultSettings; 
-            ApplyLayout(_layoutSettings);
-        }
-    }
-
-    private void ApplyLayout(LayoutSettings settings)
-    {
-        if (MainColumnsGrid == null) return;
-
-        var panelMap = new Dictionary<PanelType, FrameworkElement>
-    {
-        { PanelType.Resources,   PanelResources },
-        { PanelType.Schedule,    PanelSchedule },
-        { PanelType.Slides,      PanelSlides },
-        { PanelType.Live,        PanelLive },
-        { PanelType.WorshipTeam, PanelWorshipTeam }
-    };
-
-        foreach (var config in settings.Panels)
-        {
-            if (panelMap.TryGetValue(config.Type, out var element))
-            {
-                Grid.SetRow(element, Math.Clamp(config.Row, 0, 3));
-                Grid.SetColumn(element, Math.Clamp(config.Column, 0, 3));
-                Grid.SetRowSpan(element, Math.Clamp(config.RowSpan, 1, 4));
-                Grid.SetColumnSpan(element, Math.Clamp(config.ColumnSpan, 1, 4));
-            }
-        }
     }
 
     private void RestoreLastSession()
@@ -167,7 +204,7 @@ public partial class MainWindow : Window
             if (System.IO.File.Exists(AutoSavePath))
             {
                 string json = System.IO.File.ReadAllText(AutoSavePath);
-                var items = System.Text.Json.JsonSerializer.Deserialize<List<ScheduleItem>>(json);
+                var items = JsonSerializer.Deserialize<List<ScheduleItem>>(json);
                 if (items != null && items.Count > 0)
                 {
                     ScheduleItems.Clear();
@@ -207,167 +244,6 @@ public partial class MainWindow : Window
 
             SendToProjection(slide.Content);
         }
-    }
-
-    private void BtnSaveSchedule_Click(object sender, RoutedEventArgs e)
-    {
-        if (ScheduleItems.Count == 0)
-        {
-            System.Windows.MessageBox.Show("O Rol do Culto está vazio.", "Aviso", MessageBoxButton.OK, MessageBoxImage.Information);
-            return;
-        }
-
-        var dialog = new Microsoft.Win32.SaveFileDialog
-        {
-            Title = "Guardar Rol de Culto",
-            Filter = "Ficheiro de Culto (*.worship)|*.worship|Ficheiro JSON (*.json)|*.json",
-            FileName = $"Culto_{DateTime.Now:yyyy-MM-dd}"
-        };
-
-        if (dialog.ShowDialog() == true)
-        {
-            try
-            {
-                var options = new JsonSerializerOptions { WriteIndented = true };
-                string json = JsonSerializer.Serialize(ScheduleItems, options);
-                System.IO.File.WriteAllText(dialog.FileName, json);
-
-                System.Windows.MessageBox.Show("Rol de Culto guardado com sucesso!", "Sucesso", MessageBoxButton.OK, MessageBoxImage.Information);
-            }
-            catch (Exception ex)
-            {
-                System.Windows.MessageBox.Show($"Erro ao guardar: {ex.Message}", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
-            }
-        }
-    }
-
-    private void BtnLoadSchedule_Click(object sender, RoutedEventArgs e)
-    {
-        var dialog = new Microsoft.Win32.OpenFileDialog
-        {
-            Title = "Abrir Rol de Culto",
-            Filter = "Ficheiro de Culto (*.worship;*.json)|*.worship;*.json|Todos os Ficheiros (*.*)|*.*"
-        };
-
-        if (dialog.ShowDialog() == true)
-        {
-            try
-            {
-                string json = System.IO.File.ReadAllText(dialog.FileName);
-                var items = JsonSerializer.Deserialize<List<ScheduleItem>>(json);
-
-                if (items != null)
-                {
-                    ScheduleItems.Clear();
-                    foreach (var item in items)
-                    {
-                        ScheduleItems.Add(item);
-                    }
-
-                    if (ScheduleItems.Count > 0)
-                    {
-                        LstSchedule.SelectedIndex = 0;
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                System.Windows.MessageBox.Show($"Erro ao abrir o ficheiro: {ex.Message}", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
-            }
-        }
-    }
-
-    private void BtnMoveUpSchedule_Click(object sender, RoutedEventArgs e)
-    {
-        int index = LstSchedule.SelectedIndex;
-        if (index > 0)
-        {
-            var item = ScheduleItems[index];
-            ScheduleItems.RemoveAt(index);
-            ScheduleItems.Insert(index - 1, item);
-            LstSchedule.SelectedIndex = index - 1;
-            SaveCurrentSession();
-        }
-    }
-
-    private void BtnMoveDownSchedule_Click(object sender, RoutedEventArgs e)
-    {
-        int index = LstSchedule.SelectedIndex;
-        if (index >= 0 && index < ScheduleItems.Count - 1)
-        {
-            var item = ScheduleItems[index];
-            ScheduleItems.RemoveAt(index);
-            ScheduleItems.Insert(index + 1, item);
-            LstSchedule.SelectedIndex = index + 1;
-            SaveCurrentSession();
-        }
-    }
-
-    private void BtnAddSongToSchedule_Click(object sender, RoutedEventArgs e)
-    {
-        if (LstSongs.SelectedItem is Song song)
-        {
-            var item = new ScheduleItem
-            {
-                Title = song.Title,
-                Subtitle = string.IsNullOrWhiteSpace(song.Artist) ? "Música" : song.Artist,
-                Slides = song.ParseSlides()
-            };
-
-            ScheduleItems.Add(item);
-            LstSchedule.SelectedItem = item;
-            SaveCurrentSession();
-        }
-        else
-        {
-            System.Windows.MessageBox.Show(
-                "Seleciona uma música da lista para adicionar ao rol.",
-                "Aviso",
-                MessageBoxButton.OK,
-                MessageBoxImage.Information);
-        }
-    }
-
-    private void BtnAddBibleToSchedule_Click(object sender, RoutedEventArgs e)
-    {
-        if (LstBibleResults.SelectedItem is BibleVerse verse)
-        {
-            var item = new ScheduleItem
-            {
-                Title = verse.Reference,
-                Subtitle = "Passagem Bíblica",
-                Slides = new List<SlideItem> { verse.ToSlideItem() }
-            };
-
-            ScheduleItems.Add(item);
-            LstSchedule.SelectedItem = item;
-            SaveCurrentSession();
-        }
-        else
-        {
-            System.Windows.MessageBox.Show(
-                "Pesquisa e seleciona um versículo da lista para adicionar ao rol.",
-                "Aviso",
-                MessageBoxButton.OK,
-                MessageBoxImage.Information);
-        }
-    }
-
-    private void BtnRemoveFromSchedule_Click(object sender, RoutedEventArgs e)
-    {
-        if (LstSchedule.SelectedItem is ScheduleItem item)
-        {
-            ScheduleItems.Remove(item);
-            SaveCurrentSession();
-        }
-    }
-
-    private void BtnClearSchedule_Click(object sender, RoutedEventArgs e)
-    {
-        ScheduleItems.Clear();
-        LstSlides.ItemsSource = null;
-        TxtSelectedSongTitle.Text = "Nenhum item selecionado";
-        SaveCurrentSession();
     }
 
     private void LstSchedule_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -600,7 +476,6 @@ public partial class MainWindow : Window
         {
             SetPreviewMediaBackground(null);
             TxtPreview.Text = string.Empty;
-
             _projectionWindow?.SetBlackout(true);
         }
         else
@@ -615,27 +490,6 @@ public partial class MainWindow : Window
             {
                 _projectionWindow.SetMediaBackground(_currentBackgroundPath);
                 _projectionWindow.UpdateText(TxtPreview.Text);
-            }
-        }
-    }
-
-    private void BtnSelectBackground_Click(object sender, RoutedEventArgs e)
-    {
-        var dialog = new Microsoft.Win32.OpenFileDialog
-        {
-            Title = "Selecionar Fundo (Vídeo ou Imagem)",
-            Filter = "Ficheiros Multimédia (*.mp4;*.mov;*.wmv;*.jpg;*.png;*.webp)|*.mp4;*.mov;*.wmv;*.avi;*.jpg;*.jpeg;*.png;*.webp|Vídeos (*.mp4;*.mov;*.wmv)|*.mp4;*.mov;*.wmv;*.avi|Imagens (*.jpg;*.png)|*.jpg;*.jpeg;*.png;*.webp"
-        };
-
-        if (dialog.ShowDialog() == true)
-        {
-            _currentBackgroundPath = dialog.FileName;
-
-            SetPreviewMediaBackground(_currentBackgroundPath);
-
-            if (_projectionWindow != null && !_isBlackout)
-            {
-                _projectionWindow.SetMediaBackground(_currentBackgroundPath);
             }
         }
     }
@@ -689,13 +543,6 @@ public partial class MainWindow : Window
     {
         PreviewVideo.Position = TimeSpan.Zero;
         PreviewVideo.Play();
-    }
-
-    private void BtnRemoveBackground_Click(object sender, RoutedEventArgs e)
-    {
-        _currentBackgroundPath = null;
-        SetPreviewMediaBackground(null);
-        _projectionWindow?.SetMediaBackground(null);
     }
 
     private void BtnMinimize_Click(object sender, RoutedEventArgs e)

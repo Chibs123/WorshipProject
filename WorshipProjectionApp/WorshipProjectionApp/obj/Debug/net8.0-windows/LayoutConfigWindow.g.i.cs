@@ -101,7 +101,7 @@ namespace WorshipProjectionApp {
                 return;
             }
             _contentLoaded = true;
-            System.Uri resourceLocater = new System.Uri("/WorshipProjectionApp;V1.0.0.0;component/layoutconfigwindow.xaml", System.UriKind.Relative);
+            System.Uri resourceLocater = new System.Uri("/WorshipProjectionApp;component/layoutconfigwindow.xaml", System.UriKind.Relative);
             
             #line 1 "..\..\..\LayoutConfigWindow.xaml"
             System.Windows.Application.LoadComponent(this, resourceLocater);

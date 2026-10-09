@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "2XROTw0oPhE=",
+  "dgSpecHash": "pTv5ZF1LSRw=",
   "success": true,
-  "projectFilePath": "C:\\Users\\Tiago.Rosario\\source\\repos\\WorshipProjectionApp\\WorshipProjectionApp\\WorshipProjectionApp.csproj",
+  "projectFilePath": "C:\\Users\\Tiago.Rosario\\Documents\\GitHub\\WorshipProject\\WorshipProjectionApp\\WorshipProjectionApp\\WorshipProjectionApp.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\Tiago.Rosario\\.nuget\\packages\\dapper\\2.1.89\\dapper.2.1.89.nupkg.sha512",
     "C:\\Users\\Tiago.Rosario\\.nuget\\packages\\libvlcsharp\\3.10.1\\libvlcsharp.3.10.1.nupkg.sha512",
