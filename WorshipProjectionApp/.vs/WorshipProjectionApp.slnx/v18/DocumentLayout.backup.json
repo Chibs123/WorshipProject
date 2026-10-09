@@ -1,0 +1,355 @@
+{
+  "Version": 1,
+  "WorkspaceRootPath": "C:\\Users\\Tiago.Rosario\\source\\repos\\WorshipProjectionApp\\",
+  "Documents": [
+    {
+      "AbsoluteMoniker": "D:0:0:{2FD0B889-E0E2-F9BD-1339-7C14597ECC99}|WorshipProjectionApp\\WorshipProjectionApp.csproj|c:\\users\\tiago.rosario\\source\\repos\\worshipprojectionapp\\worshipprojectionapp\\mainwindow.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}",
+      "RelativeMoniker": "D:0:0:{2FD0B889-E0E2-F9BD-1339-7C14597ECC99}|WorshipProjectionApp\\WorshipProjectionApp.csproj|solutionrelative:worshipprojectionapp\\mainwindow.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{2FD0B889-E0E2-F9BD-1339-7C14597ECC99}|WorshipProjectionApp\\WorshipProjectionApp.csproj|c:\\users\\tiago.rosario\\source\\repos\\worshipprojectionapp\\worshipprojectionapp\\mainwindow.xaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{2FD0B889-E0E2-F9BD-1339-7C14597ECC99}|WorshipProjectionApp\\WorshipProjectionApp.csproj|solutionrelative:worshipprojectionapp\\mainwindow.xaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{2FD0B889-E0E2-F9BD-1339-7C14597ECC99}|WorshipProjectionApp\\WorshipProjectionApp.csproj|c:\\users\\tiago.rosario\\source\\repos\\worshipprojectionapp\\worshipprojectionapp\\layoutconfigwindow.xaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{2FD0B889-E0E2-F9BD-1339-7C14597ECC99}|WorshipProjectionApp\\WorshipProjectionApp.csproj|solutionrelative:worshipprojectionapp\\layoutconfigwindow.xaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{2FD0B889-E0E2-F9BD-1339-7C14597ECC99}|WorshipProjectionApp\\WorshipProjectionApp.csproj|c:\\users\\tiago.rosario\\source\\repos\\worshipprojectionapp\\worshipprojectionapp\\layoutconfigwindow.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}",
+      "RelativeMoniker": "D:0:0:{2FD0B889-E0E2-F9BD-1339-7C14597ECC99}|WorshipProjectionApp\\WorshipProjectionApp.csproj|solutionrelative:worshipprojectionapp\\layoutconfigwindow.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{2FD0B889-E0E2-F9BD-1339-7C14597ECC99}|WorshipProjectionApp\\WorshipProjectionApp.csproj|c:\\users\\tiago.rosario\\source\\repos\\worshipprojectionapp\\worshipprojectionapp\\models\\layoutsettings.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{2FD0B889-E0E2-F9BD-1339-7C14597ECC99}|WorshipProjectionApp\\WorshipProjectionApp.csproj|solutionrelative:worshipprojectionapp\\models\\layoutsettings.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{2FD0B889-E0E2-F9BD-1339-7C14597ECC99}|WorshipProjectionApp\\WorshipProjectionApp.csproj|c:\\users\\tiago.rosario\\source\\repos\\worshipprojectionapp\\worshipprojectionapp\\models\\projectionsettings.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{2FD0B889-E0E2-F9BD-1339-7C14597ECC99}|WorshipProjectionApp\\WorshipProjectionApp.csproj|solutionrelative:worshipprojectionapp\\models\\projectionsettings.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{2FD0B889-E0E2-F9BD-1339-7C14597ECC99}|WorshipProjectionApp\\WorshipProjectionApp.csproj|c:\\users\\tiago.rosario\\source\\repos\\worshipprojectionapp\\worshipprojectionapp\\models\\worshipteammember.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{2FD0B889-E0E2-F9BD-1339-7C14597ECC99}|WorshipProjectionApp\\WorshipProjectionApp.csproj|solutionrelative:worshipprojectionapp\\models\\worshipteammember.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{2FD0B889-E0E2-F9BD-1339-7C14597ECC99}|WorshipProjectionApp\\WorshipProjectionApp.csproj|c:\\users\\tiago.rosario\\source\\repos\\worshipprojectionapp\\worshipprojectionapp\\app.xaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{2FD0B889-E0E2-F9BD-1339-7C14597ECC99}|WorshipProjectionApp\\WorshipProjectionApp.csproj|solutionrelative:worshipprojectionapp\\app.xaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{2FD0B889-E0E2-F9BD-1339-7C14597ECC99}|WorshipProjectionApp\\WorshipProjectionApp.csproj|c:\\users\\tiago.rosario\\source\\repos\\worshipprojectionapp\\worshipprojectionapp\\settingswindow.xaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{2FD0B889-E0E2-F9BD-1339-7C14597ECC99}|WorshipProjectionApp\\WorshipProjectionApp.csproj|solutionrelative:worshipprojectionapp\\settingswindow.xaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{2FD0B889-E0E2-F9BD-1339-7C14597ECC99}|WorshipProjectionApp\\WorshipProjectionApp.csproj|c:\\users\\tiago.rosario\\source\\repos\\worshipprojectionapp\\worshipprojectionapp\\settingswindow.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}",
+      "RelativeMoniker": "D:0:0:{2FD0B889-E0E2-F9BD-1339-7C14597ECC99}|WorshipProjectionApp\\WorshipProjectionApp.csproj|solutionrelative:worshipprojectionapp\\settingswindow.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{2FD0B889-E0E2-F9BD-1339-7C14597ECC99}|WorshipProjectionApp\\WorshipProjectionApp.csproj|c:\\users\\tiago.rosario\\source\\repos\\worshipprojectionapp\\worshipprojectionapp\\projectionwindow.xaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{2FD0B889-E0E2-F9BD-1339-7C14597ECC99}|WorshipProjectionApp\\WorshipProjectionApp.csproj|solutionrelative:worshipprojectionapp\\projectionwindow.xaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{2FD0B889-E0E2-F9BD-1339-7C14597ECC99}|WorshipProjectionApp\\WorshipProjectionApp.csproj|c:\\users\\tiago.rosario\\source\\repos\\worshipprojectionapp\\worshipprojectionapp\\projectionwindow.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}",
+      "RelativeMoniker": "D:0:0:{2FD0B889-E0E2-F9BD-1339-7C14597ECC99}|WorshipProjectionApp\\WorshipProjectionApp.csproj|solutionrelative:worshipprojectionapp\\projectionwindow.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{2FD0B889-E0E2-F9BD-1339-7C14597ECC99}|WorshipProjectionApp\\WorshipProjectionApp.csproj|c:\\users\\tiago.rosario\\source\\repos\\worshipprojectionapp\\worshipprojectionapp\\services\\scheduleitem.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{2FD0B889-E0E2-F9BD-1339-7C14597ECC99}|WorshipProjectionApp\\WorshipProjectionApp.csproj|solutionrelative:worshipprojectionapp\\services\\scheduleitem.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{2FD0B889-E0E2-F9BD-1339-7C14597ECC99}|WorshipProjectionApp\\WorshipProjectionApp.csproj|c:\\users\\tiago.rosario\\source\\repos\\worshipprojectionapp\\worshipprojectionapp\\services\\bibleservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{2FD0B889-E0E2-F9BD-1339-7C14597ECC99}|WorshipProjectionApp\\WorshipProjectionApp.csproj|solutionrelative:worshipprojectionapp\\services\\bibleservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{2FD0B889-E0E2-F9BD-1339-7C14597ECC99}|WorshipProjectionApp\\WorshipProjectionApp.csproj|c:\\users\\tiago.rosario\\source\\repos\\worshipprojectionapp\\worshipprojectionapp\\app.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}",
+      "RelativeMoniker": "D:0:0:{2FD0B889-E0E2-F9BD-1339-7C14597ECC99}|WorshipProjectionApp\\WorshipProjectionApp.csproj|solutionrelative:worshipprojectionapp\\app.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{2FD0B889-E0E2-F9BD-1339-7C14597ECC99}|WorshipProjectionApp\\WorshipProjectionApp.csproj|c:\\users\\tiago.rosario\\source\\repos\\worshipprojectionapp\\worshipprojectionapp\\services\\easyworshipimporter.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{2FD0B889-E0E2-F9BD-1339-7C14597ECC99}|WorshipProjectionApp\\WorshipProjectionApp.csproj|solutionrelative:worshipprojectionapp\\services\\easyworshipimporter.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{2FD0B889-E0E2-F9BD-1339-7C14597ECC99}|WorshipProjectionApp\\WorshipProjectionApp.csproj|c:\\users\\tiago.rosario\\source\\repos\\worshipprojectionapp\\worshipprojectionapp\\services\\databaseservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{2FD0B889-E0E2-F9BD-1339-7C14597ECC99}|WorshipProjectionApp\\WorshipProjectionApp.csproj|solutionrelative:worshipprojectionapp\\services\\databaseservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{2FD0B889-E0E2-F9BD-1339-7C14597ECC99}|WorshipProjectionApp\\WorshipProjectionApp.csproj|c:\\users\\tiago.rosario\\source\\repos\\worshipprojectionapp\\worshipprojectionapp\\models\\bibleverse.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{2FD0B889-E0E2-F9BD-1339-7C14597ECC99}|WorshipProjectionApp\\WorshipProjectionApp.csproj|solutionrelative:worshipprojectionapp\\models\\bibleverse.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{2FD0B889-E0E2-F9BD-1339-7C14597ECC99}|WorshipProjectionApp\\WorshipProjectionApp.csproj|c:\\users\\tiago.rosario\\source\\repos\\worshipprojectionapp\\worshipprojectionapp\\models\\song.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{2FD0B889-E0E2-F9BD-1339-7C14597ECC99}|WorshipProjectionApp\\WorshipProjectionApp.csproj|solutionrelative:worshipprojectionapp\\models\\song.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{2FD0B889-E0E2-F9BD-1339-7C14597ECC99}|WorshipProjectionApp\\WorshipProjectionApp.csproj|c:\\users\\tiago.rosario\\source\\repos\\worshipprojectionapp\\worshipprojectionapp\\models\\slideitem.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{2FD0B889-E0E2-F9BD-1339-7C14597ECC99}|WorshipProjectionApp\\WorshipProjectionApp.csproj|solutionrelative:worshipprojectionapp\\models\\slideitem.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    }
+  ],
+  "DocumentGroupContainers": [
+    {
+      "Orientation": 0,
+      "VerticalTabListWidth": 256,
+      "DocumentGroups": [
+        {
+          "DockedWidth": 200,
+          "SelectedChildIndex": 13,
+          "Children": [
+            {
+              "$type": "Document",
+              "DocumentIndex": 6,
+              "Title": "WorshipTeamMember.cs",
+              "DocumentMoniker": "C:\\Users\\Tiago.Rosario\\source\\repos\\WorshipProjectionApp\\WorshipProjectionApp\\Models\\WorshipTeamMember.cs",
+              "RelativeDocumentMoniker": "WorshipProjectionApp\\Models\\WorshipTeamMember.cs",
+              "ToolTip": "C:\\Users\\Tiago.Rosario\\source\\repos\\WorshipProjectionApp\\WorshipProjectionApp\\Models\\WorshipTeamMember.cs",
+              "RelativeToolTip": "WorshipProjectionApp\\Models\\WorshipTeamMember.cs",
+              "ViewState": "AgIAABQAAAAAAAAAAADwvzYAAAABAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-10-09T13:29:14.952Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
+              "Title": "LayoutConfigWindow.xaml.cs",
+              "DocumentMoniker": "C:\\Users\\Tiago.Rosario\\source\\repos\\WorshipProjectionApp\\WorshipProjectionApp\\LayoutConfigWindow.xaml.cs",
+              "RelativeDocumentMoniker": "WorshipProjectionApp\\LayoutConfigWindow.xaml.cs",
+              "ToolTip": "C:\\Users\\Tiago.Rosario\\source\\repos\\WorshipProjectionApp\\WorshipProjectionApp\\LayoutConfigWindow.xaml.cs",
+              "RelativeToolTip": "WorshipProjectionApp\\LayoutConfigWindow.xaml.cs",
+              "ViewState": "AgIAAIsAAAAAAAAAAAAwwKoAAAAFAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-10-09T12:34:53.463Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 3,
+              "Title": "LayoutConfigWindow.xaml",
+              "DocumentMoniker": "C:\\Users\\Tiago.Rosario\\source\\repos\\WorshipProjectionApp\\WorshipProjectionApp\\LayoutConfigWindow.xaml",
+              "RelativeDocumentMoniker": "WorshipProjectionApp\\LayoutConfigWindow.xaml",
+              "ToolTip": "C:\\Users\\Tiago.Rosario\\source\\repos\\WorshipProjectionApp\\WorshipProjectionApp\\LayoutConfigWindow.xaml",
+              "RelativeToolTip": "WorshipProjectionApp\\LayoutConfigWindow.xaml",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003549|",
+              "WhenOpened": "2026-10-09T12:34:31.863Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 4,
+              "Title": "LayoutSettings.cs",
+              "DocumentMoniker": "C:\\Users\\Tiago.Rosario\\source\\repos\\WorshipProjectionApp\\WorshipProjectionApp\\Models\\LayoutSettings.cs",
+              "RelativeDocumentMoniker": "WorshipProjectionApp\\Models\\LayoutSettings.cs",
+              "ToolTip": "C:\\Users\\Tiago.Rosario\\source\\repos\\WorshipProjectionApp\\WorshipProjectionApp\\Models\\LayoutSettings.cs",
+              "RelativeToolTip": "WorshipProjectionApp\\Models\\LayoutSettings.cs",
+              "ViewState": "AgIAABwAAAAAAAAAAAAkwCkAAABBAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-10-09T12:33:41.646Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 8,
+              "Title": "SettingsWindow.xaml.cs",
+              "DocumentMoniker": "C:\\Users\\Tiago.Rosario\\source\\repos\\WorshipProjectionApp\\WorshipProjectionApp\\SettingsWindow.xaml.cs",
+              "RelativeDocumentMoniker": "WorshipProjectionApp\\SettingsWindow.xaml.cs",
+              "ToolTip": "C:\\Users\\Tiago.Rosario\\source\\repos\\WorshipProjectionApp\\WorshipProjectionApp\\SettingsWindow.xaml.cs",
+              "RelativeToolTip": "WorshipProjectionApp\\SettingsWindow.xaml.cs",
+              "ViewState": "AgIAAEIAAAAAAAAAAAAcwGIAAAABAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-10-09T11:30:58.877Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 9,
+              "Title": "SettingsWindow.xaml",
+              "DocumentMoniker": "C:\\Users\\Tiago.Rosario\\source\\repos\\WorshipProjectionApp\\WorshipProjectionApp\\SettingsWindow.xaml",
+              "RelativeDocumentMoniker": "WorshipProjectionApp\\SettingsWindow.xaml",
+              "ToolTip": "C:\\Users\\Tiago.Rosario\\source\\repos\\WorshipProjectionApp\\WorshipProjectionApp\\SettingsWindow.xaml",
+              "RelativeToolTip": "WorshipProjectionApp\\SettingsWindow.xaml",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003549|",
+              "WhenOpened": "2026-10-09T11:30:38.582Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 5,
+              "Title": "ProjectionSettings.cs",
+              "DocumentMoniker": "C:\\Users\\Tiago.Rosario\\source\\repos\\WorshipProjectionApp\\WorshipProjectionApp\\Models\\ProjectionSettings.cs",
+              "RelativeDocumentMoniker": "WorshipProjectionApp\\Models\\ProjectionSettings.cs",
+              "ToolTip": "C:\\Users\\Tiago.Rosario\\source\\repos\\WorshipProjectionApp\\WorshipProjectionApp\\Models\\ProjectionSettings.cs",
+              "RelativeToolTip": "WorshipProjectionApp\\Models\\ProjectionSettings.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAC8AAAABAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-10-09T11:29:52.474Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 7,
+              "Title": "App.xaml.cs",
+              "DocumentMoniker": "C:\\Users\\Tiago.Rosario\\source\\repos\\WorshipProjectionApp\\WorshipProjectionApp\\App.xaml.cs",
+              "RelativeDocumentMoniker": "WorshipProjectionApp\\App.xaml.cs",
+              "ToolTip": "C:\\Users\\Tiago.Rosario\\source\\repos\\WorshipProjectionApp\\WorshipProjectionApp\\App.xaml.cs",
+              "RelativeToolTip": "WorshipProjectionApp\\App.xaml.cs",
+              "ViewState": "AgIAAAYAAAAAAAAAAAAAAA0AAAABAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-10-09T10:10:07.854Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 14,
+              "Title": "App.xaml",
+              "DocumentMoniker": "C:\\Users\\Tiago.Rosario\\source\\repos\\WorshipProjectionApp\\WorshipProjectionApp\\App.xaml",
+              "RelativeDocumentMoniker": "WorshipProjectionApp\\App.xaml",
+              "ToolTip": "C:\\Users\\Tiago.Rosario\\source\\repos\\WorshipProjectionApp\\WorshipProjectionApp\\App.xaml",
+              "RelativeToolTip": "WorshipProjectionApp\\App.xaml",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003549|",
+              "WhenOpened": "2026-10-09T10:10:04.619Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 12,
+              "Title": "ScheduleItem.cs",
+              "DocumentMoniker": "C:\\Users\\Tiago.Rosario\\source\\repos\\WorshipProjectionApp\\WorshipProjectionApp\\Services\\ScheduleItem.cs",
+              "RelativeDocumentMoniker": "WorshipProjectionApp\\Services\\ScheduleItem.cs",
+              "ToolTip": "C:\\Users\\Tiago.Rosario\\source\\repos\\WorshipProjectionApp\\WorshipProjectionApp\\Services\\ScheduleItem.cs",
+              "RelativeToolTip": "WorshipProjectionApp\\Services\\ScheduleItem.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAUAAAA4AAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-10-09T10:04:00.582Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 11,
+              "Title": "ProjectionWindow.xaml",
+              "DocumentMoniker": "C:\\Users\\Tiago.Rosario\\source\\repos\\WorshipProjectionApp\\WorshipProjectionApp\\ProjectionWindow.xaml",
+              "RelativeDocumentMoniker": "WorshipProjectionApp\\ProjectionWindow.xaml",
+              "ToolTip": "C:\\Users\\Tiago.Rosario\\source\\repos\\WorshipProjectionApp\\WorshipProjectionApp\\ProjectionWindow.xaml",
+              "RelativeToolTip": "WorshipProjectionApp\\ProjectionWindow.xaml",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003549|",
+              "WhenOpened": "2026-10-09T09:59:29.603Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 13,
+              "Title": "BibleService.cs",
+              "DocumentMoniker": "C:\\Users\\Tiago.Rosario\\source\\repos\\WorshipProjectionApp\\WorshipProjectionApp\\Services\\BibleService.cs",
+              "RelativeDocumentMoniker": "WorshipProjectionApp\\Services\\BibleService.cs",
+              "ToolTip": "C:\\Users\\Tiago.Rosario\\source\\repos\\WorshipProjectionApp\\WorshipProjectionApp\\Services\\BibleService.cs",
+              "RelativeToolTip": "WorshipProjectionApp\\Services\\BibleService.cs",
+              "ViewState": "AgIAAEgAAAAAAAAAAAAuwF4AAAABAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-10-09T09:55:02.867Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 17,
+              "Title": "BibleVerse.cs",
+              "DocumentMoniker": "C:\\Users\\Tiago.Rosario\\source\\repos\\WorshipProjectionApp\\WorshipProjectionApp\\Models\\BibleVerse.cs",
+              "RelativeDocumentMoniker": "WorshipProjectionApp\\Models\\BibleVerse.cs",
+              "ToolTip": "C:\\Users\\Tiago.Rosario\\source\\repos\\WorshipProjectionApp\\WorshipProjectionApp\\Models\\BibleVerse.cs",
+              "RelativeToolTip": "WorshipProjectionApp\\Models\\BibleVerse.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABQAAAABAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-10-09T09:54:46.19Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "MainWindow.xaml",
+              "DocumentMoniker": "C:\\Users\\Tiago.Rosario\\source\\repos\\WorshipProjectionApp\\WorshipProjectionApp\\MainWindow.xaml",
+              "RelativeDocumentMoniker": "WorshipProjectionApp\\MainWindow.xaml",
+              "ToolTip": "C:\\Users\\Tiago.Rosario\\source\\repos\\WorshipProjectionApp\\WorshipProjectionApp\\MainWindow.xaml",
+              "RelativeToolTip": "WorshipProjectionApp\\MainWindow.xaml",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003549|",
+              "WhenOpened": "2026-10-09T09:49:50.244Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 15,
+              "Title": "EasyWorshipImporter.cs",
+              "DocumentMoniker": "C:\\Users\\Tiago.Rosario\\source\\repos\\WorshipProjectionApp\\WorshipProjectionApp\\Services\\EasyWorshipImporter.cs",
+              "RelativeDocumentMoniker": "WorshipProjectionApp\\Services\\EasyWorshipImporter.cs",
+              "ToolTip": "C:\\Users\\Tiago.Rosario\\source\\repos\\WorshipProjectionApp\\WorshipProjectionApp\\Services\\EasyWorshipImporter.cs",
+              "RelativeToolTip": "WorshipProjectionApp\\Services\\EasyWorshipImporter.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-10-09T09:49:32.287Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 16,
+              "Title": "DatabaseService.cs",
+              "DocumentMoniker": "C:\\Users\\Tiago.Rosario\\source\\repos\\WorshipProjectionApp\\WorshipProjectionApp\\Services\\DatabaseService.cs",
+              "RelativeDocumentMoniker": "WorshipProjectionApp\\Services\\DatabaseService.cs",
+              "ToolTip": "C:\\Users\\Tiago.Rosario\\source\\repos\\WorshipProjectionApp\\WorshipProjectionApp\\Services\\DatabaseService.cs",
+              "RelativeToolTip": "WorshipProjectionApp\\Services\\DatabaseService.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAwAAAAcAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-10-09T09:48:45.973Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 18,
+              "Title": "Song.cs",
+              "DocumentMoniker": "C:\\Users\\Tiago.Rosario\\source\\repos\\WorshipProjectionApp\\WorshipProjectionApp\\Models\\Song.cs",
+              "RelativeDocumentMoniker": "WorshipProjectionApp\\Models\\Song.cs",
+              "ToolTip": "C:\\Users\\Tiago.Rosario\\source\\repos\\WorshipProjectionApp\\WorshipProjectionApp\\Models\\Song.cs",
+              "RelativeToolTip": "WorshipProjectionApp\\Models\\Song.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAADwvx0AAABRAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-10-09T09:39:25.837Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 19,
+              "Title": "SlideItem.cs",
+              "DocumentMoniker": "C:\\Users\\Tiago.Rosario\\source\\repos\\WorshipProjectionApp\\WorshipProjectionApp\\Models\\SlideItem.cs",
+              "RelativeDocumentMoniker": "WorshipProjectionApp\\Models\\SlideItem.cs",
+              "ToolTip": "C:\\Users\\Tiago.Rosario\\source\\repos\\WorshipProjectionApp\\WorshipProjectionApp\\Models\\SlideItem.cs",
+              "RelativeToolTip": "WorshipProjectionApp\\Models\\SlideItem.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAgAAAABAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-10-09T09:39:08.081Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 10,
+              "Title": "ProjectionWindow.xaml.cs",
+              "DocumentMoniker": "C:\\Users\\Tiago.Rosario\\source\\repos\\WorshipProjectionApp\\WorshipProjectionApp\\ProjectionWindow.xaml.cs",
+              "RelativeDocumentMoniker": "WorshipProjectionApp\\ProjectionWindow.xaml.cs",
+              "ToolTip": "C:\\Users\\Tiago.Rosario\\source\\repos\\WorshipProjectionApp\\WorshipProjectionApp\\ProjectionWindow.xaml.cs",
+              "RelativeToolTip": "WorshipProjectionApp\\ProjectionWindow.xaml.cs",
+              "ViewState": "AgIAAFwAAAAAAAAAAAAgwHwAAAAFAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-10-09T08:34:20.915Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "MainWindow.xaml.cs",
+              "DocumentMoniker": "C:\\Users\\Tiago.Rosario\\source\\repos\\WorshipProjectionApp\\WorshipProjectionApp\\MainWindow.xaml.cs",
+              "RelativeDocumentMoniker": "WorshipProjectionApp\\MainWindow.xaml.cs",
+              "ToolTip": "C:\\Users\\Tiago.Rosario\\source\\repos\\WorshipProjectionApp\\WorshipProjectionApp\\MainWindow.xaml.cs",
+              "RelativeToolTip": "WorshipProjectionApp\\MainWindow.xaml.cs",
+              "ViewState": "AgIAAIkAAAAAAAAAAAAqwJUAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-10-09T08:31:02.328Z",
+              "EditorCaption": ""
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

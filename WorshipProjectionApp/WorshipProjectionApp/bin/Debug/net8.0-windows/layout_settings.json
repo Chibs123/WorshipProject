@@ -1,0 +1,49 @@
+{
+  "Panels": [
+    {
+      "Type": 0,
+      "Title": "Recursos (M\u00FAsicas/B\u00EDblia)",
+      "Row": 0,
+      "Column": 2,
+      "RowSpan": 4,
+      "ColumnSpan": 1,
+      "IsVisible": true
+    },
+    {
+      "Type": 2,
+      "Title": "Slides / Estrofes",
+      "Row": 0,
+      "Column": 1,
+      "RowSpan": 4,
+      "ColumnSpan": 1,
+      "IsVisible": true
+    },
+    {
+      "Type": 1,
+      "Title": "Rol do Culto",
+      "Row": 1,
+      "Column": 0,
+      "RowSpan": 3,
+      "ColumnSpan": 1,
+      "IsVisible": true
+    },
+    {
+      "Type": 3,
+      "Title": "Em Direto (Projetor)",
+      "Row": 0,
+      "Column": 0,
+      "RowSpan": 1,
+      "ColumnSpan": 1,
+      "IsVisible": true
+    },
+    {
+      "Type": 4,
+      "Title": "\uD83C\uDFA4 Equipa Louvor",
+      "Row": 0,
+      "Column": 3,
+      "RowSpan": 4,
+      "ColumnSpan": 1,
+      "IsVisible": true
+    }
+  ]
+}

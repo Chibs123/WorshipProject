@@ -1,0 +1,26 @@
+[
+  {
+    "Name": "Vocal Principal",
+    "Microphone": "Mic 1",
+    "InEarReturn": "Aux 1",
+    "Role": "L\u00EDder"
+  },
+  {
+    "Name": "Backing Vocal 1",
+    "Microphone": "Mic 2",
+    "InEarReturn": "Aux 2",
+    "Role": "Voz"
+  },
+  {
+    "Name": "Guitarra Ac\u00FAstica",
+    "Microphone": "Line 1",
+    "InEarReturn": "Aux 3",
+    "Role": "Viol\u00E3o"
+  },
+  {
+    "Name": "Teclado",
+    "Microphone": "Line 2",
+    "InEarReturn": "Aux 4",
+    "Role": "Teclas"
+  }
+]

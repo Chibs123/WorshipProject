@@ -1,0 +1,130 @@
+﻿<Window x:Class="WorshipProjectionApp.SettingsWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Configurações de Projeção - IEBCR II Setúbal" 
+        Height="540" Width="480"
+        WindowStartupLocation="CenterOwner"
+        ResizeMode="NoResize"
+        Background="#0F172A"
+        Foreground="#F8FAFC"
+        FontFamily="Segoe UI">
+
+    <Window.Resources>
+        <SolidColorBrush x:Key="AccentGold" Color="#D4AF37"/>
+        <SolidColorBrush x:Key="AccentGoldHover" Color="#E5C158"/>
+        <SolidColorBrush x:Key="PanelBg" Color="#162032"/>
+        <SolidColorBrush x:Key="BorderDark" Color="#2A384F"/>
+
+        <Style x:Key="GoldButton" TargetType="Button">
+            <Setter Property="Background" Value="{StaticResource AccentGold}"/>
+            <Setter Property="Foreground" Value="#0F172A"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Padding" Value="14,6"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border Background="{TemplateBinding Background}" CornerRadius="6" Padding="{TemplateBinding Padding}">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="CancelButton" TargetType="Button">
+            <Setter Property="Background" Value="#24344D"/>
+            <Setter Property="Foreground" Value="#F8FAFC"/>
+            <Setter Property="Padding" Value="14,6"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border Background="{TemplateBinding Background}" CornerRadius="6" Padding="{TemplateBinding Padding}">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </Window.Resources>
+
+    <Grid Margin="18">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <!-- Cabeçalho -->
+        <TextBlock Grid.Row="0" Text="⚙️ Estilo e Tipografia da Projeção" FontSize="16" FontWeight="Bold" Foreground="{StaticResource AccentGold}" Margin="0,0,0,14"/>
+
+        <!-- Opções -->
+        <Border Grid.Row="1" Background="{StaticResource PanelBg}" BorderBrush="{StaticResource BorderDark}" BorderThickness="1" CornerRadius="8" Padding="14">
+            <ScrollViewer VerticalScrollBarVisibility="Auto">
+                <StackPanel>
+                    <!-- Fonte -->
+                    <TextBlock Text="Tipo de Letra (Fonte):" FontWeight="SemiBold" Margin="0,0,0,4"/>
+                    <ComboBox x:Name="CmbFontFamily" Margin="0,0,0,12" Height="28"/>
+
+                    <!-- Negrito e Alinhamento Horizontal -->
+                    <Grid Margin="0,0,0,12">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <CheckBox x:Name="ChkBold" Content="Negrito (Bold)" VerticalAlignment="Center" Foreground="#F8FAFC" Grid.Column="0"/>
+                        <StackPanel Grid.Column="1">
+                            <TextBlock Text="Alinhamento:" FontSize="11" Foreground="#94A3B8" Margin="0,0,0,2"/>
+                            <ComboBox x:Name="CmbAlignment" Height="26">
+                                <ComboBoxItem Content="Centro" IsSelected="True"/>
+                                <ComboBoxItem Content="Esquerda"/>
+                                <ComboBoxItem Content="Direita"/>
+                            </ComboBox>
+                        </StackPanel>
+                    </Grid>
+
+                    <!-- Posição Vertical -->
+                    <TextBlock Text="Posicionamento Vertical no Ecrã:" FontWeight="SemiBold" Margin="0,0,0,4"/>
+                    <ComboBox x:Name="CmbVerticalAlignment" Margin="0,0,0,12" Height="28">
+                        <ComboBoxItem Content="Centro (Padrão para Louvor)" IsSelected="True"/>
+                        <ComboBoxItem Content="Fundo / Terço Inferior (Lower-Third)"/>
+                        <ComboBoxItem Content="Topo"/>
+                    </ComboBox>
+
+                    <!-- Margem de Segurança -->
+                    <DockPanel Margin="0,0,0,4">
+                        <TextBlock Text="Margem de Segurança do Ecrã (%):" FontWeight="SemiBold" DockPanel.Dock="Left"/>
+                        <TextBlock x:Name="TxtMarginVal" Text="8%" Foreground="{StaticResource AccentGold}" FontWeight="Bold" HorizontalAlignment="Right"/>
+                    </DockPanel>
+                    <Slider x:Name="SldMargin" Minimum="2" Maximum="25" Value="8" TickFrequency="1" IsSnapToTickEnabled="True" 
+                            ValueChanged="SldMargin_ValueChanged" Margin="0,0,0,12"/>
+
+                    <!-- Sombra da Letra -->
+                    <DockPanel Margin="0,0,0,4">
+                        <TextBlock Text="Intensidade da Sombra de Fundo:" FontWeight="SemiBold" DockPanel.Dock="Left"/>
+                        <TextBlock x:Name="TxtShadowVal" Text="14" Foreground="{StaticResource AccentGold}" FontWeight="Bold" HorizontalAlignment="Right"/>
+                    </DockPanel>
+                    <Slider x:Name="SldShadow" Minimum="2" Maximum="30" Value="14" 
+                            ValueChanged="SldShadow_ValueChanged" Margin="0,0,0,12"/>
+
+                    <!-- Cor do Texto -->
+                    <TextBlock Text="Cor do Texto:" FontWeight="SemiBold" Margin="0,0,0,4"/>
+                    <ComboBox x:Name="CmbTextColor" Height="28">
+                        <ComboBoxItem Content="Branco Puro (#FFFFFF)" IsSelected="True"/>
+                        <ComboBoxItem Content="Amarelo / Dourado Claro (#FFF2A3)"/>
+                        <ComboBoxItem Content="Ciano Suave (#E0F2FE)"/>
+                    </ComboBox>
+                </StackPanel>
+            </ScrollViewer>
+        </Border>
+
+        <!-- Botões de Ação -->
+        <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,14,0,0">
+            <Button Content="Cancelar" Click="BtnCancel_Click" Style="{StaticResource CancelButton}" Margin="0,0,8,0"/>
+            <Button Content="Guardar e Aplicar" Click="BtnSave_Click" Style="{StaticResource GoldButton}"/>
+        </StackPanel>
+    </Grid>
+</Window>

@@ -1,0 +1,44 @@
+﻿<Window x:Class="WorshipProjectionApp.ProjectionWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Projeção"
+        WindowStyle="None"
+        ResizeMode="NoResize"
+        ShowInTaskbar="False"
+        Background="Black">
+    <Grid Background="Black">
+        <!-- Camada 1: Vídeo Nativo em Loop -->
+        <MediaElement x:Name="MediaVideo"
+                      LoadedBehavior="Manual"
+                      UnloadedBehavior="Manual"
+                      Stretch="UniformToFill"
+                      IsMuted="True"
+                      MediaEnded="MediaVideo_MediaEnded"/>
+
+        <!-- Camada 2: Imagem Estática -->
+        <Image x:Name="BackgroundImage" 
+               Stretch="UniformToFill" 
+               HorizontalAlignment="Center" 
+               VerticalAlignment="Center"/>
+
+        <!-- Camada 3: Texto de Letra / Versículo -->
+        <Viewbox Margin="90" StretchDirection="DownOnly" Stretch="Uniform">
+            <TextBlock x:Name="TxtProjection"
+                       Foreground="White"
+                       FontWeight="Bold"
+                       FontFamily="Segoe UI"
+                       TextAlignment="Center"
+                       TextWrapping="Wrap"
+                       LineHeight="52"
+                       MaxWidth="1600">
+                <TextBlock.Effect>
+                    <!-- Sombra dupla e nítida para máxima leitura sobre qualquer fundo -->
+                    <DropShadowEffect Color="Black" 
+                                      BlurRadius="16" 
+                                      ShadowDepth="4" 
+                                      Opacity="0.95"/>
+                </TextBlock.Effect>
+            </TextBlock>
+        </Viewbox>
+    </Grid>
+</Window>
