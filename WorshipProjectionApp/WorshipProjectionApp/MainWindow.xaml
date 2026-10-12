@@ -124,7 +124,7 @@
             <Setter Property="FontSize" Value="13"/>
         </Style>
 
-        <!-- Template Dark Completo para ComboBox (Caixa Fechada + Dropdown) -->
+        <!-- Template Dark Completo para ComboBox -->
         <ControlTemplate x:Key="DarkComboBoxTemplate" TargetType="ComboBox">
             <Grid>
                 <ToggleButton x:Name="ToggleButton" 
@@ -161,7 +161,6 @@
                     </ToggleButton.Template>
                 </ToggleButton>
 
-                <!-- Conteúdo Selecionado -->
                 <ContentPresenter x:Name="ContentSite" 
                                   IsHitTestVisible="False" 
                                   Content="{TemplateBinding SelectionBoxItem}" 
@@ -171,7 +170,6 @@
                                   VerticalAlignment="Center" 
                                   HorizontalAlignment="Left"/>
 
-                <!-- Popup Aberto -->
                 <Popup x:Name="Popup" 
                        Placement="Bottom" 
                        IsOpen="{TemplateBinding IsDropDownOpen}" 
@@ -310,10 +308,9 @@
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
-        <!-- CABEÇALHO LIMPO E DESIMPEDIDO -->
+        <!-- CABEÇALHO -->
         <Border Grid.Row="0" Background="#060A12" Padding="14,6,8,6" BorderBrush="{StaticResource BorderDark}" BorderThickness="0,0,0,1">
             <DockPanel LastChildFill="False">
-                <!-- Marca da Igreja (Esquerda) -->
                 <StackPanel Orientation="Horizontal" VerticalAlignment="Center" DockPanel.Dock="Left">
                     <Grid Width="20" Height="26" Margin="0,0,10,0" VerticalAlignment="Center">
                         <Rectangle Fill="{StaticResource AccentGold}" Width="4" Height="26" HorizontalAlignment="Center" RadiusX="2" RadiusY="2"/>
@@ -325,20 +322,17 @@
                     </StackPanel>
                 </StackPanel>
 
-                <!-- Botões de Controlo da Janela (Direita) -->
                 <StackPanel Orientation="Horizontal" DockPanel.Dock="Right" VerticalAlignment="Center" Margin="14,0,0,0">
                     <Button Content="🗕" Click="BtnMinimize_Click" Style="{StaticResource WindowNavButton}" WindowChrome.IsHitTestVisibleInChrome="True"/>
                     <Button Content="🗖" Click="BtnMaximize_Click" Style="{StaticResource WindowNavButton}" WindowChrome.IsHitTestVisibleInChrome="True"/>
                     <Button Content="✕" Click="BtnClose_Click" Style="{StaticResource WindowCloseButton}" WindowChrome.IsHitTestVisibleInChrome="True"/>
                 </StackPanel>
 
-                <!-- Ações Principais do Cabeçalho -->
                 <StackPanel Orientation="Horizontal" DockPanel.Dock="Right" VerticalAlignment="Center">
                     <Button Content="📺 Ativar Projeção" Click="BtnToggleProjection_Click" Style="{StaticResource GoldButton}" Margin="0,0,8,0" WindowChrome.IsHitTestVisibleInChrome="True"/>
                     <Button Content="Limpar Texto (Esc)" Click="BtnClearText_Click" Style="{StaticResource NavyButton}" Margin="0,0,6,0" WindowChrome.IsHitTestVisibleInChrome="True"/>
                     <Button Content="Ecrã Preto (F6)" Click="BtnBlackout_Click" Style="{StaticResource NavyButton}" Margin="0,0,8,0" WindowChrome.IsHitTestVisibleInChrome="True"/>
 
-                    <!-- Menu Dropdown para Ferramentas / Configurações -->
                     <Menu Background="Transparent" WindowChrome.IsHitTestVisibleInChrome="True" VerticalAlignment="Center">
                         <MenuItem Header="⚙️ Ferramentas ▾" Foreground="{StaticResource TextPrimary}" Background="{StaticResource ButtonNeutral}" Padding="10,6" FontWeight="Medium">
                             <MenuItem Header="🧩 Personalizar Layout (Lego)" Click="BtnOpenLayoutConfig_Click" Background="#162032" Foreground="White"/>
@@ -365,35 +359,94 @@
                 <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
 
-            <!-- 1. PAINEL: RECURSOS COM ABAS -->
+            <!-- 1. PAINEL: RECURSOS COM 3 ABAS (MÚSICAS, BÍBLIA, FUNDOS) -->
             <Border x:Name="PanelResources" Background="{StaticResource PanelBg}" BorderBrush="{StaticResource BorderDark}" BorderThickness="1" CornerRadius="8" Padding="10" Margin="4">
                 <TabControl>
+                    <!-- Aba Músicas -->
                     <TabItem Header="🎵 Músicas">
                         <DockPanel Margin="0,8,0,0">
-                            <TextBox x:Name="TxtSearchSong" DockPanel.Dock="Top" Style="{StaticResource SearchTextBox}" 
-                                     Margin="0,0,0,8" TextChanged="TxtSearchSong_TextChanged" ToolTip="Pesquisar por título da canção..."/>
-                            <ListBox x:Name="LstSongs" DisplayMemberPath="Title" SelectionChanged="LstSongs_SelectionChanged" 
+                            <Grid DockPanel.Dock="Top" Margin="0,0,0,8">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBox x:Name="TxtSearchSong" Grid.Column="0" Style="{StaticResource SearchTextBox}" 
+                                         TextChanged="TxtSearchSong_TextChanged" ToolTip="Pesquisar por título da canção..."/>
+                                <Button Grid.Column="1" Content="➕ Nova Canção" Click="BtnNewSong_Click" Style="{StaticResource GoldButton}" Padding="8,4" Margin="6,0,0,0"/>
+                            </Grid>
+
+                            <ListBox x:Name="LstSongs" DisplayMemberPath="Title" 
+                                     SelectionChanged="LstSongs_SelectionChanged" 
+                                     PreviewMouseMove="LstSongs_PreviewMouseMove"
                                      BorderThickness="0" Background="Transparent"/>
                         </DockPanel>
                     </TabItem>
 
+                    <!-- Aba Bíblia -->
                     <TabItem Header="📖 Bíblia Sagrada">
                         <DockPanel Margin="0,8,0,0">
                             <TextBlock DockPanel.Dock="Top" Text="Ex: jo 3:16, sl 23 ou palavra" Foreground="{StaticResource TextMuted}" FontSize="11" Margin="0,0,0,4"/>
                             <TextBox x:Name="TxtSearchBible" DockPanel.Dock="Top" Style="{StaticResource SearchTextBox}" 
                                      Margin="0,0,0,8" KeyDown="TxtSearchBible_KeyDown"/>
-                            <ListBox x:Name="LstBibleResults" DisplayMemberPath="Reference" SelectionChanged="LstBibleResults_SelectionChanged" 
+                            <ListBox x:Name="LstBibleResults" DisplayMemberPath="Reference" 
+                                     SelectionChanged="LstBibleResults_SelectionChanged" 
+                                     PreviewMouseMove="LstBibleResults_PreviewMouseMove"
                                      BorderThickness="0" Background="Transparent"/>
+                        </DockPanel>
+                    </TabItem>
+
+                    <!-- Aba Fundos Visuais (Vídeos em Loop e Imagens) -->
+                    <TabItem Header="🖼️ Fundos">
+                        <DockPanel Margin="0,8,0,0">
+                            <Grid DockPanel.Dock="Top" Margin="0,0,0,8">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <Button Grid.Column="0" Content="📥 Importar do Windows" Click="BtnImportBackground_Click" Style="{StaticResource GoldButton}" Margin="0,0,6,0" Padding="8,4"/>
+                                <Button Grid.Column="1" Content="Sem Fundo" Click="BtnClearBackground_Click" Style="{StaticResource NavyButton}" Padding="8,4"/>
+                            </Grid>
+
+                            <ListBox x:Name="LstBackgrounds" 
+                                     SelectionChanged="LstBackgrounds_SelectionChanged"
+                                     AllowDrop="True"
+                                     Drop="LstBackgrounds_Drop"
+                                     BorderThickness="0" 
+                                     Background="Transparent"
+                                     ScrollViewer.HorizontalScrollBarVisibility="Disabled">
+                                <ListBox.ItemsPanel>
+                                    <ItemsPanelTemplate>
+                                        <WrapPanel Orientation="Horizontal"/>
+                                    </ItemsPanelTemplate>
+                                </ListBox.ItemsPanel>
+                                <ListBox.ItemTemplate>
+                                    <DataTemplate>
+                                        <Border Background="{StaticResource CardBg}" BorderBrush="{StaticResource BorderDark}" BorderThickness="1" CornerRadius="6" Width="105" Height="75" Margin="3" ClipToBounds="True">
+                                            <Grid>
+                                                <Image Source="{Binding ThumbnailPath}" Stretch="UniformToFill" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                                <Border Background="#CC0A0F19" VerticalAlignment="Bottom" Padding="4,2">
+                                                    <TextBlock Text="{Binding Name}" Foreground="White" FontSize="10" TextTrimming="CharacterEllipsis" TextAlignment="Center"/>
+                                                </Border>
+                                            </Grid>
+                                        </Border>
+                                    </DataTemplate>
+                                </ListBox.ItemTemplate>
+                            </ListBox>
                         </DockPanel>
                     </TabItem>
                 </TabControl>
             </Border>
 
-            <!-- 2. PAINEL: PROGRAMAÇÃO -->
+            <!-- 2. PAINEL: PROGRAMAÇÃO COM SUPORTE A DRAG & DROP -->
             <Border x:Name="PanelSchedule" Background="{StaticResource PanelBg}" BorderBrush="{StaticResource BorderDark}" BorderThickness="1" CornerRadius="8" Padding="12" Margin="4">
                 <DockPanel>
                     <TextBlock DockPanel.Dock="Top" Text="📜 Programação" FontWeight="Bold" FontSize="14" Foreground="{StaticResource AccentGold}" Margin="0,0,0,8"/>
-                    <ListBox x:Name="LstSchedule" SelectionChanged="LstSchedule_SelectionChanged" BorderThickness="0" Background="Transparent">
+                    <ListBox x:Name="LstSchedule" SelectionChanged="LstSchedule_SelectionChanged" 
+                             AllowDrop="True"
+                             Drop="LstSchedule_Drop"
+                             DragOver="LstSchedule_DragOver"
+                             PreviewMouseMove="LstSchedule_PreviewMouseMove"
+                             BorderThickness="0" Background="Transparent">
                         <ListBox.ItemTemplate>
                             <DataTemplate>
                                 <Border Background="{StaticResource CardBg}" BorderBrush="{StaticResource BorderDark}" BorderThickness="1" CornerRadius="6" Padding="8" Margin="0,2">
@@ -470,13 +523,11 @@
             <!-- 5. PAINEL: GRUPO DE LOUVOR & ÁUDIO -->
             <Border x:Name="PanelWorshipTeam" Background="{StaticResource PanelBg}" BorderBrush="{StaticResource BorderDark}" BorderThickness="1" CornerRadius="8" Padding="12" Margin="4">
                 <DockPanel LastChildFill="True">
-                    <!-- Cabeçalho -->
                     <DockPanel DockPanel.Dock="Top" Margin="0,0,0,8">
                         <TextBlock Text="🎤 Grupo de Louvor" FontWeight="Bold" FontSize="14" Foreground="{StaticResource AccentGold}" VerticalAlignment="Center"/>
                         <TextBlock Text="Mic &amp; Retorno" FontSize="11" Foreground="{StaticResource TextMuted}" VerticalAlignment="Center" HorizontalAlignment="Right"/>
                     </DockPanel>
 
-                    <!-- Seletor Rápido de Membro com Visibilidade Dark Mode Garantida -->
                     <Grid DockPanel.Dock="Top" Margin="0,0,0,8">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*"/>
@@ -492,40 +543,35 @@
                         <Button Grid.Column="1" Content="➕ Adicionar" Click="BtnAddTeamMember_Click" Style="{StaticResource GoldButton}" Padding="10,4" Margin="6,0,0,0"/>
                     </Grid>
 
-                    <!-- Lista de Pessoas Ativas no Culto com o Lápis de Edição -->
                     <ListBox x:Name="LstActiveTeam" BorderThickness="0" Background="Transparent">
                         <ListBox.ItemTemplate>
                             <DataTemplate>
                                 <Border Background="{StaticResource CardBg}" BorderBrush="{StaticResource BorderDark}" BorderThickness="1" CornerRadius="6" Padding="8,6" Margin="0,2">
                                     <DockPanel LastChildFill="True">
-                                        <!-- Botão Lápis com foco desativado e área de clique garantida -->
                                         <Button Content="✏️" 
-                                            Click="BtnEditTeamMember_Click" 
-                                            DockPanel.Dock="Right" 
-                                            Focusable="False"
-                                            Background="Transparent" 
-                                            Foreground="#D4AF37" 
-                                            BorderThickness="0" 
-                                            FontSize="13"
-                                            Width="30"
-                                            Height="30"
-                                            HorizontalContentAlignment="Center"
-                                            VerticalContentAlignment="Center"
-                                            Cursor="Hand" 
-                                            ToolTip="Editar ou remover membro"/>
-                                        <!-- Crachás de Equipamento -->
+                                                Click="BtnEditTeamMember_Click" 
+                                                DockPanel.Dock="Right" 
+                                                Focusable="False"
+                                                Background="Transparent" 
+                                                Foreground="#D4AF37" 
+                                                BorderThickness="0" 
+                                                FontSize="13"
+                                                Width="30"
+                                                Height="30"
+                                                HorizontalContentAlignment="Center"
+                                                VerticalContentAlignment="Center"
+                                                Cursor="Hand" 
+                                                ToolTip="Editar ou remover membro"/>
+
                                         <StackPanel Orientation="Horizontal" DockPanel.Dock="Right" VerticalAlignment="Center" Margin="0,0,8,0">
-                                            <!-- Microfone (Azul Eclesiástico) -->
                                             <Border Background="#1E3A8A" CornerRadius="4" Padding="6,2" Margin="0,0,4,0">
                                                 <TextBlock Text="{Binding Microphone}" Foreground="#93C5FD" FontSize="11" FontWeight="Bold"/>
                                             </Border>
-                                            <!-- Retorno (Verde Esmeralda) -->
                                             <Border Background="#064E3B" CornerRadius="4" Padding="6,2">
                                                 <TextBlock Text="{Binding InEarReturn}" Foreground="#6EE7B7" FontSize="11" FontWeight="Bold"/>
                                             </Border>
                                         </StackPanel>
 
-                                        <!-- Nome e Função -->
                                         <StackPanel VerticalAlignment="Center">
                                             <TextBlock Text="{Binding Name}" FontWeight="Bold" Foreground="{StaticResource TextPrimary}" FontSize="13"/>
                                             <TextBlock Text="{Binding Role}" Foreground="{StaticResource TextMuted}" FontSize="10"/>
@@ -538,5 +584,13 @@
                 </DockPanel>
             </Border>
         </Grid>
+
+        <!-- RODAPÉ -->
+        <Border Grid.Row="2" Background="#060A12" Padding="12,6" BorderBrush="{StaticResource BorderDark}" BorderThickness="0,1,0,0">
+            <DockPanel>
+                <TextBlock x:Name="TxtScreenStatus" VerticalAlignment="Center" Foreground="{StaticResource TextMuted}" FontSize="12" DockPanel.Dock="Left"/>
+                <TextBlock Text="Igreja Evangélica Baptista - IEBCR II Setúbal" HorizontalAlignment="Right" Foreground="{StaticResource TextMuted}" FontSize="11" DockPanel.Dock="Right"/>
+            </DockPanel>
+        </Border>
     </Grid>
 </Window>

@@ -20,24 +20,30 @@ public partial class MainWindow : Window
     public ObservableCollection<Song> FilteredSongs { get; set; } = new();
     public ObservableCollection<WorshipTeamMember> TeamCatalog { get; set; } = new();
     public ObservableCollection<WorshipTeamMember> ActiveTeam { get; set; } = new();
+    public ObservableCollection<MediaBackground> AvailableBackgrounds { get; set; } = new();
 
     private ProjectionWindow? _projectionWindow;
     private string? _currentBackgroundPath;
     private bool _isBlackout;
     private readonly DatabaseService _dbService = new();
-    private List<Song> _allSongs = new();
     private readonly BibleService _bibleService = new();
+    private readonly BackgroundGalleryService _bgGalleryService = new();
+    private List<Song> _allSongs = new();
 
     public MainWindow()
     {
         InitializeComponent();
+        CheckMonitors();
         LoadSampleData();
         RestoreLastSession();
         LoadTeamData();
+        LoadBackgroundGallery();
 
         LstSongs.ItemsSource = FilteredSongs;
         LstSchedule.ItemsSource = ScheduleItems;
         LstActiveTeam.ItemsSource = ActiveTeam;
+        LstBackgrounds.ItemsSource = AvailableBackgrounds;
+
         CmbPresetMembers.ItemsSource = TeamCatalog;
         if (TeamCatalog.Count > 0) CmbPresetMembers.SelectedIndex = 0;
 
@@ -77,6 +83,165 @@ public partial class MainWindow : Window
         }
     }
 
+    private void LoadBackgroundGallery()
+    {
+        AvailableBackgrounds.Clear();
+        foreach (var bg in _bgGalleryService.GetBackgrounds())
+        {
+            AvailableBackgrounds.Add(bg);
+        }
+    }
+
+    // ---------------------------------------------------------
+    // CRIAÇÃO E EDIÇÃO DE CANÇÕES
+    // ---------------------------------------------------------
+    private void BtnNewSong_Click(object sender, RoutedEventArgs e)
+    {
+        var editor = new SongEditorWindow { Owner = this };
+        if (editor.ShowDialog() == true && editor.ResultSong != null)
+        {
+            _dbService.InsertSong(editor.ResultSong.Title, editor.ResultSong.Artist, editor.ResultSong.RawLyrics);
+            _allSongs = _dbService.GetAllSongs();
+            UpdateSongFilter(string.Empty);
+        }
+    }
+
+    // ---------------------------------------------------------
+    // DRAG & DROP (MÚSICAS, BÍBLIA E REORDENAÇÃO)
+    // ---------------------------------------------------------
+    private void LstSongs_PreviewMouseMove(object sender, System.Windows.Input.MouseEventArgs e)
+    {
+        if (e.LeftButton == MouseButtonState.Pressed && LstSongs.SelectedItem is Song selectedSong)
+        {
+            var item = new ScheduleItem
+            {
+                Title = selectedSong.Title,
+                Subtitle = string.IsNullOrWhiteSpace(selectedSong.Artist) ? "Música" : selectedSong.Artist,
+                Slides = selectedSong.ParseSlides()
+            };
+
+            DragDrop.DoDragDrop(LstSongs, item, System.Windows.DragDropEffects.Copy);
+        }
+    }
+
+    private void LstBibleResults_PreviewMouseMove(object sender, System.Windows.Input.MouseEventArgs e)
+    {
+        if (e.LeftButton == MouseButtonState.Pressed && LstBibleResults.SelectedItem is BibleVerse verse)
+        {
+            var item = new ScheduleItem
+            {
+                Title = verse.Reference,
+                Subtitle = "Passagem Bíblica",
+                Slides = new List<SlideItem> { verse.ToSlideItem() }
+            };
+
+            DragDrop.DoDragDrop(LstBibleResults, item, System.Windows.DragDropEffects.Copy);
+        }
+    }
+
+    private void LstSchedule_DragOver(object sender, System.Windows.DragEventArgs e)
+    {
+        if (e.Data.GetDataPresent(typeof(ScheduleItem)))
+        {
+            e.Effects = System.Windows.DragDropEffects.Copy;
+        }
+        else
+        {
+            e.Effects = System.Windows.DragDropEffects.None;
+        }
+        e.Handled = true;
+    }
+
+    private void LstSchedule_Drop(object sender, System.Windows.DragEventArgs e)
+    {
+        if (e.Data.GetData(typeof(ScheduleItem)) is ScheduleItem item)
+        {
+            // Se já existe na lista, move para o fim ou para o ponto de soltura
+            if (ScheduleItems.Contains(item))
+            {
+                ScheduleItems.Remove(item);
+            }
+
+            ScheduleItems.Add(item);
+            LstSchedule.SelectedItem = item;
+            SaveCurrentSession();
+        }
+    }
+
+    private void LstSchedule_PreviewMouseMove(object sender, System.Windows.Input.MouseEventArgs e)
+    {
+        if (e.LeftButton == MouseButtonState.Pressed && LstSchedule.SelectedItem is ScheduleItem item)
+        {
+            DragDrop.DoDragDrop(LstSchedule, item, System.Windows.DragDropEffects.Move);
+        }
+    }
+
+    // ---------------------------------------------------------
+    // GALERIA DE FUNDOS VISUAIS
+    // ---------------------------------------------------------
+    private void BtnImportBackground_Click(object sender, RoutedEventArgs e)
+    {
+        var dialog = new Microsoft.Win32.OpenFileDialog
+        {
+            Title = "Selecionar Fundo do Windows (Vídeo ou Imagem)",
+            Filter = "Ficheiros Multimédia|*.mp4;*.mov;*.wmv;*.avi;*.jpg;*.jpeg;*.png;*.webp;*.bmp|Vídeos (*.mp4;*.mov)|*.mp4;*.mov;*.wmv;*.avi|Imagens (*.jpg;*.png)|*.jpg;*.jpeg;*.png;*.webp;*.bmp",
+            Multiselect = true
+        };
+
+        if (dialog.ShowDialog() == true)
+        {
+            foreach (string file in dialog.FileNames)
+            {
+                var imported = _bgGalleryService.ImportFile(file);
+                if (imported != null && !AvailableBackgrounds.Any(b => b.FilePath.Equals(imported.FilePath, StringComparison.OrdinalIgnoreCase)))
+                {
+                    AvailableBackgrounds.Add(imported);
+                }
+            }
+        }
+    }
+
+    private void LstBackgrounds_Drop(object sender, System.Windows.DragEventArgs e)
+    {
+        if (e.Data.GetDataPresent(System.Windows.DataFormats.FileDrop))
+        {
+            string[] files = (string[])e.Data.GetData(System.Windows.DataFormats.FileDrop);
+            foreach (string file in files)
+            {
+                var imported = _bgGalleryService.ImportFile(file);
+                if (imported != null && !AvailableBackgrounds.Any(b => b.FilePath.Equals(imported.FilePath, StringComparison.OrdinalIgnoreCase)))
+                {
+                    AvailableBackgrounds.Add(imported);
+                }
+            }
+        }
+    }
+
+    private void LstBackgrounds_SelectionChanged(object sender, SelectionChangedEventArgs e)
+    {
+        if (LstBackgrounds.SelectedItem is MediaBackground bg)
+        {
+            _currentBackgroundPath = bg.FilePath;
+            SetPreviewMediaBackground(_currentBackgroundPath);
+
+            if (_projectionWindow != null && !_isBlackout)
+            {
+                _projectionWindow.SetMediaBackground(_currentBackgroundPath);
+            }
+        }
+    }
+
+    private void BtnClearBackground_Click(object sender, RoutedEventArgs e)
+    {
+        _currentBackgroundPath = null;
+        LstBackgrounds.SelectedItem = null;
+        SetPreviewMediaBackground(null);
+        _projectionWindow?.SetMediaBackground(null);
+    }
+
+    // ---------------------------------------------------------
+    // GRUPO DE LOUVOR
+    // ---------------------------------------------------------
     private void BtnAddTeamMember_Click(object sender, RoutedEventArgs e)
     {
         if (CmbPresetMembers.SelectedItem is WorshipTeamMember member)
@@ -96,7 +261,6 @@ public partial class MainWindow : Window
 
     private void BtnEditTeamMember_Click(object sender, RoutedEventArgs e)
     {
-        // Previne que o evento suba e seja capturado pelo ListBox
         e.Handled = true;
 
         WorshipTeamMember? member = null;
@@ -108,10 +272,7 @@ public partial class MainWindow : Window
 
         if (member == null) return;
 
-        var editDialog = new EditTeamMemberWindow(member)
-        {
-            Owner = this
-        };
+        var editDialog = new EditTeamMemberWindow(member) { Owner = this };
 
         if (editDialog.ShowDialog() == true)
         {
@@ -124,7 +285,6 @@ public partial class MainWindow : Window
                 int index = ActiveTeam.IndexOf(member);
                 if (index >= 0)
                 {
-                    // Substitui a instância para notificar o ListBox da atualização
                     ActiveTeam[index] = new WorshipTeamMember
                     {
                         Name = editDialog.Member.Name,
@@ -137,6 +297,9 @@ public partial class MainWindow : Window
         }
     }
 
+    // ---------------------------------------------------------
+    // GESTÃO DE LAYOUT LEGO
+    // ---------------------------------------------------------
     private void BtnOpenLayoutConfig_Click(object sender, RoutedEventArgs e)
     {
         var dlg = new LayoutConfigWindow(_layoutSettings) { Owner = this };
@@ -174,10 +337,7 @@ public partial class MainWindow : Window
 
     private void BtnOpenSettings_Click(object sender, RoutedEventArgs e)
     {
-        var settingsDialog = new SettingsWindow(_projectionSettings)
-        {
-            Owner = this
-        };
+        var settingsDialog = new SettingsWindow(_projectionSettings) { Owner = this };
 
         if (settingsDialog.ShowDialog() == true)
         {
@@ -394,6 +554,14 @@ public partial class MainWindow : Window
         {
             _projectionWindow.UpdateText(text);
         }
+    }
+
+    private void CheckMonitors()
+    {
+        int screens = System.Windows.Forms.Screen.AllScreens.Length;
+        TxtScreenStatus.Text = screens > 1
+            ? $"Monitores: {screens} (2º ecrã detetado)"
+            : "Apenas 1 monitor (Modo Janela)";
     }
 
     private void BtnToggleProjection_Click(object sender, RoutedEventArgs e)

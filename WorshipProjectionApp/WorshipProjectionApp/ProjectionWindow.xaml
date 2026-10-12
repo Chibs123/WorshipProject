@@ -1,44 +1,54 @@
 ﻿<Window x:Class="WorshipProjectionApp.ProjectionWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="Projeção"
+        Title="IEBCR II Setúbal - Saída de Projeção"
+        Background="Black"
         WindowStyle="None"
         ResizeMode="NoResize"
         ShowInTaskbar="False"
-        Background="Black">
-    <Grid Background="Black">
-        <!-- Camada 1: Vídeo Nativo em Loop -->
-        <MediaElement x:Name="MediaVideo"
+        Topmost="True"
+        TextOptions.TextFormattingMode="Display"
+        TextOptions.TextRenderingMode="ClearType"
+        RenderOptions.BitmapScalingMode="HighQuality">
+
+    <Grid Background="Black" ClipToBounds="True">
+        <!-- Camada 1: Vídeo de Fundo -->
+        <MediaElement x:Name="MediaBgVideo"
                       LoadedBehavior="Manual"
                       UnloadedBehavior="Manual"
                       Stretch="UniformToFill"
                       IsMuted="True"
-                      MediaEnded="MediaVideo_MediaEnded"/>
+                      MediaEnded="MediaBgVideo_MediaEnded"
+                      Opacity="0"/>
 
-        <!-- Camada 2: Imagem Estática -->
-        <Image x:Name="BackgroundImage" 
-               Stretch="UniformToFill" 
-               HorizontalAlignment="Center" 
-               VerticalAlignment="Center"/>
+        <!-- Camada 2: Imagem Estática de Fundo -->
+        <Image x:Name="MediaBgImage"
+               Stretch="UniformToFill"
+               HorizontalAlignment="Center"
+               VerticalAlignment="Center"
+               Opacity="0"/>
 
-        <!-- Camada 3: Texto de Letra / Versículo -->
-        <Viewbox Margin="90" StretchDirection="DownOnly" Stretch="Uniform">
-            <TextBlock x:Name="TxtProjection"
-                       Foreground="White"
-                       FontWeight="Bold"
-                       FontFamily="Segoe UI"
-                       TextAlignment="Center"
-                       TextWrapping="Wrap"
-                       LineHeight="52"
-                       MaxWidth="1600">
-                <TextBlock.Effect>
-                    <!-- Sombra dupla e nítida para máxima leitura sobre qualquer fundo -->
-                    <DropShadowEffect Color="Black" 
-                                      BlurRadius="16" 
-                                      ShadowDepth="4" 
-                                      Opacity="0.95"/>
-                </TextBlock.Effect>
-            </TextBlock>
+        <!-- Camada 3: Filtro Escuro Suave para Contraste -->
+        <Rectangle x:Name="OverlayDimmer" Fill="#000000" Opacity="0.15"/>
+
+        <!-- Camada 4: Área das Letras e Versículos -->
+        <Viewbox x:Name="ViewboxContent" Stretch="Uniform" Margin="70">
+            <Grid MinWidth="800">
+                <TextBlock x:Name="TxtProjection"
+                           Foreground="White"
+                           FontFamily="Segoe UI"
+                           FontWeight="Bold"
+                           FontSize="54"
+                           TextWrapping="Wrap"
+                           TextAlignment="Center"
+                           MaxWidth="1100"
+                           LineHeight="68"
+                           Opacity="1">
+                    <TextBlock.Effect>
+                        <DropShadowEffect Color="Black" BlurRadius="16" ShadowDepth="4" Direction="315" Opacity="0.95"/>
+                    </TextBlock.Effect>
+                </TextBlock>
+            </Grid>
         </Viewbox>
     </Grid>
 </Window>

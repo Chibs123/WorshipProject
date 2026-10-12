@@ -4,17 +4,17 @@
 winexe
 C#
 .cs
-C:\Users\Tiago.Rosario\Documents\GitHub\WorshipProject\WorshipProjectionApp\WorshipProjectionApp\obj\Debug\net8.0-windows\
+C:\Users\tiaho\Documents\GitHub\WorshipProject\WorshipProjectionApp\WorshipProjectionApp\obj\Debug\net8.0-windows\
 WorshipProjectionApp
 none
 false
 TRACE;DEBUG;NET;NET8_0;NETCOREAPP;WINDOWS;WINDOWS7_0;NET5_0_OR_GREATER;NET6_0_OR_GREATER;NET7_0_OR_GREATER;NET8_0_OR_GREATER;NETCOREAPP1_0_OR_GREATER;NETCOREAPP1_1_OR_GREATER;NETCOREAPP2_0_OR_GREATER;NETCOREAPP2_1_OR_GREATER;NETCOREAPP2_2_OR_GREATER;NETCOREAPP3_0_OR_GREATER;NETCOREAPP3_1_OR_GREATER;WINDOWS7_0_OR_GREATER
-C:\Users\Tiago.Rosario\Documents\GitHub\WorshipProject\WorshipProjectionApp\WorshipProjectionApp\App.xaml
-5661899589
-1253-167780773
-18374421988
-214427889288
-EditTeamMemberWindow.xaml;LayoutConfigWindow.xaml;MainWindow.xaml;ProjectionWindow.xaml;SettingsWindow.xaml;
+C:\Users\tiaho\Documents\GitHub\WorshipProject\WorshipProjectionApp\WorshipProjectionApp\App.xaml
+6-1161567220
+1253600538234
+211512772980
+214659020262
+EditTeamMemberWindow.xaml;LayoutConfigWindow.xaml;MainWindow.xaml;ProjectionWindow.xaml;SettingsWindow.xaml;SongEditorWindow.xaml;
 
 False
 
