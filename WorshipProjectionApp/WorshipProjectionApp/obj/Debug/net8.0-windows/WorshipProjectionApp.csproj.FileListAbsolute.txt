@@ -5254,3 +5254,5 @@ C:\Users\Tiago.Rosario\Documents\GitHub\WorshipProject\WorshipProjectionApp\Wors
 C:\Users\Tiago.Rosario\Documents\GitHub\WorshipProject\WorshipProjectionApp\WorshipProjectionApp\obj\Debug\net8.0-windows\SongEditorWindow.g.cs
 C:\Users\Tiago.Rosario\Documents\GitHub\WorshipProject\WorshipProjectionApp\WorshipProjectionApp\obj\Debug\net8.0-windows\AlertWindow.baml
 C:\Users\Tiago.Rosario\Documents\GitHub\WorshipProject\WorshipProjectionApp\WorshipProjectionApp\obj\Debug\net8.0-windows\AlertWindow.g.cs
+C:\Users\tiaho\Documents\GitHub\WorshipProject\WorshipProjectionApp\WorshipProjectionApp\obj\Debug\net8.0-windows\AlertWindow.baml
+C:\Users\tiaho\Documents\GitHub\WorshipProject\WorshipProjectionApp\WorshipProjectionApp\obj\Debug\net8.0-windows\AlertWindow.g.cs

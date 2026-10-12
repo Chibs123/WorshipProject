@@ -1,0 +1,13 @@
+{
+  "FontFamily": "Segoe UI",
+  "FontSize": 48,
+  "FontColorHex": "#FFFFFF",
+  "IsBold": true,
+  "TextAlignment": 2,
+  "VerticalAlignment": 1,
+  "LineSpacing": 1.2,
+  "MarginPercent": 8,
+  "ShadowBlurRadius": 14,
+  "ShadowOpacity": 0.95,
+  "ScreenIndex": 1
+}

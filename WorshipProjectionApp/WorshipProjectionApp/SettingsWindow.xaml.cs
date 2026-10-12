@@ -1,4 +1,5 @@
-﻿using System.Windows;
+﻿using System.Linq;
+using System.Windows;
 using System.Windows.Media;
 using WorshipProjectionApp.Models;
 
@@ -6,9 +7,7 @@ namespace WorshipProjectionApp;
 
 public partial class SettingsWindow : Window
 {
-
     public ProjectionSettings Settings { get; private set; }
-    public int ScreenIndex { get; set; } = 1;
 
     public SettingsWindow(ProjectionSettings currentSettings)
     {
@@ -34,7 +33,7 @@ public partial class SettingsWindow : Window
             CmbScreens.Items.Add($"Ecrã {i + 1}: {screen.Bounds.Width}x{screen.Bounds.Height}{isPrimary}");
         }
 
-        // NOVO: Aplica o ecrã guardado com proteção anti-crache
+        // Aplica o ecrã guardado com proteção anti-crache
         if (Settings.ScreenIndex >= 0 && Settings.ScreenIndex < CmbScreens.Items.Count)
         {
             CmbScreens.SelectedIndex = Settings.ScreenIndex;
@@ -83,6 +82,8 @@ public partial class SettingsWindow : Window
 
     private void BtnSave_Click(object sender, RoutedEventArgs e)
     {
+        // Guardar Definições de Ecrã e Estilo
+        Settings.ScreenIndex = CmbScreens.SelectedIndex;
         Settings.FontFamily = CmbFontFamily.SelectedItem?.ToString() ?? "Segoe UI";
         Settings.IsBold = ChkBold.IsChecked == true;
         Settings.MarginPercent = (int)SldMargin.Value;
@@ -108,7 +109,7 @@ public partial class SettingsWindow : Window
             2 => "#E0F2FE",
             _ => "#FFFFFF"
         };
-        Settings.ScreenIndex = CmbScreens.SelectedIndex;
+
         Settings.Save();
         DialogResult = true;
         Close();

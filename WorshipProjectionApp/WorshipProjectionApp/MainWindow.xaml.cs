@@ -427,14 +427,40 @@ public partial class MainWindow : Window
         }
     }
 
+    private void BtnOpenBackgroundsFolder_Click(object sender, RoutedEventArgs e)
+    {
+        try
+        {
+            string backgroundsFolder = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Backgrounds");
+
+            if (!System.IO.Directory.Exists(backgroundsFolder))
+            {
+                System.IO.Directory.CreateDirectory(backgroundsFolder);
+            }
+
+            System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo()
+            {
+                FileName = backgroundsFolder,
+                UseShellExecute = true,
+                Verb = "open"
+            });
+        }
+        catch (Exception ex)
+        {
+            System.Windows.MessageBox.Show($"Erro ao abrir a pasta: {ex.Message}", "Erro");
+        }
+    }
+
     private void BtnOpenSettings_Click(object sender, RoutedEventArgs e)
     {
-        var settingsDialog = new SettingsWindow(_projectionSettings) { Owner = this };
-
-        if (settingsDialog.ShowDialog() == true)
+        var settingsWindow = new SettingsWindow(_projectionSettings);
+        if (settingsWindow.ShowDialog() == true)
         {
-            _projectionSettings = settingsDialog.Settings;
+            _projectionSettings = settingsWindow.Settings;
             _projectionWindow?.ApplySettings(_projectionSettings);
+
+            // Força a janela a saltar para o novo monitor se o utilizador trocou de ecrã!
+            OpenProjectionWindow();
         }
     }
 
@@ -731,49 +757,100 @@ public partial class MainWindow : Window
             BadgeLiveText.Text = "LOGO ATIVO";
 
             _projectionWindow?.SetBlackout(false);
-            _projectionWindow?.SetMediaBackground(_logoFilePath); // O ecrã assume o fundo do Logo
+            _projectionWindow?.SetMediaBackground(_logoFilePath);
             _projectionWindow?.ClearScreen();
         }
     }
 
     private void OpenProjectionWindow()
     {
-        if (_projectionWindow != null && _projectionWindow.IsLoaded) return;
-
-        _projectionWindow = new ProjectionWindow();
         var screens = System.Windows.Forms.Screen.AllScreens;
-
-        // NOVO: Lê o índice que foi guardado nas Definições
         int savedScreenIndex = _projectionSettings.ScreenIndex;
 
-        // NOVO: Seleciona o ecrã com segurança. Se o índice guardado não existir (ex: desligaste o monitor), vai para o ecrã secundário ou o único que sobrar.
+        // 1. Descobre qual é o ecrã de destino atualizado
         var targetScreen = (savedScreenIndex >= 0 && savedScreenIndex < screens.Length)
                             ? screens[savedScreenIndex]
                             : (screens.FirstOrDefault(s => !s.Primary) ?? screens.First());
 
         var bounds = targetScreen.Bounds;
-        _projectionWindow.WindowStartupLocation = WindowStartupLocation.Manual;
-        _projectionWindow.Left = bounds.Left;
-        _projectionWindow.Top = bounds.Top;
-        _projectionWindow.Width = bounds.Width;
-        _projectionWindow.Height = bounds.Height;
 
-        if (screens.Length == 1)
+        // 2. A SOLUÇÃO ROBUSTA: Se a janela já existe mas está no ecrã errado,
+        // temos de a fechar e reabrir. É a única forma 100% segura no WPF.
+        if (_projectionWindow != null && _projectionWindow.IsLoaded)
         {
-            _projectionWindow.WindowStyle = WindowStyle.SingleBorderWindow;
-            _projectionWindow.ResizeMode = ResizeMode.CanResize;
-            _projectionWindow.Width = 800;
-            _projectionWindow.Height = 500;
-        }
-        else
-        {
-            _projectionWindow.WindowStyle = WindowStyle.None;
-            _projectionWindow.ResizeMode = ResizeMode.NoResize;
-            _projectionWindow.WindowState = WindowState.Maximized;
+            // Usamos uma margem de tolerância (50px) para lidar com escalas do Windows (DPI)
+            if (Math.Abs(_projectionWindow.Left - bounds.Left) > 50 ||
+                Math.Abs(_projectionWindow.Top - bounds.Top) > 50)
+            {
+                _projectionWindow.Close();
+                _projectionWindow = null; // Força a recriação da janela no monitor certo
+            }
         }
 
-        _projectionWindow.Show();
+        bool isNewWindow = (_projectionWindow == null);
+
+        // 3. Cria e posiciona a janela (se for nova ou tiver sido fechada no passo anterior)
+        if (isNewWindow)
+        {
+            _projectionWindow = new ProjectionWindow();
+            _projectionWindow.WindowStartupLocation = WindowStartupLocation.Manual;
+
+            // É obrigatório definir a posição ANTES de fazer o Show()
+            _projectionWindow.Left = bounds.Left;
+            _projectionWindow.Top = bounds.Top;
+            _projectionWindow.Width = bounds.Width;
+            _projectionWindow.Height = bounds.Height;
+
+            if (screens.Length == 1)
+            {
+                _projectionWindow.WindowStyle = WindowStyle.SingleBorderWindow;
+                _projectionWindow.ResizeMode = ResizeMode.CanResize;
+                _projectionWindow.Width = 800;
+                _projectionWindow.Height = 500;
+            }
+            else
+            {
+                // Em ecrãs duplos, garantimos que ela nasce "Normal" para o Windows a colocar 
+                // nas coordenadas certas e só depois a maximizamos.
+                _projectionWindow.WindowStyle = WindowStyle.None;
+                _projectionWindow.ResizeMode = ResizeMode.NoResize;
+                _projectionWindow.WindowState = WindowState.Normal;
+            }
+
+            _projectionWindow.Show();
+
+            if (screens.Length > 1)
+            {
+                // Maximiza-se na perfeição no novo monitor
+                _projectionWindow.WindowState = WindowState.Maximized;
+            }
+        }
+
+        // 4. Aplica as novas definições (fontes, cores, sombras)
         _projectionWindow.ApplySettings(_projectionSettings);
+
+        // 5. RESTAURA A TRANSMISSÃO (Para a música e o fundo não desaparecerem ao trocar de ecrã)
+        if (isNewWindow)
+        {
+            if (_currentMode == ProjectionMode.Live)
+            {
+                _projectionWindow.SetBlackout(false);
+                _projectionWindow.SetMediaBackground(_currentBackgroundPath);
+                _projectionWindow.UpdateText(TxtPreview.Text);
+            }
+            else if (_currentMode == ProjectionMode.Clear)
+            {
+                _projectionWindow.SetBlackout(false);
+                _projectionWindow.SetMediaBackground(_currentBackgroundPath);
+                _projectionWindow.ClearScreen();
+            }
+            else if (_currentMode == ProjectionMode.Logo)
+            {
+                _projectionWindow.SetBlackout(false);
+                _projectionWindow.SetMediaBackground(_logoFilePath);
+                _projectionWindow.ClearScreen();
+            }
+        }
     }
 
     private void MainWindow_KeyDown(object sender, System.Windows.Input.KeyEventArgs e)

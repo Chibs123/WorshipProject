@@ -23,17 +23,15 @@ public class ProjectionSettings
 
     public static ProjectionSettings Load()
     {
-        try
+        if (File.Exists(SettingsPath))
         {
-            if (File.Exists(SettingsPath))
+            try
             {
                 string json = File.ReadAllText(SettingsPath);
-                var loaded = JsonSerializer.Deserialize<ProjectionSettings>(json);
-                if (loaded != null) return loaded;
+                return JsonSerializer.Deserialize<ProjectionSettings>(json) ?? new ProjectionSettings();
             }
+            catch { }
         }
-        catch { }
-
         return new ProjectionSettings();
     }
 
@@ -41,7 +39,8 @@ public class ProjectionSettings
     {
         try
         {
-            string json = JsonSerializer.Serialize(this, new JsonSerializerOptions { WriteIndented = true });
+            var options = new JsonSerializerOptions { WriteIndented = true };
+            string json = JsonSerializer.Serialize(this, options);
             File.WriteAllText(SettingsPath, json);
         }
         catch { }
