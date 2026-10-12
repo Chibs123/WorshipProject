@@ -6,7 +6,9 @@ namespace WorshipProjectionApp;
 
 public partial class SettingsWindow : Window
 {
+
     public ProjectionSettings Settings { get; private set; }
+    public int ScreenIndex { get; set; } = 1;
 
     public SettingsWindow(ProjectionSettings currentSettings)
     {
@@ -15,14 +17,35 @@ public partial class SettingsWindow : Window
 
         // Preenche com fontes do sistema mais adequadas para projeção
         var standardFonts = new[] { "Segoe UI", "Arial", "Calibri", "Montserrat", "Trebuchet MS", "Verdana", "Impact" };
-        var systemFonts = Fonts.SystemFontFamilies.Select(f => f.Source).OrderBy(f => f).ToList();
+        var systemFonts = System.Windows.Media.Fonts.SystemFontFamilies.Select(f => f.Source).OrderBy(f => f).ToList();
+        var screens = System.Windows.Forms.Screen.AllScreens;
 
         foreach (var font in standardFonts.Concat(systemFonts).Distinct())
         {
             CmbFontFamily.Items.Add(font);
         }
 
-        // Carrega valores atuais
+        // Carregar Ecrãs Detetados
+        CmbScreens.Items.Clear();
+        for (int i = 0; i < screens.Length; i++)
+        {
+            var screen = screens[i];
+            string isPrimary = screen.Primary ? " (Ecrã Principal/Operador)" : "";
+            CmbScreens.Items.Add($"Ecrã {i + 1}: {screen.Bounds.Width}x{screen.Bounds.Height}{isPrimary}");
+        }
+
+        // NOVO: Aplica o ecrã guardado com proteção anti-crache
+        if (Settings.ScreenIndex >= 0 && Settings.ScreenIndex < CmbScreens.Items.Count)
+        {
+            CmbScreens.SelectedIndex = Settings.ScreenIndex;
+        }
+        else
+        {
+            // Se nunca foi configurado, sugere o 2º ecrã automaticamente (se existir)
+            CmbScreens.SelectedIndex = CmbScreens.Items.Count > 1 ? 1 : 0;
+        }
+
+        // Carrega valores atuais de estilo
         CmbFontFamily.SelectedItem = CmbFontFamily.Items.Contains(Settings.FontFamily) ? Settings.FontFamily : "Segoe UI";
         ChkBold.IsChecked = Settings.IsBold;
 
@@ -85,7 +108,7 @@ public partial class SettingsWindow : Window
             2 => "#E0F2FE",
             _ => "#FFFFFF"
         };
-
+        Settings.ScreenIndex = CmbScreens.SelectedIndex;
         Settings.Save();
         DialogResult = true;
         Close();

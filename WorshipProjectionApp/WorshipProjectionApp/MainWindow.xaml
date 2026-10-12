@@ -25,15 +25,20 @@
         <SolidColorBrush x:Key="BorderDark" Color="#2A384F"/>
         <SolidColorBrush x:Key="TextPrimary" Color="#F8FAFC"/>
         <SolidColorBrush x:Key="TextMuted" Color="#94A3B8"/>
-
         <SolidColorBrush x:Key="AccentGold" Color="#D4AF37"/>
         <SolidColorBrush x:Key="AccentGoldHover" Color="#E5C158"/>
         <SolidColorBrush x:Key="ButtonNeutral" Color="#24344D"/>
         <SolidColorBrush x:Key="ButtonNeutralHover" Color="#334668"/>
 
+        <!-- ESTILOS DE BOTÕES COM ANIMAÇÕES SUAVES -->
+
         <!-- Estilo Botão Dourado -->
         <Style x:Key="GoldButton" TargetType="Button">
-            <Setter Property="Background" Value="{StaticResource AccentGold}"/>
+            <Setter Property="Background">
+                <Setter.Value>
+                    <SolidColorBrush Color="#D4AF37"/>
+                </Setter.Value>
+            </Setter>
             <Setter Property="Foreground" Value="#0B0F19"/>
             <Setter Property="FontWeight" Value="SemiBold"/>
             <Setter Property="Padding" Value="14,7"/>
@@ -49,15 +54,30 @@
                 </Setter.Value>
             </Setter>
             <Style.Triggers>
-                <Trigger Property="IsMouseOver" Value="True">
-                    <Setter Property="Background" Value="{StaticResource AccentGoldHover}"/>
-                </Trigger>
+                <EventTrigger RoutedEvent="MouseEnter">
+                    <BeginStoryboard>
+                        <Storyboard>
+                            <ColorAnimation Storyboard.TargetProperty="(Button.Background).(SolidColorBrush.Color)" To="#E5C158" Duration="0:0:0.15"/>
+                        </Storyboard>
+                    </BeginStoryboard>
+                </EventTrigger>
+                <EventTrigger RoutedEvent="MouseLeave">
+                    <BeginStoryboard>
+                        <Storyboard>
+                            <ColorAnimation Storyboard.TargetProperty="(Button.Background).(SolidColorBrush.Color)" To="#D4AF37" Duration="0:0:0.25"/>
+                        </Storyboard>
+                    </BeginStoryboard>
+                </EventTrigger>
             </Style.Triggers>
         </Style>
 
         <!-- Estilo Botão Neutro Escuro -->
         <Style x:Key="NavyButton" TargetType="Button">
-            <Setter Property="Background" Value="{StaticResource ButtonNeutral}"/>
+            <Setter Property="Background">
+                <Setter.Value>
+                    <SolidColorBrush Color="#24344D"/>
+                </Setter.Value>
+            </Setter>
             <Setter Property="Foreground" Value="{StaticResource TextPrimary}"/>
             <Setter Property="FontWeight" Value="Medium"/>
             <Setter Property="Padding" Value="10,6"/>
@@ -73,9 +93,59 @@
                 </Setter.Value>
             </Setter>
             <Style.Triggers>
-                <Trigger Property="IsMouseOver" Value="True">
-                    <Setter Property="Background" Value="{StaticResource ButtonNeutralHover}"/>
-                </Trigger>
+                <EventTrigger RoutedEvent="MouseEnter">
+                    <BeginStoryboard>
+                        <Storyboard>
+                            <ColorAnimation Storyboard.TargetProperty="(Button.Background).(SolidColorBrush.Color)" To="#334668" Duration="0:0:0.15"/>
+                        </Storyboard>
+                    </BeginStoryboard>
+                </EventTrigger>
+                <EventTrigger RoutedEvent="MouseLeave">
+                    <BeginStoryboard>
+                        <Storyboard>
+                            <ColorAnimation Storyboard.TargetProperty="(Button.Background).(SolidColorBrush.Color)" To="#24344D" Duration="0:0:0.25"/>
+                        </Storyboard>
+                    </BeginStoryboard>
+                </EventTrigger>
+            </Style.Triggers>
+        </Style>
+
+        <!-- Estilo Botão Perigo (Vermelho) -->
+        <Style x:Key="DangerButton" TargetType="Button">
+            <Setter Property="Background">
+                <Setter.Value>
+                    <SolidColorBrush Color="#991B1B"/>
+                </Setter.Value>
+            </Setter>
+            <Setter Property="Foreground" Value="{StaticResource TextPrimary}"/>
+            <Setter Property="FontWeight" Value="Medium"/>
+            <Setter Property="Padding" Value="10,6"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border Background="{TemplateBinding Background}" CornerRadius="4" Padding="{TemplateBinding Padding}">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+            <Style.Triggers>
+                <EventTrigger RoutedEvent="MouseEnter">
+                    <BeginStoryboard>
+                        <Storyboard>
+                            <ColorAnimation Storyboard.TargetProperty="(Button.Background).(SolidColorBrush.Color)" To="#B91C1C" Duration="0:0:0.15"/>
+                        </Storyboard>
+                    </BeginStoryboard>
+                </EventTrigger>
+                <EventTrigger RoutedEvent="MouseLeave">
+                    <BeginStoryboard>
+                        <Storyboard>
+                            <ColorAnimation Storyboard.TargetProperty="(Button.Background).(SolidColorBrush.Color)" To="#991B1B" Duration="0:0:0.25"/>
+                        </Storyboard>
+                    </BeginStoryboard>
+                </EventTrigger>
             </Style.Triggers>
         </Style>
 
@@ -111,6 +181,31 @@
                     <Setter Property="Foreground" Value="White"/>
                 </Trigger>
             </Style.Triggers>
+        </Style>
+
+        <!-- ScrollBar Moderna e Minimalista -->
+        <Style TargetType="ScrollBar">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="Width" Value="6"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ScrollBar">
+                        <Border Background="{TemplateBinding Background}" CornerRadius="3">
+                            <Track x:Name="PART_Track" IsDirectionReversed="true">
+                                <Track.Thumb>
+                                    <Thumb>
+                                        <Thumb.Template>
+                                            <ControlTemplate TargetType="Thumb">
+                                                <Border Background="#3394A3B8" CornerRadius="3" Margin="0,2"/>
+                                            </ControlTemplate>
+                                        </Thumb.Template>
+                                    </Thumb>
+                                </Track.Thumb>
+                            </Track>
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
         </Style>
 
         <!-- Caixa de Pesquisa -->
@@ -304,116 +399,279 @@
     <Grid Background="{StaticResource BgCanvas}">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
+            <!-- Cabeçalho -->
             <RowDefinition Height="*"/>
-            <RowDefinition Height="Auto"/>
+            <!-- Corpo (Grelha Principal) -->
         </Grid.RowDefinitions>
 
         <!-- CABEÇALHO -->
         <Border Grid.Row="0" Background="#060A12" Padding="14,6,8,6" BorderBrush="{StaticResource BorderDark}" BorderThickness="0,0,0,1">
             <DockPanel LastChildFill="False">
+
+                <!-- ESQUERDA/CENTRO: Botões de Estado -->
                 <StackPanel Orientation="Horizontal" VerticalAlignment="Center" DockPanel.Dock="Left">
-                    <Grid Width="20" Height="26" Margin="0,0,10,0" VerticalAlignment="Center">
-                        <Rectangle Fill="{StaticResource AccentGold}" Width="4" Height="26" HorizontalAlignment="Center" RadiusX="2" RadiusY="2"/>
-                        <Rectangle Fill="{StaticResource AccentGold}" Width="18" Height="4" VerticalAlignment="Top" Margin="0,6,0,0" RadiusX="2" RadiusY="2"/>
-                    </Grid>
-                    <StackPanel>
-                        <TextBlock Text="IEBCR II SETÚBAL" Foreground="{StaticResource TextPrimary}" FontWeight="Bold" FontSize="15"/>
-                        <TextBlock Text="Projeção &amp; Multimédia de Louvor" Foreground="{StaticResource TextMuted}" FontSize="10"/>
-                    </StackPanel>
+
+                    <!-- 1. Botão LIVE -->
+                    <Button x:Name="BtnModeLive" Content="LIVE" Click="BtnModeLive_Click" Style="{StaticResource NavyButton}" Margin="0,0,6,0" WindowChrome.IsHitTestVisibleInChrome="True" ToolTip="Transmitir (F5)"/>
+
+                    <!-- 2. Botão LOGO -->
+                    <Button x:Name="BtnModeLogo" Content="LOGO" Click="BtnModeLogo_Click" Style="{StaticResource NavyButton}" Margin="0,0,6,0" WindowChrome.IsHitTestVisibleInChrome="True" ToolTip="Clique com o Botão Direito para definir a imagem/vídeo (F6)!">
+                        <Button.ContextMenu>
+                            <ContextMenu>
+                                <MenuItem Header="Definir ficheiro de Logo..." Click="MenuSetLogo_Click"/>
+                            </ContextMenu>
+                        </Button.ContextMenu>
+                    </Button>
+
+                    <!-- 3. Botão CLEAR -->
+                    <Button x:Name="BtnModeClear" Content="CLEAR" Click="BtnModeClear_Click" Style="{StaticResource NavyButton}" Margin="0,0,6,0" WindowChrome.IsHitTestVisibleInChrome="True" ToolTip="Limpar Ecrã (Esc)"/>
+
+                    <!-- 4. Botão INFORMAÇÕES (Apenas Ícone) -->
+                    <Button Click="BtnOpenAlerts_Click" Style="{StaticResource NavyButton}" Margin="0,0,0,0" Padding="12,6" WindowChrome.IsHitTestVisibleInChrome="True" ToolTip="Informações e Alertas">
+                        <TextBlock FontFamily="Segoe Fluent Icons" Text="&#xE783;" FontSize="15" VerticalAlignment="Center"/>
+                    </Button>
+
                 </StackPanel>
 
+                <!-- DIREITA: Controlos da Janela -->
                 <StackPanel Orientation="Horizontal" DockPanel.Dock="Right" VerticalAlignment="Center" Margin="14,0,0,0">
-                    <Button Content="🗕" Click="BtnMinimize_Click" Style="{StaticResource WindowNavButton}" WindowChrome.IsHitTestVisibleInChrome="True"/>
-                    <Button Content="🗖" Click="BtnMaximize_Click" Style="{StaticResource WindowNavButton}" WindowChrome.IsHitTestVisibleInChrome="True"/>
-                    <Button Content="✕" Click="BtnClose_Click" Style="{StaticResource WindowCloseButton}" WindowChrome.IsHitTestVisibleInChrome="True"/>
+                    <Button Click="BtnMinimize_Click" Style="{StaticResource WindowNavButton}" WindowChrome.IsHitTestVisibleInChrome="True">
+                        <TextBlock FontFamily="Segoe Fluent Icons" Text="&#xE921;" FontSize="10" VerticalAlignment="Center"/>
+                    </Button>
+                    <Button Click="BtnMaximize_Click" Style="{StaticResource WindowNavButton}" WindowChrome.IsHitTestVisibleInChrome="True">
+                        <TextBlock FontFamily="Segoe Fluent Icons" Text="&#xE922;" FontSize="10" VerticalAlignment="Center"/>
+                    </Button>
+                    <Button Click="BtnClose_Click" Style="{StaticResource WindowCloseButton}" WindowChrome.IsHitTestVisibleInChrome="True">
+                        <TextBlock FontFamily="Segoe Fluent Icons" Text="&#xE8BB;" FontSize="10" VerticalAlignment="Center"/>
+                    </Button>
                 </StackPanel>
 
+                <!-- DIREITA: Menu Ferramentas (Apenas Ícone) -->
                 <StackPanel Orientation="Horizontal" DockPanel.Dock="Right" VerticalAlignment="Center">
-                    <Button Content="📺 Ativar Projeção" Click="BtnToggleProjection_Click" Style="{StaticResource GoldButton}" Margin="0,0,8,0" WindowChrome.IsHitTestVisibleInChrome="True"/>
-                    <Button Content="Limpar Texto (Esc)" Click="BtnClearText_Click" Style="{StaticResource NavyButton}" Margin="0,0,6,0" WindowChrome.IsHitTestVisibleInChrome="True"/>
-                    <Button Content="Ecrã Preto (F6)" Click="BtnBlackout_Click" Style="{StaticResource NavyButton}" Margin="0,0,8,0" WindowChrome.IsHitTestVisibleInChrome="True"/>
-
                     <Menu Background="Transparent" WindowChrome.IsHitTestVisibleInChrome="True" VerticalAlignment="Center">
-                        <MenuItem Header="⚙️ Ferramentas ▾" Foreground="{StaticResource TextPrimary}" Background="{StaticResource ButtonNeutral}" Padding="10,6" FontWeight="Medium">
-                            <MenuItem Header="🧩 Personalizar Layout (Lego)" Click="BtnOpenLayoutConfig_Click" Background="#162032" Foreground="White"/>
-                            <MenuItem Header="⚙️ Definições de Projeção" Click="BtnOpenSettings_Click" Background="#162032" Foreground="White"/>
-                            <MenuItem Header="📥 Importar EasyWorship" Click="BtnImportEasyWorship_Click" Background="#162032" Foreground="White"/>
+                        <MenuItem Foreground="{StaticResource TextPrimary}" Background="{StaticResource ButtonNeutral}" Padding="12,6" FontWeight="Medium" ToolTip="Ferramentas do Sistema">
+                            <MenuItem.Header>
+                                <TextBlock FontFamily="Segoe Fluent Icons" Text="&#xE713;" FontSize="15" VerticalAlignment="Center"/>
+                            </MenuItem.Header>
+                            <MenuItem Header="Personalizar Layout (Lego)" Click="BtnOpenLayoutConfig_Click" Background="#162032" Foreground="White">
+                                <MenuItem.Icon>
+                                    <TextBlock FontFamily="Segoe Fluent Icons" Text="&#xE7C3;" Foreground="White"/>
+                                </MenuItem.Icon>
+                            </MenuItem>
+                            <MenuItem Header="Definições de Projeção" Click="BtnOpenSettings_Click" Background="#162032" Foreground="White">
+                                <MenuItem.Icon>
+                                    <TextBlock FontFamily="Segoe Fluent Icons" Text="&#xE713;" Foreground="White"/>
+                                </MenuItem.Icon>
+                            </MenuItem>
+                            <MenuItem Header="Importar EasyWorship" Click="BtnImportEasyWorship_Click" Background="#162032" Foreground="White">
+                                <MenuItem.Icon>
+                                    <TextBlock FontFamily="Segoe Fluent Icons" Text="&#xE896;" Foreground="White"/>
+                                </MenuItem.Icon>
+                            </MenuItem>
+                            <MenuItem Header="Importar Bíblia (SQLite)" Click="BtnImportBible_Click" Background="#162032" Foreground="White">
+                                <MenuItem.Icon>
+                                    <TextBlock FontFamily="Segoe Fluent Icons" Text="&#xE896;" Foreground="White"/>
+                                </MenuItem.Icon>
+                            </MenuItem>
                         </MenuItem>
                     </Menu>
                 </StackPanel>
             </DockPanel>
         </Border>
 
-        <!-- CORPO PRINCIPAL COM MATRIZ 4x4 -->
-        <Grid x:Name="MainColumnsGrid" Grid.Row="1" Margin="14,12,14,6">
-            <Grid.RowDefinitions>
-                <RowDefinition Height="*"/>
-                <RowDefinition Height="*"/>
-                <RowDefinition Height="*"/>
-                <RowDefinition Height="*"/>
-            </Grid.RowDefinitions>
+        <!-- CORPO PRINCIPAL COM MATRIZ PROPORCIONAL -->
+        <Grid x:Name="MainColumnsGrid" Grid.Row="1" Margin="14,12,14,14">
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="*"/>
-                <ColumnDefinition Width="*"/>
-                <ColumnDefinition Width="*"/>
-                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="1.1*"/>
+                <!-- Coluna 0: Live + Programação -->
+                <ColumnDefinition Width="1.5*"/>
+                <!-- Coluna 1: Slides/Letras (Mais larga) -->
+                <ColumnDefinition Width="1.5*"/>
+                <!-- Coluna 2: Recursos/Bíblia (Mais larga) -->
+                <ColumnDefinition Width="1.1*"/>
+                <!-- Coluna 3: Equipa de Louvor -->
             </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <!-- Linha 0: Ajusta-se à altura da miniatura -->
+                <RowDefinition Height="*"/>
+                <!-- Linha 1: Ocupa o resto do ecrã para baixo -->
+            </Grid.RowDefinitions>
 
-            <!-- 1. PAINEL: RECURSOS COM 3 ABAS (MÚSICAS, BÍBLIA, FUNDOS) -->
-            <Border x:Name="PanelResources" Background="{StaticResource PanelBg}" BorderBrush="{StaticResource BorderDark}" BorderThickness="1" CornerRadius="8" Padding="10" Margin="4">
+            <!-- 1. PAINEL: EM DIRETO (Canto Superior Esquerdo | Col 0, Row 0) -->
+            <Border x:Name="PanelLive" Grid.Column="0" Grid.Row="0" Background="{StaticResource PanelBg}" BorderBrush="{StaticResource BorderDark}" BorderThickness="1" CornerRadius="8" Padding="8" Margin="4">
+                <Viewbox Stretch="Uniform" HorizontalAlignment="Center" VerticalAlignment="Center" MaxHeight="180">
+                    <Border Width="320" Height="180" Background="Black" CornerRadius="6" ClipToBounds="True" BorderBrush="{StaticResource BorderDark}" BorderThickness="1">
+                        <Grid>
+                            <MediaElement x:Name="PreviewVideo" LoadedBehavior="Manual" UnloadedBehavior="Manual" Stretch="UniformToFill" IsMuted="True" MediaEnded="PreviewVideo_MediaEnded"/>
+                            <Image x:Name="PreviewBackgroundImage" Stretch="UniformToFill" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            <Viewbox Margin="14" Stretch="Uniform">
+                                <TextBlock x:Name="TxtPreview" Foreground="White" FontWeight="Bold" TextWrapping="Wrap" MaxWidth="300" TextAlignment="Center">
+                                    <TextBlock.Effect>
+                                        <DropShadowEffect Color="Black" BlurRadius="4" ShadowDepth="2" Opacity="0.95"/>
+                                    </TextBlock.Effect>
+                                </TextBlock>
+                            </Viewbox>
+                            <!-- Badge EM DIRETO -->
+                            <Border x:Name="BadgeLiveBorder" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="8" Background="#CC060A12" BorderBrush="#33EF4444" BorderThickness="1" CornerRadius="4" Padding="7,3">
+                                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                    <Ellipse x:Name="BadgeLiveDot" Width="7" Height="7" Fill="#EF4444" Margin="0,0,5,0"/>
+                                    <TextBlock x:Name="BadgeLiveText" Text="EM DIRETO" Foreground="#EF4444" FontWeight="Bold" FontSize="9" VerticalAlignment="Center"/>
+                                </StackPanel>
+                            </Border>
+                        </Grid>
+                    </Border>
+                </Viewbox>
+            </Border>
+
+            <!-- 2. PAINEL: PROGRAMAÇÃO (Canto Inferior Esquerdo | Col 0, Row 1) -->
+            <Border x:Name="PanelSchedule" Grid.Column="0" Grid.Row="1" Background="{StaticResource PanelBg}" BorderBrush="{StaticResource BorderDark}" BorderThickness="1" CornerRadius="8" Padding="12" Margin="4">
+                <DockPanel>
+                    <Grid DockPanel.Dock="Top" Margin="0,0,0,8">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                            <TextBlock FontFamily="Segoe Fluent Icons" Text="&#xE8FD;" Foreground="{StaticResource AccentGold}" FontSize="14" Margin="0,0,6,0" VerticalAlignment="Center"/>
+                            <TextBlock Text="Programação" FontWeight="Bold" FontSize="14" Foreground="{StaticResource AccentGold}" VerticalAlignment="Center"/>
+                        </StackPanel>
+                        <StackPanel Grid.Column="1" Orientation="Horizontal">
+                            <Button Click="BtnScheduleMoveUp_Click" Style="{StaticResource NavyButton}" Padding="6,2" Margin="0,0,4,0" ToolTip="Mover para Cima">
+                                <TextBlock FontFamily="Segoe Fluent Icons" Text="&#xE74A;" FontSize="12"/>
+                            </Button>
+                            <Button Click="BtnScheduleMoveDown_Click" Style="{StaticResource NavyButton}" Padding="6,2" Margin="0,0,8,0" ToolTip="Mover para Baixo">
+                                <TextBlock FontFamily="Segoe Fluent Icons" Text="&#xE74B;" FontSize="12"/>
+                            </Button>
+                            <Button Click="BtnScheduleRemove_Click" Style="{StaticResource DangerButton}" Padding="6,2" Margin="0,0,4,0" ToolTip="Remover (Del)">
+                                <TextBlock FontFamily="Segoe Fluent Icons" Text="&#xE74D;" FontSize="12"/>
+                            </Button>
+                        </StackPanel>
+                    </Grid>
+                    <ListBox x:Name="LstSchedule" SelectionChanged="LstSchedule_SelectionChanged" KeyDown="LstSchedule_KeyDown" AllowDrop="True" Drop="LstSchedule_Drop" DragOver="LstSchedule_DragOver" PreviewMouseMove="LstSchedule_PreviewMouseMove" BorderThickness="0" Background="Transparent">
+                        <ListBox.ItemTemplate>
+                            <DataTemplate>
+                                <Border Background="{StaticResource CardBg}" BorderBrush="{StaticResource BorderDark}" BorderThickness="1" CornerRadius="6" Padding="8" Margin="4,4,10,4">
+                                    <Border.Effect>
+                                        <DropShadowEffect Color="Black" BlurRadius="8" ShadowDepth="3" Opacity="0.2"/>
+                                    </Border.Effect>
+                                    <StackPanel>
+                                        <TextBlock Text="{Binding Title}" FontWeight="Bold" Foreground="{StaticResource TextPrimary}" FontSize="13"/>
+                                        <TextBlock Text="{Binding Subtitle}" Foreground="{StaticResource TextMuted}" FontSize="11" Margin="0,2,0,0"/>
+                                    </StackPanel>
+                                </Border>
+                            </DataTemplate>
+                        </ListBox.ItemTemplate>
+                    </ListBox>
+                </DockPanel>
+            </Border>
+
+            <!-- 3. PAINEL: SLIDES ATIVOS (Centro Esquerda | Col 1, Ocupa 2 Linhas) -->
+            <Border x:Name="PanelSlides" Grid.Column="1" Grid.Row="0" Grid.RowSpan="2" Background="{StaticResource PanelBg}" BorderBrush="{StaticResource BorderDark}" BorderThickness="1" CornerRadius="8" Padding="12" Margin="4">
+                <DockPanel>
+                    <TextBlock x:Name="TxtSelectedSongTitle" DockPanel.Dock="Top" Text="Nenhum item selecionado" FontWeight="Bold" FontSize="15" Foreground="{StaticResource TextPrimary}" Margin="4,0,0,10"/>
+                    <ListBox x:Name="LstSlides" SelectionChanged="LstSlides_SelectionChanged" BorderThickness="0" Background="Transparent">
+                        <ListBox.ItemTemplate>
+                            <DataTemplate>
+                                <Border BorderBrush="{StaticResource BorderDark}" BorderThickness="1" CornerRadius="8" Padding="12" Margin="4,4,10,6" Background="{StaticResource CardBg}">
+                                    <Border.Effect>
+                                        <DropShadowEffect Color="Black" BlurRadius="10" ShadowDepth="4" Opacity="0.25"/>
+                                    </Border.Effect>
+                                    <StackPanel>
+                                        <TextBlock Text="{Binding Header}" FontWeight="Bold" Foreground="{StaticResource AccentGold}" FontSize="12" Margin="0,0,0,4"/>
+                                        <TextBlock Text="{Binding Content}" FontSize="14" Foreground="{StaticResource TextPrimary}" TextWrapping="Wrap" LineHeight="20"/>
+                                    </StackPanel>
+                                </Border>
+                            </DataTemplate>
+                        </ListBox.ItemTemplate>
+                    </ListBox>
+                </DockPanel>
+            </Border>
+
+            <!-- 4. PAINEL: RECURSOS (Centro Direita | Col 2, Ocupa 2 Linhas) -->
+            <Border x:Name="PanelResources" Grid.Column="2" Grid.Row="0" Grid.RowSpan="2" Background="{StaticResource PanelBg}" BorderBrush="{StaticResource BorderDark}" BorderThickness="1" CornerRadius="8" Padding="10" Margin="4">
                 <TabControl>
                     <!-- Aba Músicas -->
-                    <TabItem Header="🎵 Músicas">
+                    <TabItem>
+                        <TabItem.Header>
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock FontFamily="Segoe Fluent Icons" Text="&#xE8D6;" Margin="0,0,6,0" FontSize="13" VerticalAlignment="Center"/>
+                                <TextBlock Text="Músicas" VerticalAlignment="Center"/>
+                            </StackPanel>
+                        </TabItem.Header>
                         <DockPanel Margin="0,8,0,0">
                             <Grid DockPanel.Dock="Top" Margin="0,0,0,8">
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="*"/>
                                     <ColumnDefinition Width="Auto"/>
                                 </Grid.ColumnDefinitions>
-                                <TextBox x:Name="TxtSearchSong" Grid.Column="0" Style="{StaticResource SearchTextBox}" 
-                                         TextChanged="TxtSearchSong_TextChanged" ToolTip="Pesquisar por título da canção..."/>
-                                <Button Grid.Column="1" Content="➕ Nova Canção" Click="BtnNewSong_Click" Style="{StaticResource GoldButton}" Padding="8,4" Margin="6,0,0,0"/>
+                                <TextBox x:Name="TxtSearchSong" Grid.Column="0" Style="{StaticResource SearchTextBox}" TextChanged="TxtSearchSong_TextChanged"/>
+                                <Button Grid.Column="1" Click="BtnNewSong_Click" Style="{StaticResource GoldButton}" Padding="8,4" Margin="6,0,0,0">
+                                    <StackPanel Orientation="Horizontal">
+                                        <TextBlock FontFamily="Segoe Fluent Icons" Text="&#xE710;" Margin="0,0,6,0" VerticalAlignment="Center"/>
+                                        <TextBlock Text="Nova" VerticalAlignment="Center"/>
+                                    </StackPanel>
+                                </Button>
                             </Grid>
-
-                            <ListBox x:Name="LstSongs" DisplayMemberPath="Title" 
-                                     SelectionChanged="LstSongs_SelectionChanged" 
-                                     PreviewMouseMove="LstSongs_PreviewMouseMove"
-                                     BorderThickness="0" Background="Transparent"/>
+                            <ListBox x:Name="LstSongs" DisplayMemberPath="Title" SelectionChanged="LstSongs_SelectionChanged" PreviewMouseMove="LstSongs_PreviewMouseMove" BorderThickness="0" Background="Transparent"/>
                         </DockPanel>
                     </TabItem>
 
                     <!-- Aba Bíblia -->
-                    <TabItem Header="📖 Bíblia Sagrada">
+                    <TabItem>
+                        <TabItem.Header>
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock FontFamily="Segoe Fluent Icons" Text="&#xE82D;" Margin="0,0,6,0" FontSize="13" VerticalAlignment="Center"/>
+                                <TextBlock Text="Bíblia" VerticalAlignment="Center"/>
+                            </StackPanel>
+                        </TabItem.Header>
                         <DockPanel Margin="0,8,0,0">
                             <TextBlock DockPanel.Dock="Top" Text="Ex: jo 3:16, sl 23 ou palavra" Foreground="{StaticResource TextMuted}" FontSize="11" Margin="0,0,0,4"/>
-                            <TextBox x:Name="TxtSearchBible" DockPanel.Dock="Top" Style="{StaticResource SearchTextBox}" 
-                                     Margin="0,0,0,8" KeyDown="TxtSearchBible_KeyDown"/>
-                            <ListBox x:Name="LstBibleResults" DisplayMemberPath="Reference" 
-                                     SelectionChanged="LstBibleResults_SelectionChanged" 
-                                     PreviewMouseMove="LstBibleResults_PreviewMouseMove"
-                                     BorderThickness="0" Background="Transparent"/>
+                            <Grid DockPanel.Dock="Top" Margin="0,0,0,8">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="80"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBox x:Name="TxtSearchBible" Grid.Column="0" Style="{StaticResource SearchTextBox}" Margin="0,0,4,0" KeyDown="TxtSearchBible_KeyDown"/>
+                                <ComboBox x:Name="CmbBibleVersion" Grid.Column="1" SelectionChanged="CmbBibleVersion_SelectionChanged"/>
+                            </Grid>
+                            <ListBox x:Name="LstBibleResults" DisplayMemberPath="Reference" SelectionChanged="LstBibleResults_SelectionChanged" PreviewMouseMove="LstBibleResults_PreviewMouseMove" BorderThickness="0" Background="Transparent"/>
                         </DockPanel>
                     </TabItem>
 
-                    <!-- Aba Fundos Visuais (Vídeos em Loop e Imagens) -->
-                    <TabItem Header="🖼️ Fundos">
+                    <!-- Aba Fundos -->
+                    <TabItem>
+                        <TabItem.Header>
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock FontFamily="Segoe Fluent Icons" Text="&#xE91B;" Margin="0,0,6,0" FontSize="13" VerticalAlignment="Center"/>
+                                <TextBlock Text="Fundos" VerticalAlignment="Center"/>
+                            </StackPanel>
+                        </TabItem.Header>
                         <DockPanel Margin="0,8,0,0">
                             <Grid DockPanel.Dock="Top" Margin="0,0,0,8">
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="*"/>
                                     <ColumnDefinition Width="Auto"/>
                                 </Grid.ColumnDefinitions>
-                                <Button Grid.Column="0" Content="📥 Importar do Windows" Click="BtnImportBackground_Click" Style="{StaticResource GoldButton}" Margin="0,0,6,0" Padding="8,4"/>
-                                <Button Grid.Column="1" Content="Sem Fundo" Click="BtnClearBackground_Click" Style="{StaticResource NavyButton}" Padding="8,4"/>
+                                <Button Grid.Column="0" Click="BtnImportBackground_Click" Style="{StaticResource GoldButton}" Margin="0,0,6,0" Padding="8,4">
+                                    <StackPanel Orientation="Horizontal">
+                                        <TextBlock FontFamily="Segoe Fluent Icons" Text="&#xE896;" Margin="0,0,6,0" VerticalAlignment="Center"/>
+                                        <TextBlock Text="Importar" VerticalAlignment="Center"/>
+                                    </StackPanel>
+                                </Button>
+                                <Button Grid.Column="1" Click="BtnClearBackground_Click" Style="{StaticResource NavyButton}" Padding="8,4">
+                                    <StackPanel Orientation="Horizontal">
+                                        <TextBlock FontFamily="Segoe Fluent Icons" Text="&#xE894;" Margin="0,0,6,0" VerticalAlignment="Center"/>
+                                        <TextBlock Text="Limpar" VerticalAlignment="Center"/>
+                                    </StackPanel>
+                                </Button>
                             </Grid>
-
-                            <ListBox x:Name="LstBackgrounds" 
-                                     SelectionChanged="LstBackgrounds_SelectionChanged"
-                                     AllowDrop="True"
-                                     Drop="LstBackgrounds_Drop"
-                                     BorderThickness="0" 
-                                     Background="Transparent"
-                                     ScrollViewer.HorizontalScrollBarVisibility="Disabled">
+                            <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Margin="0,0,0,8">
+                                <RadioButton x:Name="RbFilterAll" Content="Todos" IsChecked="True" Checked="BgFilter_Changed" Foreground="{StaticResource TextPrimary}" Margin="0,0,12,0"/>
+                                <RadioButton x:Name="RbFilterVideos" Content="Vídeos" Checked="BgFilter_Changed" Foreground="{StaticResource TextPrimary}" Margin="0,0,12,0"/>
+                                <RadioButton x:Name="RbFilterImages" Content="Fotos" Checked="BgFilter_Changed" Foreground="{StaticResource TextPrimary}"/>
+                            </StackPanel>
+                            <ListBox x:Name="LstBackgrounds" SelectionChanged="LstBackgrounds_SelectionChanged" AllowDrop="True" Drop="LstBackgrounds_Drop" BorderThickness="0" Background="Transparent" ScrollViewer.HorizontalScrollBarVisibility="Disabled">
                                 <ListBox.ItemsPanel>
                                     <ItemsPanelTemplate>
                                         <WrapPanel Orientation="Horizontal"/>
@@ -421,9 +679,15 @@
                                 </ListBox.ItemsPanel>
                                 <ListBox.ItemTemplate>
                                     <DataTemplate>
-                                        <Border Background="{StaticResource CardBg}" BorderBrush="{StaticResource BorderDark}" BorderThickness="1" CornerRadius="6" Width="105" Height="75" Margin="3" ClipToBounds="True">
+                                        <Border Background="{StaticResource CardBg}" BorderBrush="{StaticResource BorderDark}" BorderThickness="1" CornerRadius="6" Width="105" Height="75" Margin="4,4,8,8" ClipToBounds="True">
+                                            <Border.Effect>
+                                                <DropShadowEffect Color="Black" BlurRadius="6" ShadowDepth="2" Opacity="0.3"/>
+                                            </Border.Effect>
                                             <Grid>
                                                 <Image Source="{Binding ThumbnailPath}" Stretch="UniformToFill" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                                <Border Background="#B21E293B" HorizontalAlignment="Right" VerticalAlignment="Top" Padding="4,2" CornerRadius="0,0,0,4">
+                                                    <TextBlock Text="{Binding IsVideo, Converter={x:Null}}" Foreground="{StaticResource AccentGold}" FontSize="9" FontWeight="Bold"/>
+                                                </Border>
                                                 <Border Background="#CC0A0F19" VerticalAlignment="Bottom" Padding="4,2">
                                                     <TextBlock Text="{Binding Name}" Foreground="White" FontSize="10" TextTrimming="CharacterEllipsis" TextAlignment="Center"/>
                                                 </Border>
@@ -437,97 +701,16 @@
                 </TabControl>
             </Border>
 
-            <!-- 2. PAINEL: PROGRAMAÇÃO COM SUPORTE A DRAG & DROP -->
-            <Border x:Name="PanelSchedule" Background="{StaticResource PanelBg}" BorderBrush="{StaticResource BorderDark}" BorderThickness="1" CornerRadius="8" Padding="12" Margin="4">
-                <DockPanel>
-                    <TextBlock DockPanel.Dock="Top" Text="📜 Programação" FontWeight="Bold" FontSize="14" Foreground="{StaticResource AccentGold}" Margin="0,0,0,8"/>
-                    <ListBox x:Name="LstSchedule" SelectionChanged="LstSchedule_SelectionChanged" 
-                             AllowDrop="True"
-                             Drop="LstSchedule_Drop"
-                             DragOver="LstSchedule_DragOver"
-                             PreviewMouseMove="LstSchedule_PreviewMouseMove"
-                             BorderThickness="0" Background="Transparent">
-                        <ListBox.ItemTemplate>
-                            <DataTemplate>
-                                <Border Background="{StaticResource CardBg}" BorderBrush="{StaticResource BorderDark}" BorderThickness="1" CornerRadius="6" Padding="8" Margin="0,2">
-                                    <StackPanel>
-                                        <TextBlock Text="{Binding Title}" FontWeight="Bold" Foreground="{StaticResource TextPrimary}" FontSize="13"/>
-                                        <TextBlock Text="{Binding Subtitle}" Foreground="{StaticResource TextMuted}" FontSize="11" Margin="0,2,0,0"/>
-                                    </StackPanel>
-                                </Border>
-                            </DataTemplate>
-                        </ListBox.ItemTemplate>
-                    </ListBox>
-                </DockPanel>
-            </Border>
-
-            <!-- 3. PAINEL: SLIDES ATIVOS -->
-            <Border x:Name="PanelSlides" Background="{StaticResource PanelBg}" BorderBrush="{StaticResource BorderDark}" BorderThickness="1" CornerRadius="8" Padding="12" Margin="4">
-                <DockPanel>
-                    <TextBlock x:Name="TxtSelectedSongTitle" DockPanel.Dock="Top" Text="Nenhum item selecionado" 
-                               FontWeight="Bold" FontSize="15" Foreground="{StaticResource TextPrimary}" Margin="0,0,0,10"/>
-
-                    <ListBox x:Name="LstSlides" SelectionChanged="LstSlides_SelectionChanged" BorderThickness="0" Background="Transparent">
-                        <ListBox.ItemTemplate>
-                            <DataTemplate>
-                                <Border BorderBrush="{StaticResource BorderDark}" BorderThickness="1" CornerRadius="8" Padding="12" Margin="0,4" Background="{StaticResource CardBg}">
-                                    <StackPanel>
-                                        <TextBlock Text="{Binding Header}" FontWeight="Bold" Foreground="{StaticResource AccentGold}" FontSize="12" Margin="0,0,0,4"/>
-                                        <TextBlock Text="{Binding Content}" FontSize="14" Foreground="{StaticResource TextPrimary}" TextWrapping="Wrap" LineHeight="20"/>
-                                    </StackPanel>
-                                </Border>
-                            </DataTemplate>
-                        </ListBox.ItemTemplate>
-                    </ListBox>
-                </DockPanel>
-            </Border>
-
-            <!-- 4. PAINEL: EM DIRETO (16:9 AUTOAJUSTÁVEL) -->
-            <Border x:Name="PanelLive" Background="{StaticResource PanelBg}" BorderBrush="{StaticResource BorderDark}" BorderThickness="1" CornerRadius="8" Padding="12" Margin="4">
-                <DockPanel LastChildFill="True">
-                    <TextBlock DockPanel.Dock="Top" Text="🔴 Em Direto (Projetor)" FontWeight="Bold" FontSize="14" Foreground="#EF4444" Margin="0,0,0,8"/>
-
-                    <Viewbox Stretch="Uniform" HorizontalAlignment="Center" VerticalAlignment="Center">
-                        <Border Width="320" Height="180" Background="Black" CornerRadius="6" ClipToBounds="True" BorderBrush="{StaticResource BorderDark}" BorderThickness="1">
-                            <Grid RenderOptions.BitmapScalingMode="LowQuality">
-                                <MediaElement x:Name="PreviewVideo"
-                                              LoadedBehavior="Manual"
-                                              UnloadedBehavior="Manual"
-                                              Stretch="UniformToFill"
-                                              IsMuted="True"
-                                              MediaEnded="PreviewVideo_MediaEnded"/>
-
-                                <Image x:Name="PreviewBackgroundImage" 
-                                       Stretch="UniformToFill" 
-                                       HorizontalAlignment="Center" 
-                                       VerticalAlignment="Center"/>
-
-                                <Viewbox Margin="14" Stretch="Uniform">
-                                    <TextBlock x:Name="TxtPreview" 
-                                               Foreground="White" 
-                                               FontWeight="Bold" 
-                                               TextWrapping="Wrap" 
-                                               MaxWidth="300" 
-                                               TextAlignment="Center">
-                                        <TextBlock.Effect>
-                                            <DropShadowEffect Color="Black" BlurRadius="4" ShadowDepth="2" Opacity="0.95"/>
-                                        </TextBlock.Effect>
-                                    </TextBlock>
-                                </Viewbox>
-                            </Grid>
-                        </Border>
-                    </Viewbox>
-                </DockPanel>
-            </Border>
-
-            <!-- 5. PAINEL: GRUPO DE LOUVOR & ÁUDIO -->
-            <Border x:Name="PanelWorshipTeam" Background="{StaticResource PanelBg}" BorderBrush="{StaticResource BorderDark}" BorderThickness="1" CornerRadius="8" Padding="12" Margin="4">
+            <!-- 5. PAINEL: GRUPO DE LOUVOR (Extrema Direita | Col 3, Ocupa 2 Linhas) -->
+            <Border x:Name="PanelWorshipTeam" Grid.Column="3" Grid.Row="0" Grid.RowSpan="2" Background="{StaticResource PanelBg}" BorderBrush="{StaticResource BorderDark}" BorderThickness="1" CornerRadius="8" Padding="12" Margin="4">
                 <DockPanel LastChildFill="True">
                     <DockPanel DockPanel.Dock="Top" Margin="0,0,0,8">
-                        <TextBlock Text="🎤 Grupo de Louvor" FontWeight="Bold" FontSize="14" Foreground="{StaticResource AccentGold}" VerticalAlignment="Center"/>
-                        <TextBlock Text="Mic &amp; Retorno" FontSize="11" Foreground="{StaticResource TextMuted}" VerticalAlignment="Center" HorizontalAlignment="Right"/>
+                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                            <TextBlock FontFamily="Segoe Fluent Icons" Text="&#xE1D6;" Foreground="{StaticResource AccentGold}" FontSize="14" Margin="0,0,6,0" VerticalAlignment="Center"/>
+                            <TextBlock Text="Equipa" FontWeight="Bold" FontSize="14" Foreground="{StaticResource AccentGold}" VerticalAlignment="Center"/>
+                        </StackPanel>
+                        <TextBlock Text="Mic/Retorno" FontSize="11" Foreground="{StaticResource TextMuted}" VerticalAlignment="Center" HorizontalAlignment="Right"/>
                     </DockPanel>
-
                     <Grid DockPanel.Dock="Top" Margin="0,0,0,8">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*"/>
@@ -540,29 +723,21 @@
                                 </DataTemplate>
                             </ComboBox.ItemTemplate>
                         </ComboBox>
-                        <Button Grid.Column="1" Content="➕ Adicionar" Click="BtnAddTeamMember_Click" Style="{StaticResource GoldButton}" Padding="10,4" Margin="6,0,0,0"/>
+                        <Button Grid.Column="1" Click="BtnAddTeamMember_Click" Style="{StaticResource GoldButton}" Padding="10,4" Margin="6,0,0,0" ToolTip="Adicionar Membro">
+                            <TextBlock FontFamily="Segoe Fluent Icons" Text="&#xE710;" FontSize="12"/>
+                        </Button>
                     </Grid>
-
                     <ListBox x:Name="LstActiveTeam" BorderThickness="0" Background="Transparent">
                         <ListBox.ItemTemplate>
                             <DataTemplate>
-                                <Border Background="{StaticResource CardBg}" BorderBrush="{StaticResource BorderDark}" BorderThickness="1" CornerRadius="6" Padding="8,6" Margin="0,2">
+                                <Border Background="{StaticResource CardBg}" BorderBrush="{StaticResource BorderDark}" BorderThickness="1" CornerRadius="6" Padding="8,6" Margin="4,4,10,4">
+                                    <Border.Effect>
+                                        <DropShadowEffect Color="Black" BlurRadius="6" ShadowDepth="2" Opacity="0.2"/>
+                                    </Border.Effect>
                                     <DockPanel LastChildFill="True">
-                                        <Button Content="✏️" 
-                                                Click="BtnEditTeamMember_Click" 
-                                                DockPanel.Dock="Right" 
-                                                Focusable="False"
-                                                Background="Transparent" 
-                                                Foreground="#D4AF37" 
-                                                BorderThickness="0" 
-                                                FontSize="13"
-                                                Width="30"
-                                                Height="30"
-                                                HorizontalContentAlignment="Center"
-                                                VerticalContentAlignment="Center"
-                                                Cursor="Hand" 
-                                                ToolTip="Editar ou remover membro"/>
-
+                                        <Button Click="BtnEditTeamMember_Click" DockPanel.Dock="Right" Focusable="False" Background="Transparent" Foreground="#D4AF37" BorderThickness="0" FontSize="13" Width="30" Height="30" Cursor="Hand" ToolTip="Editar">
+                                            <TextBlock FontFamily="Segoe Fluent Icons" Text="&#xE70F;"/>
+                                        </Button>
                                         <StackPanel Orientation="Horizontal" DockPanel.Dock="Right" VerticalAlignment="Center" Margin="0,0,8,0">
                                             <Border Background="#1E3A8A" CornerRadius="4" Padding="6,2" Margin="0,0,4,0">
                                                 <TextBlock Text="{Binding Microphone}" Foreground="#93C5FD" FontSize="11" FontWeight="Bold"/>
@@ -571,7 +746,6 @@
                                                 <TextBlock Text="{Binding InEarReturn}" Foreground="#6EE7B7" FontSize="11" FontWeight="Bold"/>
                                             </Border>
                                         </StackPanel>
-
                                         <StackPanel VerticalAlignment="Center">
                                             <TextBlock Text="{Binding Name}" FontWeight="Bold" Foreground="{StaticResource TextPrimary}" FontSize="13"/>
                                             <TextBlock Text="{Binding Role}" Foreground="{StaticResource TextMuted}" FontSize="10"/>
@@ -584,13 +758,5 @@
                 </DockPanel>
             </Border>
         </Grid>
-
-        <!-- RODAPÉ -->
-        <Border Grid.Row="2" Background="#060A12" Padding="12,6" BorderBrush="{StaticResource BorderDark}" BorderThickness="0,1,0,0">
-            <DockPanel>
-                <TextBlock x:Name="TxtScreenStatus" VerticalAlignment="Center" Foreground="{StaticResource TextMuted}" FontSize="12" DockPanel.Dock="Left"/>
-                <TextBlock Text="Igreja Evangélica Baptista - IEBCR II Setúbal" HorizontalAlignment="Right" Foreground="{StaticResource TextMuted}" FontSize="11" DockPanel.Dock="Right"/>
-            </DockPanel>
-        </Border>
     </Grid>
 </Window>

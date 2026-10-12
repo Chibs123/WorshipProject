@@ -1,17 +1,24 @@
 ﻿using System.Collections.ObjectModel;
 using System.Linq;
+using System.Text.Json;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Documents;
 using System.Windows.Input;
-using System.Text.Json;
+using System.Windows.Media;
 using WorshipProjectionApp.Models;
 using WorshipProjectionApp.Services;
+using KeyEventArgs = System.Windows.Input.KeyEventArgs;
 using LayoutSettings = WorshipProjectionApp.Models.LayoutSettings;
+using MessageBox = System.Windows.MessageBox;
 
 namespace WorshipProjectionApp;
 
 public partial class MainWindow : Window
 {
+    public ObservableCollection<MediaBackground> FilteredBackgrounds { get; set; } = new();
+    private DragAdorner? _dragAdorner;
+    private AdornerLayer? _adornerLayer;
     private static readonly string AutoSavePath = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "autosave_schedule.json");
     private ProjectionSettings _projectionSettings = ProjectionSettings.Load();
     private LayoutSettings _layoutSettings = LayoutSettings.Load();
@@ -21,7 +28,9 @@ public partial class MainWindow : Window
     public ObservableCollection<WorshipTeamMember> TeamCatalog { get; set; } = new();
     public ObservableCollection<WorshipTeamMember> ActiveTeam { get; set; } = new();
     public ObservableCollection<MediaBackground> AvailableBackgrounds { get; set; } = new();
-
+    public enum ProjectionMode { Logo, Clear, Live }
+    private ProjectionMode _currentMode = ProjectionMode.Clear;
+    private string? _logoFilePath;
     private ProjectionWindow? _projectionWindow;
     private string? _currentBackgroundPath;
     private bool _isBlackout;
@@ -33,7 +42,6 @@ public partial class MainWindow : Window
     public MainWindow()
     {
         InitializeComponent();
-        CheckMonitors();
         LoadSampleData();
         RestoreLastSession();
         LoadTeamData();
@@ -43,13 +51,52 @@ public partial class MainWindow : Window
         LstSchedule.ItemsSource = ScheduleItems;
         LstActiveTeam.ItemsSource = ActiveTeam;
         LstBackgrounds.ItemsSource = AvailableBackgrounds;
+        LstBackgrounds.ItemsSource = FilteredBackgrounds;
 
         CmbPresetMembers.ItemsSource = TeamCatalog;
         if (TeamCatalog.Count > 0) CmbPresetMembers.SelectedIndex = 0;
 
         ApplyLayout(_layoutSettings);
-
+        LoadBibleVersions();
         this.KeyDown += MainWindow_KeyDown;
+    }
+
+    private void BtnImportBible_Click(object sender, RoutedEventArgs e)
+    {
+        var dialog = new Microsoft.Win32.OpenFileDialog
+        {
+            Title = "Selecionar ficheiro(s) da Bíblia (SQLite / DB)",
+            Filter = "Base de Dados SQLite (*.sqlite;*.db)|*.sqlite;*.db",
+            Multiselect = true // <-- Permite selecionar vários ficheiros de uma vez!
+        };
+
+        if (dialog.ShowDialog() == true)
+        {
+            int successCount = 0;
+
+            // Corre todos os ficheiros selecionados
+            foreach (string file in dialog.FileNames)
+            {
+                if (_bibleService.ImportBible(file))
+                {
+                    successCount++;
+                }
+            }
+
+            LoadBibleVersions();
+            MessageBox.Show($"{successCount} Bíblias importadas com sucesso!", "Importação Concluída", MessageBoxButton.OK, MessageBoxImage.Information);
+        }
+    }
+
+    private void LoadBibleVersions()
+    {
+        var versions = _bibleService.GetAvailableVersions();
+        CmbBibleVersion.ItemsSource = versions;
+
+        if (versions.Count > 0)
+            CmbBibleVersion.SelectedIndex = 0;
+        else
+            CmbBibleVersion.ItemsSource = new List<string> { "Nenhuma Bíblia" };
     }
 
     private void LoadSampleData()
@@ -83,6 +130,22 @@ public partial class MainWindow : Window
         }
     }
 
+    private void BtnOpenAlerts_Click(object sender, RoutedEventArgs e)
+    {
+        var dlg = new AlertWindow { Owner = this };
+        if (dlg.ShowDialog() == true)
+        {
+            if (dlg.ShouldHide)
+            {
+                _projectionWindow?.HideAlert();
+            }
+            else
+            {
+                _projectionWindow?.ShowAlert(dlg.MessageText, dlg.ShowClock, dlg.CountdownMinutes);
+            }
+        }
+    }
+
     private void LoadBackgroundGallery()
     {
         AvailableBackgrounds.Clear();
@@ -90,6 +153,7 @@ public partial class MainWindow : Window
         {
             AvailableBackgrounds.Add(bg);
         }
+        ApplyBackgroundFilter();
     }
 
     // ---------------------------------------------------------
@@ -120,8 +184,35 @@ public partial class MainWindow : Window
                 Slides = selectedSong.ParseSlides()
             };
 
-            DragDrop.DoDragDrop(LstSongs, item, System.Windows.DragDropEffects.Copy);
+            StartDrag(LstSongs, item);
         }
+    }
+
+
+
+    private void ApplyBackgroundFilter()
+    {
+        FilteredBackgrounds.Clear();
+        var list = AvailableBackgrounds.AsEnumerable();
+
+        if (RbFilterVideos?.IsChecked == true)
+        {
+            list = list.Where(b => b.IsVideo);
+        }
+        else if (RbFilterImages?.IsChecked == true)
+        {
+            list = list.Where(b => !b.IsVideo);
+        }
+
+        foreach (var item in list)
+        {
+            FilteredBackgrounds.Add(item);
+        }
+    }
+
+    private void BgFilter_Changed(object sender, RoutedEventArgs e)
+    {
+        ApplyBackgroundFilter();
     }
 
     private void LstBibleResults_PreviewMouseMove(object sender, System.Windows.Input.MouseEventArgs e)
@@ -135,7 +226,7 @@ public partial class MainWindow : Window
                 Slides = new List<SlideItem> { verse.ToSlideItem() }
             };
 
-            DragDrop.DoDragDrop(LstBibleResults, item, System.Windows.DragDropEffects.Copy);
+            StartDrag(LstBibleResults, item);
         }
     }
 
@@ -224,7 +315,8 @@ public partial class MainWindow : Window
             _currentBackgroundPath = bg.FilePath;
             SetPreviewMediaBackground(_currentBackgroundPath);
 
-            if (_projectionWindow != null && !_isBlackout)
+            // Se o logo estiver ativo, não mudamos o background do projetor!
+            if (_projectionWindow != null && _currentMode != ProjectionMode.Logo)
             {
                 _projectionWindow.SetMediaBackground(_currentBackgroundPath);
             }
@@ -383,12 +475,26 @@ public partial class MainWindow : Window
     {
         if (e.Key == System.Windows.Input.Key.Enter)
         {
-            var results = _bibleService.Search(TxtSearchBible.Text);
+            string version = CmbBibleVersion.SelectedItem?.ToString() ?? "";
+
+            if (version == "Nenhuma Bíblia" || string.IsNullOrEmpty(version))
+                return;
+
+            var results = _bibleService.Search(TxtSearchBible.Text, version);
             LstBibleResults.ItemsSource = results;
             if (results.Count > 0)
             {
                 LstBibleResults.SelectedIndex = 0;
             }
+        }
+    }
+
+    private void CmbBibleVersion_SelectionChanged(object sender, SelectionChangedEventArgs e)
+    {
+        if (!string.IsNullOrWhiteSpace(TxtSearchBible?.Text))
+        {
+            // Força a pesquisa novamente se mudares de ARC para NVI, por exemplo
+            TxtSearchBible_KeyDown(TxtSearchBible, new System.Windows.Input.KeyEventArgs(Keyboard.PrimaryDevice, Keyboard.PrimaryDevice.ActiveSource, 0, Key.Enter) { RoutedEvent = Keyboard.KeyDownEvent });
         }
     }
 
@@ -550,60 +656,124 @@ public partial class MainWindow : Window
     {
         TxtPreview.Text = text;
 
-        if (_projectionWindow != null && !_isBlackout)
+        // Só envia texto se o modo estiver a LIVE
+        if (_projectionWindow != null && _currentMode == ProjectionMode.Live)
         {
             _projectionWindow.UpdateText(text);
         }
     }
 
-    private void CheckMonitors()
+    // ---------------------------------------------------------
+    // MÁQUINA DE ESTADOS DA PROJEÇÃO (LOGO, CLEAR, LIVE)
+    // ---------------------------------------------------------
+    private void BtnModeLogo_Click(object sender, RoutedEventArgs e) => SetProjectionMode(ProjectionMode.Logo);
+    private void BtnModeClear_Click(object sender, RoutedEventArgs e) => SetProjectionMode(ProjectionMode.Clear);
+    private void BtnModeLive_Click(object sender, RoutedEventArgs e) => SetProjectionMode(ProjectionMode.Live);
+
+    private void MenuSetLogo_Click(object sender, RoutedEventArgs e)
     {
-        int screens = System.Windows.Forms.Screen.AllScreens.Length;
-        TxtScreenStatus.Text = screens > 1
-            ? $"Monitores: {screens} (2º ecrã detetado)"
-            : "Apenas 1 monitor (Modo Janela)";
+        var dialog = new Microsoft.Win32.OpenFileDialog
+        {
+            Title = "Selecionar Ficheiro do Logo",
+            Filter = "Imagens/Vídeos (*.jpg;*.png;*.mp4)|*.jpg;*.jpeg;*.png;*.mp4;*.mov"
+        };
+        if (dialog.ShowDialog() == true)
+        {
+            _logoFilePath = dialog.FileName;
+            if (_currentMode == ProjectionMode.Logo)
+            {
+                SetProjectionMode(ProjectionMode.Logo); // Recarrega o logo se já estiver no modo Logo
+            }
+        }
     }
 
-    private void BtnToggleProjection_Click(object sender, RoutedEventArgs e)
+    private void SetProjectionMode(ProjectionMode mode)
     {
-        if (_projectionWindow == null || !_projectionWindow.IsLoaded)
+        OpenProjectionWindow(); // Garante que o projetor está ligado
+        _currentMode = mode;
+
+        // 1. Atualizar visual dos botões no topo (O ativo fica a Ouro, os outros a Azul Escuro)
+        BtnModeLogo.Style = (Style)FindResource(mode == ProjectionMode.Logo ? "GoldButton" : "NavyButton");
+        BtnModeClear.Style = (Style)FindResource(mode == ProjectionMode.Clear ? "GoldButton" : "NavyButton");
+        BtnModeLive.Style = (Style)FindResource(mode == ProjectionMode.Live ? "GoldButton" : "NavyButton");
+
+        // 2. Controlar Cores e Ações no Projetor e no Em Direto
+        if (mode == ProjectionMode.Live)
         {
-            _projectionWindow = new ProjectionWindow();
+            // VERDE - Estamos a transmitir Letra + Fundo
+            BadgeLiveDot.Fill = new SolidColorBrush(System.Windows.Media.Color.FromRgb(16, 185, 129));
+            BadgeLiveText.Foreground = new SolidColorBrush(System.Windows.Media.Color.FromRgb(16, 185, 129));
+            BadgeLiveBorder.BorderBrush = new SolidColorBrush(System.Windows.Media.Color.FromArgb(51, 16, 185, 129));
+            BadgeLiveText.Text = "EM DIRETO";
 
-            var screens = System.Windows.Forms.Screen.AllScreens;
-            var targetScreen = screens.FirstOrDefault(s => !s.Primary) ?? screens.First();
+            _projectionWindow?.SetBlackout(false);
+            _projectionWindow?.SetMediaBackground(_currentBackgroundPath);
+            _projectionWindow?.UpdateText(TxtPreview.Text);
+        }
+        else if (mode == ProjectionMode.Clear)
+        {
+            // VERMELHO - Fundo mantém-se, mas texto apagado
+            BadgeLiveDot.Fill = new SolidColorBrush(System.Windows.Media.Color.FromRgb(239, 68, 68));
+            BadgeLiveText.Foreground = new SolidColorBrush(System.Windows.Media.Color.FromRgb(239, 68, 68));
+            BadgeLiveBorder.BorderBrush = new SolidColorBrush(System.Windows.Media.Color.FromArgb(51, 239, 68, 68));
+            BadgeLiveText.Text = "SÓ FUNDO (CLEAR)";
 
-            var bounds = targetScreen.Bounds;
-            _projectionWindow.WindowStartupLocation = WindowStartupLocation.Manual;
-            _projectionWindow.Left = bounds.Left;
-            _projectionWindow.Top = bounds.Top;
-            _projectionWindow.Width = bounds.Width;
-            _projectionWindow.Height = bounds.Height;
+            _projectionWindow?.SetBlackout(false);
+            _projectionWindow?.SetMediaBackground(_currentBackgroundPath);
+            _projectionWindow?.ClearScreen();
+        }
+        else if (mode == ProjectionMode.Logo)
+        {
+            // VERMELHO - Corta tudo e põe a imagem/vídeo do Logo
+            BadgeLiveDot.Fill = new SolidColorBrush(System.Windows.Media.Color.FromRgb(239, 68, 68));
+            BadgeLiveText.Foreground = new SolidColorBrush(System.Windows.Media.Color.FromRgb(239, 68, 68));
+            BadgeLiveBorder.BorderBrush = new SolidColorBrush(System.Windows.Media.Color.FromArgb(51, 239, 68, 68));
+            BadgeLiveText.Text = "LOGO ATIVO";
 
-            if (screens.Length == 1)
-            {
-                _projectionWindow.WindowStyle = WindowStyle.SingleBorderWindow;
-                _projectionWindow.ResizeMode = ResizeMode.CanResize;
-                _projectionWindow.Width = 800;
-                _projectionWindow.Height = 500;
-            }
-            else
-            {
-                _projectionWindow.WindowStyle = WindowStyle.None;
-                _projectionWindow.ResizeMode = ResizeMode.NoResize;
-                _projectionWindow.WindowState = WindowState.Maximized;
-            }
+            _projectionWindow?.SetBlackout(false);
+            _projectionWindow?.SetMediaBackground(_logoFilePath); // O ecrã assume o fundo do Logo
+            _projectionWindow?.ClearScreen();
+        }
+    }
 
-            _projectionWindow.Show();
-            _projectionWindow.ApplySettings(_projectionSettings);
-            _projectionWindow.SetMediaBackground(_currentBackgroundPath);
-            _projectionWindow.UpdateText(TxtPreview.Text);
+    private void OpenProjectionWindow()
+    {
+        if (_projectionWindow != null && _projectionWindow.IsLoaded) return;
+
+        _projectionWindow = new ProjectionWindow();
+        var screens = System.Windows.Forms.Screen.AllScreens;
+
+        // NOVO: Lê o índice que foi guardado nas Definições
+        int savedScreenIndex = _projectionSettings.ScreenIndex;
+
+        // NOVO: Seleciona o ecrã com segurança. Se o índice guardado não existir (ex: desligaste o monitor), vai para o ecrã secundário ou o único que sobrar.
+        var targetScreen = (savedScreenIndex >= 0 && savedScreenIndex < screens.Length)
+                            ? screens[savedScreenIndex]
+                            : (screens.FirstOrDefault(s => !s.Primary) ?? screens.First());
+
+        var bounds = targetScreen.Bounds;
+        _projectionWindow.WindowStartupLocation = WindowStartupLocation.Manual;
+        _projectionWindow.Left = bounds.Left;
+        _projectionWindow.Top = bounds.Top;
+        _projectionWindow.Width = bounds.Width;
+        _projectionWindow.Height = bounds.Height;
+
+        if (screens.Length == 1)
+        {
+            _projectionWindow.WindowStyle = WindowStyle.SingleBorderWindow;
+            _projectionWindow.ResizeMode = ResizeMode.CanResize;
+            _projectionWindow.Width = 800;
+            _projectionWindow.Height = 500;
         }
         else
         {
-            _projectionWindow.Close();
-            _projectionWindow = null;
+            _projectionWindow.WindowStyle = WindowStyle.None;
+            _projectionWindow.ResizeMode = ResizeMode.NoResize;
+            _projectionWindow.WindowState = WindowState.Maximized;
         }
+
+        _projectionWindow.Show();
+        _projectionWindow.ApplySettings(_projectionSettings);
     }
 
     private void MainWindow_KeyDown(object sender, System.Windows.Input.KeyEventArgs e)
@@ -612,11 +782,18 @@ public partial class MainWindow : Window
 
         if (e.Key == Key.Escape)
         {
-            BtnClearText_Click(sender, e);
+            SetProjectionMode(ProjectionMode.Clear);
+            e.Handled = true;
         }
         else if (e.Key == Key.F6)
         {
-            BtnBlackout_Click(sender, e);
+            SetProjectionMode(ProjectionMode.Logo);
+            e.Handled = true;
+        }
+        else if (e.Key == System.Windows.Input.Key.F5)
+        {
+            SetProjectionMode(ProjectionMode.Live);
+            e.Handled = true;
         }
         else if (e.Key == Key.Down || e.Key == Key.Space || e.Key == Key.PageDown)
         {
@@ -627,38 +804,6 @@ public partial class MainWindow : Window
         {
             PrevSlide();
             e.Handled = true;
-        }
-    }
-
-    private void BtnClearText_Click(object sender, RoutedEventArgs e)
-    {
-        TxtPreview.Text = string.Empty;
-        _projectionWindow?.ClearScreen();
-    }
-
-    private void BtnBlackout_Click(object sender, RoutedEventArgs e)
-    {
-        _isBlackout = !_isBlackout;
-
-        if (_isBlackout)
-        {
-            SetPreviewMediaBackground(null);
-            TxtPreview.Text = string.Empty;
-            _projectionWindow?.SetBlackout(true);
-        }
-        else
-        {
-            SetPreviewMediaBackground(_currentBackgroundPath);
-            if (LstSlides.SelectedItem is Models.SlideItem slide)
-            {
-                TxtPreview.Text = slide.Content;
-            }
-
-            if (_projectionWindow != null)
-            {
-                _projectionWindow.SetMediaBackground(_currentBackgroundPath);
-                _projectionWindow.UpdateText(TxtPreview.Text);
-            }
         }
     }
 
@@ -707,6 +852,8 @@ public partial class MainWindow : Window
         }
     }
 
+
+
     private void PreviewVideo_MediaEnded(object sender, RoutedEventArgs e)
     {
         PreviewVideo.Position = TimeSpan.Zero;
@@ -735,5 +882,161 @@ public partial class MainWindow : Window
         SaveCurrentSession();
         _projectionWindow?.Close();
         base.OnClosed(e);
+    }
+
+    private Border CreateDragVisual(string title, string subtitle)
+    {
+        var border = new Border
+        {
+            Background = new SolidColorBrush(System.Windows.Media.Color.FromArgb(220, 22, 32, 50)),
+            BorderBrush = new SolidColorBrush(System.Windows.Media.Color.FromRgb(212, 175, 55)),
+            BorderThickness = new Thickness(1),
+            CornerRadius = new CornerRadius(6),
+            Padding = new Thickness(10, 6, 10, 6),
+            IsHitTestVisible = false
+        };
+
+        var sp = new StackPanel();
+        sp.Children.Add(new TextBlock
+        {
+            Text = "📄 " + title,
+            FontWeight = FontWeights.Bold,
+            Foreground = System.Windows.Media.Brushes.White,
+            FontSize = 13
+        });
+        sp.Children.Add(new TextBlock
+        {
+            Text = subtitle,
+            Foreground = new SolidColorBrush(System.Windows.Media.Color.FromRgb(148, 163, 184)),
+            FontSize = 11
+        });
+
+        border.Child = sp;
+        return border;
+    }
+
+    // ---------------------------------------------------------
+    // CONTROLOS DA PROGRAMAÇÃO (MOVER, REMOVER, LIMPAR)
+    // ---------------------------------------------------------
+    private void BtnScheduleMoveUp_Click(object sender, RoutedEventArgs e)
+    {
+        int index = LstSchedule.SelectedIndex;
+        if (index > 0)
+        {
+            var item = ScheduleItems[index];
+            ScheduleItems.RemoveAt(index);
+            ScheduleItems.Insert(index - 1, item);
+            LstSchedule.SelectedIndex = index - 1;
+            SaveCurrentSession();
+        }
+    }
+
+    private void BtnScheduleMoveDown_Click(object sender, RoutedEventArgs e)
+    {
+        int index = LstSchedule.SelectedIndex;
+        if (index >= 0 && index < ScheduleItems.Count - 1)
+        {
+            var item = ScheduleItems[index];
+            ScheduleItems.RemoveAt(index);
+            ScheduleItems.Insert(index + 1, item);
+            LstSchedule.SelectedIndex = index + 1;
+            SaveCurrentSession();
+        }
+    }
+
+    private void BtnScheduleRemove_Click(object sender, RoutedEventArgs e)
+    {
+        RemoveSelectedScheduleItem();
+    }
+
+    private void LstSchedule_KeyDown(object sender, KeyEventArgs e)
+    {
+        // Permite apagar a música da programação pressionando a tecla Delete ou Backspace
+        if (e.Key == Key.Delete || e.Key == Key.Back)
+        {
+            RemoveSelectedScheduleItem();
+            e.Handled = true;
+        }
+    }
+
+    private void RemoveSelectedScheduleItem()
+    {
+        int index = LstSchedule.SelectedIndex;
+        if (index >= 0)
+        {
+            ScheduleItems.RemoveAt(index);
+            SaveCurrentSession();
+
+            // Seleciona automaticamente o item anterior ou o próximo para manter o fluxo
+            if (ScheduleItems.Count > 0)
+            {
+                LstSchedule.SelectedIndex = Math.Min(index, ScheduleItems.Count - 1);
+            }
+            else
+            {
+                TxtSelectedSongTitle.Text = "Nenhum item selecionado";
+                LstSlides.ItemsSource = null;
+            }
+        }
+    }
+
+    private void StartDrag(UIElement source, ScheduleItem item)
+    {
+        // 1. O truque: ancorar o Adorner ao conteúdo da janela (o Grid principal) e não à Window!
+        UIElement rootElement = (UIElement)this.Content;
+        _adornerLayer = AdornerLayer.GetAdornerLayer(rootElement);
+
+        if (_adornerLayer != null)
+        {
+            var dragVisual = CreateDragVisual(item.Title, item.Subtitle);
+            _dragAdorner = new DragAdorner(rootElement, dragVisual);
+            _adornerLayer.Add(_dragAdorner);
+        }
+
+        // 2. Forçar a janela a rastrear o arrasto em toda a sua superfície
+        this.AllowDrop = true;
+        this.PreviewDragOver += MainWindow_PreviewDragOver;
+        this.QueryContinueDrag += MainWindow_QueryContinueDrag;
+
+        // 3. Inicia o bloqueio de Drag & Drop
+        System.Windows.DragDrop.DoDragDrop(source, item, System.Windows.DragDropEffects.Copy | System.Windows.DragDropEffects.Move);
+
+        // 4. Limpeza quando o arrasto termina
+        RemoveDragAdorner();
+        this.AllowDrop = false; // Restaura o estado normal
+    }
+
+    private void MainWindow_PreviewDragOver(object sender, System.Windows.DragEventArgs e)
+    {
+        if (_dragAdorner != null)
+        {
+            // Calcula a posição do rato relativa ao conteúdo interno
+            var position = e.GetPosition((UIElement)this.Content);
+
+            // O +15 serve para a etiqueta flutuante não ficar debaixo da ponta do rato, 
+            // permitindo que o evento de largar seja detetado pela lista correta.
+            _dragAdorner.UpdatePosition(new System.Windows.Point(position.X + 15, position.Y + 15));
+        }
+    }
+
+    private void MainWindow_QueryContinueDrag(object sender, System.Windows.QueryContinueDragEventArgs e)
+    {
+        // Se a tecla ESC for premida ou o item for largado, limpamos a interface
+        if (e.EscapePressed || e.Action == System.Windows.DragAction.Drop || e.Action == System.Windows.DragAction.Cancel)
+        {
+            RemoveDragAdorner();
+        }
+    }
+
+    private void RemoveDragAdorner()
+    {
+        this.PreviewDragOver -= MainWindow_PreviewDragOver;
+        this.QueryContinueDrag -= MainWindow_QueryContinueDrag;
+
+        if (_dragAdorner != null && _adornerLayer != null)
+        {
+            _adornerLayer.Remove(_dragAdorner);
+            _dragAdorner = null;
+        }
     }
 }

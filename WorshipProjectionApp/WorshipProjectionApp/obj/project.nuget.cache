@@ -1,20 +1,20 @@
 {
   "version": 2,
-  "dgSpecHash": "VwAmIOvJJ/c=",
+  "dgSpecHash": "pTv5ZF1LSRw=",
   "success": true,
-  "projectFilePath": "C:\\Users\\tiaho\\Documents\\GitHub\\WorshipProject\\WorshipProjectionApp\\WorshipProjectionApp\\WorshipProjectionApp.csproj",
+  "projectFilePath": "C:\\Users\\Tiago.Rosario\\Documents\\GitHub\\WorshipProject\\WorshipProjectionApp\\WorshipProjectionApp\\WorshipProjectionApp.csproj",
   "expectedPackageFiles": [
-    "C:\\Users\\tiaho\\.nuget\\packages\\dapper\\2.1.89\\dapper.2.1.89.nupkg.sha512",
-    "C:\\Users\\tiaho\\.nuget\\packages\\libvlcsharp\\3.10.1\\libvlcsharp.3.10.1.nupkg.sha512",
-    "C:\\Users\\tiaho\\.nuget\\packages\\libvlcsharp.wpf\\3.10.1\\libvlcsharp.wpf.3.10.1.nupkg.sha512",
-    "C:\\Users\\tiaho\\.nuget\\packages\\microsoft.data.sqlite\\10.0.12\\microsoft.data.sqlite.10.0.12.nupkg.sha512",
-    "C:\\Users\\tiaho\\.nuget\\packages\\microsoft.data.sqlite.core\\10.0.12\\microsoft.data.sqlite.core.10.0.12.nupkg.sha512",
-    "C:\\Users\\tiaho\\.nuget\\packages\\sqlitepclraw.bundle_e_sqlite3\\2.1.12\\sqlitepclraw.bundle_e_sqlite3.2.1.12.nupkg.sha512",
-    "C:\\Users\\tiaho\\.nuget\\packages\\sqlitepclraw.core\\2.1.12\\sqlitepclraw.core.2.1.12.nupkg.sha512",
-    "C:\\Users\\tiaho\\.nuget\\packages\\sqlitepclraw.lib.e_sqlite3\\2.1.12\\sqlitepclraw.lib.e_sqlite3.2.1.12.nupkg.sha512",
-    "C:\\Users\\tiaho\\.nuget\\packages\\sqlitepclraw.provider.e_sqlite3\\2.1.12\\sqlitepclraw.provider.e_sqlite3.2.1.12.nupkg.sha512",
-    "C:\\Users\\tiaho\\.nuget\\packages\\system.memory\\4.5.3\\system.memory.4.5.3.nupkg.sha512",
-    "C:\\Users\\tiaho\\.nuget\\packages\\videolan.libvlc.windows\\3.0.24\\videolan.libvlc.windows.3.0.24.nupkg.sha512"
+    "C:\\Users\\Tiago.Rosario\\.nuget\\packages\\dapper\\2.1.89\\dapper.2.1.89.nupkg.sha512",
+    "C:\\Users\\Tiago.Rosario\\.nuget\\packages\\libvlcsharp\\3.10.1\\libvlcsharp.3.10.1.nupkg.sha512",
+    "C:\\Users\\Tiago.Rosario\\.nuget\\packages\\libvlcsharp.wpf\\3.10.1\\libvlcsharp.wpf.3.10.1.nupkg.sha512",
+    "C:\\Users\\Tiago.Rosario\\.nuget\\packages\\microsoft.data.sqlite\\10.0.12\\microsoft.data.sqlite.10.0.12.nupkg.sha512",
+    "C:\\Users\\Tiago.Rosario\\.nuget\\packages\\microsoft.data.sqlite.core\\10.0.12\\microsoft.data.sqlite.core.10.0.12.nupkg.sha512",
+    "C:\\Users\\Tiago.Rosario\\.nuget\\packages\\sqlitepclraw.bundle_e_sqlite3\\2.1.12\\sqlitepclraw.bundle_e_sqlite3.2.1.12.nupkg.sha512",
+    "C:\\Users\\Tiago.Rosario\\.nuget\\packages\\sqlitepclraw.core\\2.1.12\\sqlitepclraw.core.2.1.12.nupkg.sha512",
+    "C:\\Users\\Tiago.Rosario\\.nuget\\packages\\sqlitepclraw.lib.e_sqlite3\\2.1.12\\sqlitepclraw.lib.e_sqlite3.2.1.12.nupkg.sha512",
+    "C:\\Users\\Tiago.Rosario\\.nuget\\packages\\sqlitepclraw.provider.e_sqlite3\\2.1.12\\sqlitepclraw.provider.e_sqlite3.2.1.12.nupkg.sha512",
+    "C:\\Users\\Tiago.Rosario\\.nuget\\packages\\system.memory\\4.5.3\\system.memory.4.5.3.nupkg.sha512",
+    "C:\\Users\\Tiago.Rosario\\.nuget\\packages\\videolan.libvlc.windows\\3.0.24\\videolan.libvlc.windows.3.0.24.nupkg.sha512"
   ],
   "logs": []
 }

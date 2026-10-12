@@ -17,6 +17,7 @@ public class ProjectionSettings
     public int MarginPercent { get; set; } = 8;
     public double ShadowBlurRadius { get; set; } = 14;
     public double ShadowOpacity { get; set; } = 0.95;
+    public int ScreenIndex { get; internal set; }
 
     private static readonly string SettingsPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "projection_settings.json");
 

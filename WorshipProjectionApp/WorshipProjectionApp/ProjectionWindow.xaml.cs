@@ -3,11 +3,15 @@ using System.Windows.Media;
 using System.Windows.Media.Animation;
 using System.Windows.Media.Imaging;
 using WorshipProjectionApp.Models;
+using System.Windows.Threading;
 
 namespace WorshipProjectionApp;
 
 public partial class ProjectionWindow : Window
 {
+    private DispatcherTimer? _clockTimer;
+    private TimeSpan _timeRemaining;
+    private bool _isCountdown;
     private readonly Duration _fadeDuration = new(TimeSpan.FromMilliseconds(220));
     private bool _isBlackout;
 
@@ -142,6 +146,88 @@ public partial class ProjectionWindow : Window
     {
         MediaBgVideo.Position = TimeSpan.Zero;
         MediaBgVideo.Play();
+    }
+
+    public void ShowAlert(string message, bool showClock = false, int countdownMinutes = 0)
+    {
+        TxtProjectionAlert.Text = message;
+        _isCountdown = countdownMinutes > 0;
+
+        if (_isCountdown)
+        {
+            _timeRemaining = TimeSpan.FromMinutes(countdownMinutes);
+            TxtProjectionClock.Text = _timeRemaining.ToString(@"mm\:ss");
+            TxtProjectionClock.Visibility = Visibility.Visible;
+        }
+        else if (showClock)
+        {
+            TxtProjectionClock.Text = DateTime.Now.ToString("HH:mm");
+            TxtProjectionClock.Visibility = Visibility.Visible;
+        }
+        else
+        {
+            TxtProjectionClock.Text = string.Empty;
+            TxtProjectionClock.Visibility = Visibility.Collapsed;
+        }
+
+        if (showClock || _isCountdown)
+        {
+            StartClockTimer();
+        }
+        else
+        {
+            _clockTimer?.Stop();
+        }
+
+        // Torna a Grid visível e faz o Fade In
+        FullScreenAlertOverlay.Visibility = Visibility.Visible;
+        var fadeIn = new DoubleAnimation(1, _fadeDuration);
+        FullScreenAlertOverlay.BeginAnimation(OpacityProperty, fadeIn);
+    }
+
+    public void HideAlert()
+    {
+        _clockTimer?.Stop();
+
+        // Faz o Fade Out e, quando terminar, esconde a Grid completamente
+        var fadeOut = new DoubleAnimation(0, _fadeDuration);
+        fadeOut.Completed += (s, e) =>
+        {
+            TxtProjectionAlert.Text = string.Empty;
+            TxtProjectionClock.Text = string.Empty;
+            FullScreenAlertOverlay.Visibility = Visibility.Collapsed;
+        };
+
+        FullScreenAlertOverlay.BeginAnimation(OpacityProperty, fadeOut);
+    }
+
+    private void StartClockTimer()
+    {
+        _clockTimer ??= new DispatcherTimer { Interval = TimeSpan.FromSeconds(1) };
+        _clockTimer.Tick -= ClockTimer_Tick;
+        _clockTimer.Tick += ClockTimer_Tick;
+        _clockTimer.Start();
+    }
+
+    private void ClockTimer_Tick(object? sender, EventArgs e)
+    {
+        if (_isCountdown)
+        {
+            if (_timeRemaining.TotalSeconds > 0)
+            {
+                _timeRemaining = _timeRemaining.Subtract(TimeSpan.FromSeconds(1));
+                TxtProjectionClock.Text = _timeRemaining.ToString(@"mm\:ss");
+            }
+            else
+            {
+                TxtProjectionClock.Text = "00:00 (Fim)";
+                _clockTimer?.Stop();
+            }
+        }
+        else
+        {
+            TxtProjectionClock.Text = DateTime.Now.ToString("HH:mm");
+        }
     }
 
     public void ApplySettings(ProjectionSettings settings)
