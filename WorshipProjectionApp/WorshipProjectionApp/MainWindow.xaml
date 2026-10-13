@@ -5,10 +5,27 @@
         Title="IEBCR II Setúbal - Sistema de Projeção Multimédia" 
         Height="760" Width="1220" MinWidth="1000" MinHeight="600"
         WindowStartupLocation="CenterScreen"
-        Background="#0B0F19"
+        Background="{DynamicResource BgCanvas}"
+        Foreground="{DynamicResource TextPrimary}"
         FontFamily="Segoe UI">
 
-    <!-- Configuração da Barra de Título Integrada -->
+    <Window.Triggers>
+        <EventTrigger RoutedEvent="Window.Loaded">
+            <BeginStoryboard>
+                <Storyboard>
+                    <DoubleAnimation Storyboard.TargetName="MainColumnsGrid"
+                                     Storyboard.TargetProperty="Opacity"
+                                     From="0.0" To="1.0" Duration="0:0:0.4"
+                                     DecelerationRatio="0.8"/>
+                    <ThicknessAnimation Storyboard.TargetName="MainColumnsGrid"
+                                        Storyboard.TargetProperty="Margin"
+                                        From="14,30,14,14" To="14,12,14,14" 
+                                        Duration="0:0:0.5" DecelerationRatio="0.8"/>
+                </Storyboard>
+            </BeginStoryboard>
+        </EventTrigger>
+    </Window.Triggers>
+
     <WindowChrome.WindowChrome>
         <WindowChrome CaptionHeight="46" 
                       ResizeBorderThickness="6" 
@@ -18,27 +35,17 @@
     </WindowChrome.WindowChrome>
 
     <Window.Resources>
-        <!-- Paleta Dark Mode Eclesiástica -->
         <SolidColorBrush x:Key="BgCanvas" Color="#0B0F19"/>
         <SolidColorBrush x:Key="PanelBg" Color="#162032"/>
         <SolidColorBrush x:Key="CardBg" Color="#101726"/>
         <SolidColorBrush x:Key="BorderDark" Color="#2A384F"/>
         <SolidColorBrush x:Key="TextPrimary" Color="#F8FAFC"/>
         <SolidColorBrush x:Key="TextMuted" Color="#94A3B8"/>
-        <SolidColorBrush x:Key="AccentGold" Color="#D4AF37"/>
-        <SolidColorBrush x:Key="AccentGoldHover" Color="#E5C158"/>
         <SolidColorBrush x:Key="ButtonNeutral" Color="#24344D"/>
         <SolidColorBrush x:Key="ButtonNeutralHover" Color="#334668"/>
 
-        <!-- ESTILOS DE BOTÕES COM ANIMAÇÕES SUAVES -->
-
-        <!-- Estilo Botão Dourado -->
         <Style x:Key="GoldButton" TargetType="Button">
-            <Setter Property="Background">
-                <Setter.Value>
-                    <SolidColorBrush Color="#D4AF37"/>
-                </Setter.Value>
-            </Setter>
+            <Setter Property="Background" Value="{DynamicResource AccentColor}"/>
             <Setter Property="Foreground" Value="#0B0F19"/>
             <Setter Property="FontWeight" Value="SemiBold"/>
             <Setter Property="Padding" Value="14,7"/>
@@ -47,37 +54,21 @@
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="Button">
-                        <Border Background="{TemplateBinding Background}" CornerRadius="6" Padding="{TemplateBinding Padding}">
+                        <Border x:Name="Bd" Background="{TemplateBinding Background}" CornerRadius="6" Padding="{TemplateBinding Padding}">
                             <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
                         </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="Bd" Property="Opacity" Value="0.85"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
                     </ControlTemplate>
                 </Setter.Value>
             </Setter>
-            <Style.Triggers>
-                <EventTrigger RoutedEvent="MouseEnter">
-                    <BeginStoryboard>
-                        <Storyboard>
-                            <ColorAnimation Storyboard.TargetProperty="(Button.Background).(SolidColorBrush.Color)" To="#E5C158" Duration="0:0:0.15"/>
-                        </Storyboard>
-                    </BeginStoryboard>
-                </EventTrigger>
-                <EventTrigger RoutedEvent="MouseLeave">
-                    <BeginStoryboard>
-                        <Storyboard>
-                            <ColorAnimation Storyboard.TargetProperty="(Button.Background).(SolidColorBrush.Color)" To="#D4AF37" Duration="0:0:0.25"/>
-                        </Storyboard>
-                    </BeginStoryboard>
-                </EventTrigger>
-            </Style.Triggers>
         </Style>
 
-        <!-- Estilo Botão Neutro Escuro -->
         <Style x:Key="NavyButton" TargetType="Button">
-            <Setter Property="Background">
-                <Setter.Value>
-                    <SolidColorBrush Color="#24344D"/>
-                </Setter.Value>
-            </Setter>
+            <Setter Property="Background" Value="{StaticResource ButtonNeutral}"/>
             <Setter Property="Foreground" Value="{StaticResource TextPrimary}"/>
             <Setter Property="FontWeight" Value="Medium"/>
             <Setter Property="Padding" Value="10,6"/>
@@ -86,7 +77,7 @@
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="Button">
-                        <Border Background="{TemplateBinding Background}" CornerRadius="6" Padding="{TemplateBinding Padding}">
+                        <Border x:Name="Bd" Background="{TemplateBinding Background}" CornerRadius="6" Padding="{TemplateBinding Padding}">
                             <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
                         </Border>
                     </ControlTemplate>
@@ -96,27 +87,24 @@
                 <EventTrigger RoutedEvent="MouseEnter">
                     <BeginStoryboard>
                         <Storyboard>
-                            <ColorAnimation Storyboard.TargetProperty="(Button.Background).(SolidColorBrush.Color)" To="#334668" Duration="0:0:0.15"/>
+                            <ColorAnimation Storyboard.TargetProperty="(Button.Background).(SolidColorBrush.Color)"
+                                            To="#334668" Duration="0:0:0.15" />
                         </Storyboard>
                     </BeginStoryboard>
                 </EventTrigger>
                 <EventTrigger RoutedEvent="MouseLeave">
                     <BeginStoryboard>
                         <Storyboard>
-                            <ColorAnimation Storyboard.TargetProperty="(Button.Background).(SolidColorBrush.Color)" To="#24344D" Duration="0:0:0.25"/>
+                            <ColorAnimation Storyboard.TargetProperty="(Button.Background).(SolidColorBrush.Color)"
+                                            To="#24344D" Duration="0:0:0.25" />
                         </Storyboard>
                     </BeginStoryboard>
                 </EventTrigger>
             </Style.Triggers>
         </Style>
 
-        <!-- Estilo Botão Perigo (Vermelho) -->
         <Style x:Key="DangerButton" TargetType="Button">
-            <Setter Property="Background">
-                <Setter.Value>
-                    <SolidColorBrush Color="#991B1B"/>
-                </Setter.Value>
-            </Setter>
+            <Setter Property="Background" Value="#991B1B"/>
             <Setter Property="Foreground" Value="{StaticResource TextPrimary}"/>
             <Setter Property="FontWeight" Value="Medium"/>
             <Setter Property="Padding" Value="10,6"/>
@@ -135,21 +123,22 @@
                 <EventTrigger RoutedEvent="MouseEnter">
                     <BeginStoryboard>
                         <Storyboard>
-                            <ColorAnimation Storyboard.TargetProperty="(Button.Background).(SolidColorBrush.Color)" To="#B91C1C" Duration="0:0:0.15"/>
+                            <ColorAnimation Storyboard.TargetProperty="(Button.Background).(SolidColorBrush.Color)"
+                                            To="#B91C1C" Duration="0:0:0.15" />
                         </Storyboard>
                     </BeginStoryboard>
                 </EventTrigger>
                 <EventTrigger RoutedEvent="MouseLeave">
                     <BeginStoryboard>
                         <Storyboard>
-                            <ColorAnimation Storyboard.TargetProperty="(Button.Background).(SolidColorBrush.Color)" To="#991B1B" Duration="0:0:0.25"/>
+                            <ColorAnimation Storyboard.TargetProperty="(Button.Background).(SolidColorBrush.Color)"
+                                            To="#991B1B" Duration="0:0:0.25" />
                         </Storyboard>
                     </BeginStoryboard>
                 </EventTrigger>
             </Style.Triggers>
         </Style>
 
-        <!-- Botões de Janela -->
         <Style x:Key="WindowNavButton" TargetType="Button">
             <Setter Property="Background" Value="Transparent"/>
             <Setter Property="Foreground" Value="{StaticResource TextMuted}"/>
@@ -160,18 +149,18 @@
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="Button">
-                        <Border Background="{TemplateBinding Background}">
+                        <Border x:Name="Bd" Background="{TemplateBinding Background}">
                             <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
                         </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="Bd" Property="Background" Value="#24344D"/>
+                                <Setter Property="Foreground" Value="White"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
                     </ControlTemplate>
                 </Setter.Value>
             </Setter>
-            <Style.Triggers>
-                <Trigger Property="IsMouseOver" Value="True">
-                    <Setter Property="Background" Value="#24344D"/>
-                    <Setter Property="Foreground" Value="White"/>
-                </Trigger>
-            </Style.Triggers>
         </Style>
 
         <Style x:Key="WindowCloseButton" TargetType="Button" BasedOn="{StaticResource WindowNavButton}">
@@ -183,7 +172,6 @@
             </Style.Triggers>
         </Style>
 
-        <!-- ScrollBar Moderna e Minimalista -->
         <Style TargetType="ScrollBar">
             <Setter Property="Background" Value="Transparent"/>
             <Setter Property="Width" Value="6"/>
@@ -208,18 +196,16 @@
             </Setter>
         </Style>
 
-        <!-- Caixa de Pesquisa -->
         <Style x:Key="SearchTextBox" TargetType="TextBox">
             <Setter Property="Padding" Value="8,6"/>
             <Setter Property="Background" Value="#0B0F19"/>
             <Setter Property="Foreground" Value="{StaticResource TextPrimary}"/>
             <Setter Property="BorderBrush" Value="{StaticResource BorderDark}"/>
             <Setter Property="BorderThickness" Value="1"/>
-            <Setter Property="CaretBrush" Value="{StaticResource AccentGold}"/>
+            <Setter Property="CaretBrush" Value="{DynamicResource AccentColor}"/>
             <Setter Property="FontSize" Value="13"/>
         </Style>
 
-        <!-- Template Dark Completo para ComboBox -->
         <ControlTemplate x:Key="DarkComboBoxTemplate" TargetType="ComboBox">
             <Grid>
                 <ToggleButton x:Name="ToggleButton" 
@@ -240,7 +226,7 @@
                                     </Grid.ColumnDefinitions>
                                     <Path x:Name="Arrow" 
                                           Grid.Column="1" 
-                                          Fill="{StaticResource AccentGold}" 
+                                          Fill="{DynamicResource AccentColor}" 
                                           HorizontalAlignment="Center" 
                                           VerticalAlignment="Center" 
                                           Data="M 0 0 L 4 4 L 8 0 Z"/>
@@ -249,13 +235,12 @@
                             <ControlTemplate.Triggers>
                                 <Trigger Property="IsMouseOver" Value="True">
                                     <Setter TargetName="Border" Property="Background" Value="#162032"/>
-                                    <Setter TargetName="Border" Property="BorderBrush" Value="{StaticResource AccentGold}"/>
+                                    <Setter TargetName="Border" Property="BorderBrush" Value="{DynamicResource AccentColor}"/>
                                 </Trigger>
                             </ControlTemplate.Triggers>
                         </ControlTemplate>
                     </ToggleButton.Template>
                 </ToggleButton>
-
                 <ContentPresenter x:Name="ContentSite" 
                                   IsHitTestVisible="False" 
                                   Content="{TemplateBinding SelectionBoxItem}" 
@@ -264,7 +249,6 @@
                                   Margin="10,0,28,0" 
                                   VerticalAlignment="Center" 
                                   HorizontalAlignment="Left"/>
-
                 <Popup x:Name="Popup" 
                        Placement="Bottom" 
                        IsOpen="{TemplateBinding IsDropDownOpen}" 
@@ -311,7 +295,7 @@
                                     <ControlTemplate.Triggers>
                                         <Trigger Property="IsHighlighted" Value="True">
                                             <Setter TargetName="ItemBorder" Property="Background" Value="#24344D"/>
-                                            <Setter Property="Foreground" Value="{StaticResource AccentGold}"/>
+                                            <Setter Property="Foreground" Value="{DynamicResource AccentColor}"/>
                                         </Trigger>
                                         <Trigger Property="IsSelected" Value="True">
                                             <Setter TargetName="ItemBorder" Property="Background" Value="#1E3A8A"/>
@@ -326,7 +310,6 @@
             </Setter>
         </Style>
 
-        <!-- Abas -->
         <Style TargetType="TabControl">
             <Setter Property="BorderThickness" Value="0"/>
             <Setter Property="Background" Value="Transparent"/>
@@ -358,7 +341,7 @@
                         <ControlTemplate.Triggers>
                             <Trigger Property="IsSelected" Value="True">
                                 <Setter TargetName="TabBorder" Property="Background" Value="#24344D"/>
-                                <Setter TargetName="TabBorder" Property="BorderBrush" Value="{StaticResource AccentGold}"/>
+                                <Setter TargetName="TabBorder" Property="BorderBrush" Value="{DynamicResource AccentColor}"/>
                                 <Setter TargetName="TabBorder" Property="BorderThickness" Value="1,2,1,0"/>
                                 <Setter Property="Foreground" Value="{StaticResource TextPrimary}"/>
                             </Trigger>
@@ -372,84 +355,111 @@
             </Setter>
         </Style>
 
-        <!-- ListBox Items -->
-        <Style TargetType="ListBoxItem">
+        <Style x:Key="AnimatedCardItemStyle" TargetType="ListBoxItem">
             <Setter Property="Foreground" Value="{StaticResource TextPrimary}"/>
-            <Setter Property="Padding" Value="4,3"/>
+            <Setter Property="Padding" Value="2,2"/>
+            <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="RenderTransformOrigin" Value="0.5, 0.5"/>
+            <Setter Property="RenderTransform">
+                <Setter.Value>
+                    <ScaleTransform ScaleX="1.0" ScaleY="1.0"/>
+                </Setter.Value>
+            </Setter>
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="ListBoxItem">
                         <Border x:Name="Bd" Background="Transparent" CornerRadius="4" Padding="{TemplateBinding Padding}">
-                            <ContentPresenter/>
+                            <ContentPresenter HorizontalAlignment="Stretch"/>
                         </Border>
                         <ControlTemplate.Triggers>
                             <Trigger Property="IsSelected" Value="True">
-                                <Setter TargetName="Bd" Property="Background" Value="#24344D"/>
-                            </Trigger>
-                            <Trigger Property="IsMouseOver" Value="True">
-                                <Setter TargetName="Bd" Property="Background" Value="#1A2538"/>
+                                <Setter TargetName="Bd" Property="Background" Value="#1124344D"/>
                             </Trigger>
                         </ControlTemplate.Triggers>
                     </ControlTemplate>
                 </Setter.Value>
             </Setter>
+            <Style.Triggers>
+                <EventTrigger RoutedEvent="MouseEnter">
+                    <BeginStoryboard>
+                        <Storyboard>
+                            <DoubleAnimation Storyboard.TargetProperty="RenderTransform.ScaleX" To="1.02" Duration="0:0:0.15">
+                                <DoubleAnimation.EasingFunction>
+                                    <QuadraticEase EasingMode="EaseOut"/>
+                                </DoubleAnimation.EasingFunction>
+                            </DoubleAnimation>
+                            <DoubleAnimation Storyboard.TargetProperty="RenderTransform.ScaleY" To="1.02" Duration="0:0:0.15">
+                                <DoubleAnimation.EasingFunction>
+                                    <QuadraticEase EasingMode="EaseOut"/>
+                                </DoubleAnimation.EasingFunction>
+                            </DoubleAnimation>
+                        </Storyboard>
+                    </BeginStoryboard>
+                </EventTrigger>
+                <EventTrigger RoutedEvent="MouseLeave">
+                    <BeginStoryboard>
+                        <Storyboard>
+                            <DoubleAnimation Storyboard.TargetProperty="RenderTransform.ScaleX" To="1.0" Duration="0:0:0.25">
+                                <DoubleAnimation.EasingFunction>
+                                    <QuadraticEase EasingMode="EaseOut"/>
+                                </DoubleAnimation.EasingFunction>
+                            </DoubleAnimation>
+                            <DoubleAnimation Storyboard.TargetProperty="RenderTransform.ScaleY" To="1.0" Duration="0:0:0.25">
+                                <DoubleAnimation.EasingFunction>
+                                    <QuadraticEase EasingMode="EaseOut"/>
+                                </DoubleAnimation.EasingFunction>
+                            </DoubleAnimation>
+                        </Storyboard>
+                    </BeginStoryboard>
+                </EventTrigger>
+            </Style.Triggers>
         </Style>
     </Window.Resources>
 
     <Grid Background="{StaticResource BgCanvas}">
+
+        <!-- CORREÇÃO 1: As definições de Linha têm de estar no topo do Grid ANTES de qualquer controlo -->
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
-            <!-- Cabeçalho -->
             <RowDefinition Height="*"/>
-            <!-- Corpo (Grelha Principal) -->
         </Grid.RowDefinitions>
 
+        <!-- OVERLAY RENOMEAR ITEM DA PROGRAMAÇÃO -->
+        <Grid x:Name="OverlayRename" Background="#99000000" Visibility="Collapsed" Panel.ZIndex="100" Grid.RowSpan="2">
+            <Border Background="{DynamicResource PanelBg}" BorderBrush="{DynamicResource BorderDark}" BorderThickness="1" CornerRadius="8" Padding="20" HorizontalAlignment="Center" VerticalAlignment="Center" Width="350">
+                <Border.Effect>
+                    <DropShadowEffect Color="Black" BlurRadius="20" ShadowDepth="5" Opacity="0.5"/>
+                </Border.Effect>
+                <StackPanel>
+                    <TextBlock Text="Renomear Item da Programação" FontWeight="Bold" Foreground="{DynamicResource TextPrimary}" FontSize="14" Margin="0,0,0,10"/>
+                    <TextBox x:Name="TxtRenameItem" Style="{DynamicResource DarkTextBox}" Margin="0,0,0,15" KeyDown="TxtRenameItem_KeyDown"/>
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                        <Button Content="Cancelar" Click="BtnCancelRename_Click" Style="{DynamicResource NavyButton}" Margin="0,0,8,0"/>
+                        <Button Content="Guardar" Click="BtnSaveRename_Click" Style="{DynamicResource GoldButton}"/>
+                    </StackPanel>
+                </StackPanel>
+            </Border>
+        </Grid>
+
         <!-- CABEÇALHO -->
-        <Border Grid.Row="0" Background="#060A12" Padding="14,6,8,6" BorderBrush="{StaticResource BorderDark}" BorderThickness="0,0,0,1">
+        <Border Grid.Row="0" Background="#060A12" Padding="14,6,8,6" BorderBrush="{DynamicResource BorderDark}" BorderThickness="0,0,0,1">
             <DockPanel LastChildFill="False">
-
-                <!-- ESQUERDA/CENTRO: Botões de Estado -->
                 <StackPanel Orientation="Horizontal" VerticalAlignment="Center" DockPanel.Dock="Left">
-
-                    <!-- 1. Botão LIVE -->
-                    <Button x:Name="BtnModeLive" Content="LIVE" Click="BtnModeLive_Click" Style="{StaticResource NavyButton}" Margin="0,0,6,0" WindowChrome.IsHitTestVisibleInChrome="True" ToolTip="Transmitir (F5)"/>
-
-                    <!-- 2. Botão LOGO -->
-                    <Button x:Name="BtnModeLogo" Content="LOGO" Click="BtnModeLogo_Click" Style="{StaticResource NavyButton}" Margin="0,0,6,0" WindowChrome.IsHitTestVisibleInChrome="True" ToolTip="Clique com o Botão Direito para definir a imagem/vídeo (F6)!">
+                    <Button x:Name="BtnModeLive" Content="LIVE" Click="BtnModeLive_Click" Style="{DynamicResource NavyButton}" Margin="0,0,6,0" WindowChrome.IsHitTestVisibleInChrome="True" ToolTip="Transmitir (F5)"/>
+                    <Button x:Name="BtnModeLogo" Content="LOGO" Click="BtnModeLogo_Click" Style="{DynamicResource NavyButton}" Margin="0,0,6,0" WindowChrome.IsHitTestVisibleInChrome="True" ToolTip="Clique com o Botão Direito para definir a imagem/vídeo (F6)!">
                         <Button.ContextMenu>
                             <ContextMenu>
                                 <MenuItem Header="Definir ficheiro de Logo..." Click="MenuSetLogo_Click"/>
                             </ContextMenu>
                         </Button.ContextMenu>
                     </Button>
-
-                    <!-- 3. Botão CLEAR -->
-                    <Button x:Name="BtnModeClear" Content="CLEAR" Click="BtnModeClear_Click" Style="{StaticResource NavyButton}" Margin="0,0,6,0" WindowChrome.IsHitTestVisibleInChrome="True" ToolTip="Limpar Ecrã (Esc)"/>
-
-                    <!-- 4. Botão INFORMAÇÕES (Apenas Ícone) -->
-                    <Button Click="BtnOpenAlerts_Click" Style="{StaticResource NavyButton}" Margin="0,0,0,0" Padding="12,6" WindowChrome.IsHitTestVisibleInChrome="True" ToolTip="Informações e Alertas">
+                    <Button x:Name="BtnModeClear" Content="CLEAR" Click="BtnModeClear_Click" Style="{DynamicResource NavyButton}" Margin="0,0,6,0" WindowChrome.IsHitTestVisibleInChrome="True" ToolTip="Limpar Ecrã (Esc)"/>
+                    <Button Click="BtnOpenAlerts_Click" Style="{DynamicResource NavyButton}" Margin="0,0,6,0" Padding="12,6" WindowChrome.IsHitTestVisibleInChrome="True" ToolTip="Informações e Alertas">
                         <TextBlock FontFamily="Segoe Fluent Icons" Text="&#xE783;" FontSize="15" VerticalAlignment="Center"/>
                     </Button>
-
-                </StackPanel>
-
-                <!-- DIREITA: Controlos da Janela -->
-                <StackPanel Orientation="Horizontal" DockPanel.Dock="Right" VerticalAlignment="Center" Margin="14,0,0,0">
-                    <Button Click="BtnMinimize_Click" Style="{StaticResource WindowNavButton}" WindowChrome.IsHitTestVisibleInChrome="True">
-                        <TextBlock FontFamily="Segoe Fluent Icons" Text="&#xE921;" FontSize="10" VerticalAlignment="Center"/>
-                    </Button>
-                    <Button Click="BtnMaximize_Click" Style="{StaticResource WindowNavButton}" WindowChrome.IsHitTestVisibleInChrome="True">
-                        <TextBlock FontFamily="Segoe Fluent Icons" Text="&#xE922;" FontSize="10" VerticalAlignment="Center"/>
-                    </Button>
-                    <Button Click="BtnClose_Click" Style="{StaticResource WindowCloseButton}" WindowChrome.IsHitTestVisibleInChrome="True">
-                        <TextBlock FontFamily="Segoe Fluent Icons" Text="&#xE8BB;" FontSize="10" VerticalAlignment="Center"/>
-                    </Button>
-                </StackPanel>
-
-                <!-- DIREITA: Menu Ferramentas (Apenas Ícone) -->
-                <StackPanel Orientation="Horizontal" DockPanel.Dock="Right" VerticalAlignment="Center">
                     <Menu Background="Transparent" WindowChrome.IsHitTestVisibleInChrome="True" VerticalAlignment="Center">
-                        <MenuItem Foreground="{StaticResource TextPrimary}" Background="{StaticResource ButtonNeutral}" Padding="12,6" FontWeight="Medium" ToolTip="Ferramentas do Sistema">
+                        <MenuItem Foreground="{DynamicResource TextPrimary}" Background="{DynamicResource ButtonNeutral}" Padding="12,6" FontWeight="Medium" ToolTip="Ferramentas do Sistema">
                             <MenuItem.Header>
                                 <TextBlock FontFamily="Segoe Fluent Icons" Text="&#xE713;" FontSize="15" VerticalAlignment="Center"/>
                             </MenuItem.Header>
@@ -476,32 +486,38 @@
                         </MenuItem>
                     </Menu>
                 </StackPanel>
+
+                <StackPanel Orientation="Horizontal" DockPanel.Dock="Right" VerticalAlignment="Center" Margin="14,0,0,0">
+                    <Button Click="BtnMinimize_Click" Style="{DynamicResource WindowNavButton}" WindowChrome.IsHitTestVisibleInChrome="True">
+                        <TextBlock FontFamily="Segoe Fluent Icons" Text="&#xE921;" FontSize="10" VerticalAlignment="Center"/>
+                    </Button>
+                    <Button Click="BtnMaximize_Click" Style="{DynamicResource WindowNavButton}" WindowChrome.IsHitTestVisibleInChrome="True">
+                        <TextBlock FontFamily="Segoe Fluent Icons" Text="&#xE922;" FontSize="10" VerticalAlignment="Center"/>
+                    </Button>
+                    <Button Click="BtnClose_Click" Style="{DynamicResource WindowCloseButton}" WindowChrome.IsHitTestVisibleInChrome="True">
+                        <TextBlock FontFamily="Segoe Fluent Icons" Text="&#xE8BB;" FontSize="10" VerticalAlignment="Center"/>
+                    </Button>
+                </StackPanel>
             </DockPanel>
         </Border>
 
-        <!-- CORPO PRINCIPAL COM MATRIZ PROPORCIONAL -->
-        <Grid x:Name="MainColumnsGrid" Grid.Row="1" Margin="14,12,14,14">
+        <!-- CORPO PRINCIPAL -->
+        <Grid x:Name="MainColumnsGrid" Grid.Row="1" Margin="14,12,14,14" Opacity="0">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="1.1*"/>
-                <!-- Coluna 0: Live + Programação -->
                 <ColumnDefinition Width="1.5*"/>
-                <!-- Coluna 1: Slides/Letras (Mais larga) -->
                 <ColumnDefinition Width="1.5*"/>
-                <!-- Coluna 2: Recursos/Bíblia (Mais larga) -->
                 <ColumnDefinition Width="1.1*"/>
-                <!-- Coluna 3: Equipa de Louvor -->
             </Grid.ColumnDefinitions>
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto"/>
-                <!-- Linha 0: Ajusta-se à altura da miniatura -->
                 <RowDefinition Height="*"/>
-                <!-- Linha 1: Ocupa o resto do ecrã para baixo -->
             </Grid.RowDefinitions>
 
-            <!-- 1. PAINEL: EM DIRETO (Canto Superior Esquerdo | Col 0, Row 0) -->
-            <Border x:Name="PanelLive" Grid.Column="0" Grid.Row="0" Background="{StaticResource PanelBg}" BorderBrush="{StaticResource BorderDark}" BorderThickness="1" CornerRadius="8" Padding="8" Margin="4">
-                <Viewbox Stretch="Uniform" HorizontalAlignment="Center" VerticalAlignment="Center" MaxHeight="180">
-                    <Border Width="320" Height="180" Background="Black" CornerRadius="6" ClipToBounds="True" BorderBrush="{StaticResource BorderDark}" BorderThickness="1">
+            <!-- 1. PAINEL: EM DIRETO -->
+            <Border x:Name="PanelLive" Grid.Column="0" Grid.Row="0" Background="{DynamicResource PanelBg}" BorderBrush="{DynamicResource BorderDark}" BorderThickness="1" CornerRadius="8" Padding="12" Margin="4">
+                <Viewbox Stretch="Uniform" HorizontalAlignment="Stretch" VerticalAlignment="Center">
+                    <Border Width="320" Height="180" Background="Black" CornerRadius="6" ClipToBounds="True" BorderBrush="{DynamicResource BorderDark}" BorderThickness="1">
                         <Grid>
                             <MediaElement x:Name="PreviewVideo" LoadedBehavior="Manual" UnloadedBehavior="Manual" Stretch="UniformToFill" IsMuted="True" MediaEnded="PreviewVideo_MediaEnded"/>
                             <Image x:Name="PreviewBackgroundImage" Stretch="UniformToFill" HorizontalAlignment="Center" VerticalAlignment="Center"/>
@@ -524,8 +540,8 @@
                 </Viewbox>
             </Border>
 
-            <!-- 2. PAINEL: PROGRAMAÇÃO (Canto Inferior Esquerdo | Col 0, Row 1) -->
-            <Border x:Name="PanelSchedule" Grid.Column="0" Grid.Row="1" Background="{StaticResource PanelBg}" BorderBrush="{StaticResource BorderDark}" BorderThickness="1" CornerRadius="8" Padding="12" Margin="4">
+            <!-- 2. PAINEL: PROGRAMAÇÃO -->
+            <Border x:Name="PanelSchedule" Grid.Column="0" Grid.Row="1" Background="{DynamicResource PanelBg}" BorderBrush="{DynamicResource BorderDark}" BorderThickness="1" CornerRadius="8" Padding="12" Margin="4">
                 <DockPanel>
                     <Grid DockPanel.Dock="Top" Margin="0,0,0,8">
                         <Grid.ColumnDefinitions>
@@ -533,63 +549,183 @@
                             <ColumnDefinition Width="Auto"/>
                         </Grid.ColumnDefinitions>
                         <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                            <TextBlock FontFamily="Segoe Fluent Icons" Text="&#xE8FD;" Foreground="{StaticResource AccentGold}" FontSize="14" Margin="0,0,6,0" VerticalAlignment="Center"/>
-                            <TextBlock Text="Programação" FontWeight="Bold" FontSize="14" Foreground="{StaticResource AccentGold}" VerticalAlignment="Center"/>
+                            <TextBlock FontFamily="Segoe Fluent Icons" Text="&#xE8FD;" Foreground="{DynamicResource AccentColor}" FontSize="14" Margin="0,0,6,0" VerticalAlignment="Center"/>
+                            <TextBlock Text="Programação" FontWeight="Bold" FontSize="14" Foreground="{DynamicResource AccentColor}" VerticalAlignment="Center"/>
                         </StackPanel>
                         <StackPanel Grid.Column="1" Orientation="Horizontal">
-                            <Button Click="BtnScheduleMoveUp_Click" Style="{StaticResource NavyButton}" Padding="6,2" Margin="0,0,4,0" ToolTip="Mover para Cima">
-                                <TextBlock FontFamily="Segoe Fluent Icons" Text="&#xE74A;" FontSize="12"/>
+                            <Button Click="BtnLoadPlaylist_Click" Style="{DynamicResource NavyButton}" Padding="6,2" Margin="0,0,4,0" ToolTip="Abrir Culto">
+                                <TextBlock FontFamily="Segoe Fluent Icons" Text="&#xE8E5;" FontSize="12"/>
                             </Button>
-                            <Button Click="BtnScheduleMoveDown_Click" Style="{StaticResource NavyButton}" Padding="6,2" Margin="0,0,8,0" ToolTip="Mover para Baixo">
-                                <TextBlock FontFamily="Segoe Fluent Icons" Text="&#xE74B;" FontSize="12"/>
-                            </Button>
-                            <Button Click="BtnScheduleRemove_Click" Style="{StaticResource DangerButton}" Padding="6,2" Margin="0,0,4,0" ToolTip="Remover (Del)">
-                                <TextBlock FontFamily="Segoe Fluent Icons" Text="&#xE74D;" FontSize="12"/>
+                            <Button Click="BtnSavePlaylist_Click" Style="{DynamicResource NavyButton}" Padding="6,2" Margin="0,0,8,0" ToolTip="Gravar Culto">
+                                <TextBlock FontFamily="Segoe Fluent Icons" Text="&#xE792;" FontSize="12"/>
                             </Button>
                         </StackPanel>
                     </Grid>
-                    <ListBox x:Name="LstSchedule" SelectionChanged="LstSchedule_SelectionChanged" KeyDown="LstSchedule_KeyDown" AllowDrop="True" Drop="LstSchedule_Drop" DragOver="LstSchedule_DragOver" PreviewMouseMove="LstSchedule_PreviewMouseMove" BorderThickness="0" Background="Transparent">
-                        <ListBox.ItemTemplate>
-                            <DataTemplate>
-                                <Border Background="{StaticResource CardBg}" BorderBrush="{StaticResource BorderDark}" BorderThickness="1" CornerRadius="6" Padding="8" Margin="4,4,10,4">
-                                    <Border.Effect>
-                                        <DropShadowEffect Color="Black" BlurRadius="8" ShadowDepth="3" Opacity="0.2"/>
-                                    </Border.Effect>
-                                    <StackPanel>
-                                        <TextBlock Text="{Binding Title}" FontWeight="Bold" Foreground="{StaticResource TextPrimary}" FontSize="13"/>
-                                        <TextBlock Text="{Binding Subtitle}" Foreground="{StaticResource TextMuted}" FontSize="11" Margin="0,2,0,0"/>
-                                    </StackPanel>
-                                </Border>
-                            </DataTemplate>
-                        </ListBox.ItemTemplate>
-                    </ListBox>
+
+                    <Grid>
+                        <!-- ESTADO VAZIO (EMPTY STATE) -->
+                        <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center" IsHitTestVisible="False">
+                            <StackPanel.Style>
+                                <Style TargetType="StackPanel">
+                                    <Setter Property="Visibility" Value="Collapsed"/>
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding Items.Count, ElementName=LstSchedule}" Value="0">
+                                            <Setter Property="Visibility" Value="Visible"/>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </StackPanel.Style>
+                            <TextBlock FontFamily="Segoe Fluent Icons" Text="&#xE81C;" FontSize="28" Foreground="{DynamicResource TextMuted}" HorizontalAlignment="Center" Opacity="0.5"/>
+                            <TextBlock Text="Arraste itens para iniciar o culto" Foreground="{DynamicResource TextMuted}" FontSize="11" Margin="0,6,0,0" Opacity="0.7"/>
+                        </StackPanel>
+
+                        <!-- LISTA DE PROGRAMAÇÃO COM DUPLO-CLIQUE -->
+                        <ListBox x:Name="LstSchedule" 
+                                 MouseDoubleClick="LstSchedule_MouseDoubleClick" 
+                                 ItemContainerStyle="{DynamicResource AnimatedCardItemStyle}" 
+                                 SelectionChanged="LstSchedule_SelectionChanged" 
+                                 KeyDown="LstSchedule_KeyDown" 
+                                 AllowDrop="True" 
+                                 Drop="LstSchedule_Drop" 
+                                 DragOver="LstSchedule_DragOver" 
+                                 PreviewMouseLeftButtonDown="LstSchedule_PreviewMouseLeftButtonDown"
+                                 PreviewMouseMove="LstSchedule_PreviewMouseMove" 
+                                 PreviewMouseLeftButtonUp="LstSchedule_PreviewMouseLeftButtonUp"
+                                 BorderThickness="0" Background="Transparent" ScrollViewer.HorizontalScrollBarVisibility="Disabled">
+                            <ListBox.ItemTemplate>
+                                <DataTemplate>
+                                    <Border x:Name="CardBorder" Background="{DynamicResource CardBg}" BorderBrush="{DynamicResource BorderDark}" BorderThickness="1" CornerRadius="6" Padding="8" Margin="0,2,4,4">
+
+                                        <!-- BORDA COM A COR DO TEMA (Substituído o Verde pelo AccentColor) -->
+                                        <Border.Style>
+                                            <Style TargetType="Border">
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding IsActive}" Value="True">
+                                                        <Setter Property="BorderBrush" Value="{DynamicResource AccentColor}"/>
+                                                        <Setter Property="BorderThickness" Value="2"/>
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </Border.Style>
+
+                                        <Border.ContextMenu>
+                                            <ContextMenu>
+                                                <MenuItem Header="Renomear Item..." Click="MenuRenameScheduleItem_Click">
+                                                    <MenuItem.Icon>
+                                                        <TextBlock FontFamily="Segoe Fluent Icons" Text="&#xE70F;" Foreground="White"/>
+                                                    </MenuItem.Icon>
+                                                </MenuItem>
+                                                <MenuItem Header="Remover da Lista" Click="BtnScheduleRemove_Click">
+                                                    <MenuItem.Icon>
+                                                        <TextBlock FontFamily="Segoe Fluent Icons" Text="&#xE74D;" Foreground="#EF4444"/>
+                                                    </MenuItem.Icon>
+                                                </MenuItem>
+                                            </ContextMenu>
+                                        </Border.ContextMenu>
+                                        <Border.Effect>
+                                            <DropShadowEffect x:Name="Shadow" Color="Black" BlurRadius="8" ShadowDepth="3" Opacity="0.2"/>
+                                        </Border.Effect>
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="Auto"/>
+                                                <ColumnDefinition Width="*"/>
+                                            </Grid.ColumnDefinitions>
+                                            <TextBlock Grid.Column="0" Text="{Binding ItemTypeIcon}" FontSize="18" VerticalAlignment="Center" Margin="0,0,10,0"/>
+                                            <StackPanel Grid.Column="1" VerticalAlignment="Center">
+
+                                                <!-- TEXTO COM A COR DO TEMA (Substituído o Verde pelo AccentColor) -->
+                                                <TextBlock Text="{Binding Title}" FontWeight="Bold" FontSize="13" TextTrimming="CharacterEllipsis">
+                                                    <TextBlock.Style>
+                                                        <Style TargetType="TextBlock">
+                                                            <Setter Property="Foreground" Value="{DynamicResource TextPrimary}"/>
+                                                            <Style.Triggers>
+                                                                <DataTrigger Binding="{Binding IsActive}" Value="True">
+                                                                    <Setter Property="Foreground" Value="{DynamicResource AccentColor}"/>
+                                                                </DataTrigger>
+                                                            </Style.Triggers>
+                                                        </Style>
+                                                    </TextBlock.Style>
+                                                </TextBlock>
+
+                                                <TextBlock Text="{Binding Subtitle}" Foreground="{DynamicResource TextMuted}" FontSize="11" Margin="0,2,0,0" TextTrimming="CharacterEllipsis"/>
+                                            </StackPanel>
+                                        </Grid>
+                                    </Border>
+                                    <DataTemplate.Triggers>
+                                        <DataTrigger Binding="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type ListBoxItem}}, Path=IsMouseOver}" Value="True">
+                                            <DataTrigger.EnterActions>
+                                                <BeginStoryboard>
+                                                    <Storyboard>
+                                                        <DoubleAnimation Storyboard.TargetName="Shadow" Storyboard.TargetProperty="Opacity" To="0.5" Duration="0:0:0.15" />
+                                                        <DoubleAnimation Storyboard.TargetName="Shadow" Storyboard.TargetProperty="BlurRadius" To="12" Duration="0:0:0.15" />
+                                                    </Storyboard>
+                                                </BeginStoryboard>
+                                            </DataTrigger.EnterActions>
+                                            <DataTrigger.ExitActions>
+                                                <BeginStoryboard>
+                                                    <Storyboard>
+                                                        <DoubleAnimation Storyboard.TargetName="Shadow" Storyboard.TargetProperty="Opacity" To="0.2" Duration="0:0:0.25" />
+                                                        <DoubleAnimation Storyboard.TargetName="Shadow" Storyboard.TargetProperty="BlurRadius" To="8" Duration="0:0:0.25" />
+                                                    </Storyboard>
+                                                </BeginStoryboard>
+                                            </DataTrigger.ExitActions>
+                                        </DataTrigger>
+                                    </DataTemplate.Triggers>
+                                </DataTemplate>
+                            </ListBox.ItemTemplate>
+                        </ListBox>
+                    </Grid>
                 </DockPanel>
             </Border>
 
-            <!-- 3. PAINEL: SLIDES ATIVOS (Centro Esquerda | Col 1, Ocupa 2 Linhas) -->
-            <Border x:Name="PanelSlides" Grid.Column="1" Grid.Row="0" Grid.RowSpan="2" Background="{StaticResource PanelBg}" BorderBrush="{StaticResource BorderDark}" BorderThickness="1" CornerRadius="8" Padding="12" Margin="4">
+            <!-- 3. PAINEL: SLIDES ATIVOS (MANTIDO) -->
+            <Border x:Name="PanelSlides" Grid.Column="1" Grid.Row="0" Grid.RowSpan="2" Background="{DynamicResource PanelBg}" BorderBrush="{DynamicResource BorderDark}" BorderThickness="1" CornerRadius="8" Padding="12" Margin="4">
                 <DockPanel>
-                    <TextBlock x:Name="TxtSelectedSongTitle" DockPanel.Dock="Top" Text="Nenhum item selecionado" FontWeight="Bold" FontSize="15" Foreground="{StaticResource TextPrimary}" Margin="4,0,0,10"/>
-                    <ListBox x:Name="LstSlides" SelectionChanged="LstSlides_SelectionChanged" BorderThickness="0" Background="Transparent">
+                    <TextBlock x:Name="TxtSelectedSongTitle" DockPanel.Dock="Top" Text="Nenhum item selecionado" FontWeight="Bold" FontSize="15" Foreground="{DynamicResource TextPrimary}" Margin="4,0,0,10" TextTrimming="CharacterEllipsis"/>
+                    <ListBox x:Name="LstSlides" ItemContainerStyle="{DynamicResource AnimatedCardItemStyle}" SelectionChanged="LstSlides_SelectionChanged" BorderThickness="0" Background="Transparent" 
+                             ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                             ScrollViewer.VerticalScrollBarVisibility="Auto">
                         <ListBox.ItemTemplate>
                             <DataTemplate>
-                                <Border BorderBrush="{StaticResource BorderDark}" BorderThickness="1" CornerRadius="8" Padding="12" Margin="4,4,10,6" Background="{StaticResource CardBg}">
+                                <Border x:Name="CardBorder" BorderBrush="{DynamicResource BorderDark}" BorderThickness="1" CornerRadius="8" Padding="12" Margin="0,3,6,6" Background="{DynamicResource CardBg}">
                                     <Border.Effect>
-                                        <DropShadowEffect Color="Black" BlurRadius="10" ShadowDepth="4" Opacity="0.25"/>
+                                        <DropShadowEffect x:Name="Shadow" Color="Black" BlurRadius="10" ShadowDepth="4" Opacity="0.25"/>
                                     </Border.Effect>
                                     <StackPanel>
-                                        <TextBlock Text="{Binding Header}" FontWeight="Bold" Foreground="{StaticResource AccentGold}" FontSize="12" Margin="0,0,0,4"/>
-                                        <TextBlock Text="{Binding Content}" FontSize="14" Foreground="{StaticResource TextPrimary}" TextWrapping="Wrap" LineHeight="20"/>
+                                        <TextBlock Text="{Binding Header}" FontWeight="Bold" Foreground="{DynamicResource AccentColor}" FontSize="12" Margin="0,0,0,4"/>
+                                        <TextBlock Text="{Binding Content}" FontSize="14" Foreground="{DynamicResource TextPrimary}" TextWrapping="Wrap" LineHeight="20"/>
                                     </StackPanel>
                                 </Border>
+                                <DataTemplate.Triggers>
+                                    <DataTrigger Binding="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type ListBoxItem}}, Path=IsSelected}" Value="True">
+                                        <Setter TargetName="CardBorder" Property="BorderBrush" Value="{DynamicResource AccentColor}"/>
+                                        <Setter TargetName="CardBorder" Property="BorderThickness" Value="2"/>
+                                    </DataTrigger>
+                                    <DataTrigger Binding="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type ListBoxItem}}, Path=IsMouseOver}" Value="True">
+                                        <DataTrigger.EnterActions>
+                                            <BeginStoryboard>
+                                                <Storyboard>
+                                                    <DoubleAnimation Storyboard.TargetName="Shadow" Storyboard.TargetProperty="Opacity" To="0.5" Duration="0:0:0.15" />
+                                                </Storyboard>
+                                            </BeginStoryboard>
+                                        </DataTrigger.EnterActions>
+                                        <DataTrigger.ExitActions>
+                                            <BeginStoryboard>
+                                                <Storyboard>
+                                                    <DoubleAnimation Storyboard.TargetName="Shadow" Storyboard.TargetProperty="Opacity" To="0.25" Duration="0:0:0.25" />
+                                                </Storyboard>
+                                            </BeginStoryboard>
+                                        </DataTrigger.ExitActions>
+                                    </DataTrigger>
+                                </DataTemplate.Triggers>
                             </DataTemplate>
                         </ListBox.ItemTemplate>
                     </ListBox>
                 </DockPanel>
             </Border>
 
-            <!-- 4. PAINEL: RECURSOS (Centro Direita | Col 2, Ocupa 2 Linhas) -->
-            <Border x:Name="PanelResources" Grid.Column="2" Grid.Row="0" Grid.RowSpan="2" Background="{StaticResource PanelBg}" BorderBrush="{StaticResource BorderDark}" BorderThickness="1" CornerRadius="8" Padding="10" Margin="4">
+            <!-- 4. PAINEL: RECURSOS -->
+            <Border x:Name="PanelResources" Grid.Column="2" Grid.Row="0" Grid.RowSpan="2" Background="{DynamicResource PanelBg}" BorderBrush="{DynamicResource BorderDark}" BorderThickness="1" CornerRadius="8" Padding="10" Margin="4">
                 <TabControl>
                     <!-- Aba Músicas -->
                     <TabItem>
@@ -604,16 +740,23 @@
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="*"/>
                                     <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="Auto"/>
                                 </Grid.ColumnDefinitions>
-                                <TextBox x:Name="TxtSearchSong" Grid.Column="0" Style="{StaticResource SearchTextBox}" TextChanged="TxtSearchSong_TextChanged"/>
-                                <Button Grid.Column="1" Click="BtnNewSong_Click" Style="{StaticResource GoldButton}" Padding="8,4" Margin="6,0,0,0">
+                                <TextBox x:Name="TxtSearchSong" Grid.Column="0" Style="{DynamicResource SearchTextBox}" TextChanged="TxtSearchSong_TextChanged"/>
+                                <Button Grid.Column="1" Click="BtnEditSong_Click" Style="{DynamicResource NavyButton}" Padding="8,4" Margin="6,0,0,0" ToolTip="Editar Música Selecionada">
+                                    <StackPanel Orientation="Horizontal">
+                                        <TextBlock FontFamily="Segoe Fluent Icons" Text="&#xE70F;" Margin="0,0,6,0" VerticalAlignment="Center"/>
+                                        <TextBlock Text="Editar" VerticalAlignment="Center"/>
+                                    </StackPanel>
+                                </Button>
+                                <Button Grid.Column="2" Click="BtnNewSong_Click" Style="{DynamicResource GoldButton}" Padding="8,4" Margin="6,0,0,0">
                                     <StackPanel Orientation="Horizontal">
                                         <TextBlock FontFamily="Segoe Fluent Icons" Text="&#xE710;" Margin="0,0,6,0" VerticalAlignment="Center"/>
                                         <TextBlock Text="Nova" VerticalAlignment="Center"/>
                                     </StackPanel>
                                 </Button>
                             </Grid>
-                            <ListBox x:Name="LstSongs" DisplayMemberPath="Title" SelectionChanged="LstSongs_SelectionChanged" PreviewMouseMove="LstSongs_PreviewMouseMove" BorderThickness="0" Background="Transparent"/>
+                            <ListBox x:Name="LstSongs" DisplayMemberPath="Title" SelectionChanged="LstSongs_SelectionChanged" PreviewMouseMove="LstSongs_PreviewMouseMove" BorderThickness="0" Background="Transparent" ScrollViewer.HorizontalScrollBarVisibility="Disabled"/>
                         </DockPanel>
                     </TabItem>
 
@@ -626,16 +769,21 @@
                             </StackPanel>
                         </TabItem.Header>
                         <DockPanel Margin="0,8,0,0">
-                            <TextBlock DockPanel.Dock="Top" Text="Ex: jo 3:16, sl 23 ou palavra" Foreground="{StaticResource TextMuted}" FontSize="11" Margin="0,0,0,4"/>
+                            <TextBlock DockPanel.Dock="Top" Text="Ex: jo 3:16, sl 23 ou palavra" Foreground="{DynamicResource TextMuted}" FontSize="11" Margin="0,0,0,4"/>
                             <Grid DockPanel.Dock="Top" Margin="0,0,0,8">
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="*"/>
                                     <ColumnDefinition Width="80"/>
                                 </Grid.ColumnDefinitions>
-                                <TextBox x:Name="TxtSearchBible" Grid.Column="0" Style="{StaticResource SearchTextBox}" Margin="0,0,4,0" KeyDown="TxtSearchBible_KeyDown"/>
+                                <TextBox x:Name="TxtSearchBible" Grid.Column="0" Style="{DynamicResource SearchTextBox}" Margin="0,0,4,0" KeyDown="TxtSearchBible_KeyDown"/>
                                 <ComboBox x:Name="CmbBibleVersion" Grid.Column="1" SelectionChanged="CmbBibleVersion_SelectionChanged"/>
                             </Grid>
-                            <ListBox x:Name="LstBibleResults" DisplayMemberPath="Reference" SelectionChanged="LstBibleResults_SelectionChanged" PreviewMouseMove="LstBibleResults_PreviewMouseMove" BorderThickness="0" Background="Transparent"/>
+                            <ListBox x:Name="LstBibleResults" DisplayMemberPath="Reference" SelectionMode="Extended" 
+                                     SelectionChanged="LstBibleResults_SelectionChanged" 
+                                     PreviewMouseLeftButtonDown="LstBibleResults_PreviewMouseLeftButtonDown"
+                                     PreviewMouseMove="LstBibleResults_PreviewMouseMove" 
+                                     PreviewMouseLeftButtonUp="LstBibleResults_PreviewMouseLeftButtonUp"
+                                     BorderThickness="0" Background="Transparent" ScrollViewer.HorizontalScrollBarVisibility="Disabled"/>
                         </DockPanel>
                     </TabItem>
 
@@ -653,13 +801,13 @@
                                     <ColumnDefinition Width="*"/>
                                     <ColumnDefinition Width="Auto"/>
                                 </Grid.ColumnDefinitions>
-                                <Button Grid.Column="0" Click="BtnImportBackground_Click" Style="{StaticResource GoldButton}" Margin="0,0,6,0" Padding="8,4">
+                                <Button Grid.Column="0" Click="BtnImportBackground_Click" Style="{DynamicResource GoldButton}" Margin="0,0,6,0" Padding="8,4">
                                     <StackPanel Orientation="Horizontal">
                                         <TextBlock FontFamily="Segoe Fluent Icons" Text="&#xE896;" Margin="0,0,6,0" VerticalAlignment="Center"/>
                                         <TextBlock Text="Importar" VerticalAlignment="Center"/>
                                     </StackPanel>
                                 </Button>
-                                <Button Grid.Column="1" Click="BtnClearBackground_Click" Style="{StaticResource NavyButton}" Padding="8,4">
+                                <Button Grid.Column="1" Click="BtnClearBackground_Click" Style="{DynamicResource NavyButton}" Padding="8,4">
                                     <StackPanel Orientation="Horizontal">
                                         <TextBlock FontFamily="Segoe Fluent Icons" Text="&#xE894;" Margin="0,0,6,0" VerticalAlignment="Center"/>
                                         <TextBlock Text="Limpar" VerticalAlignment="Center"/>
@@ -667,11 +815,11 @@
                                 </Button>
                             </Grid>
                             <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Margin="0,0,0,8">
-                                <RadioButton x:Name="RbFilterAll" Content="Todos" IsChecked="True" Checked="BgFilter_Changed" Foreground="{StaticResource TextPrimary}" Margin="0,0,12,0"/>
-                                <RadioButton x:Name="RbFilterVideos" Content="Vídeos" Checked="BgFilter_Changed" Foreground="{StaticResource TextPrimary}" Margin="0,0,12,0"/>
-                                <RadioButton x:Name="RbFilterImages" Content="Fotos" Checked="BgFilter_Changed" Foreground="{StaticResource TextPrimary}"/>
+                                <RadioButton x:Name="RbFilterAll" Content="Todos" IsChecked="True" Checked="BgFilter_Changed" Foreground="{DynamicResource TextPrimary}" Margin="0,0,12,0"/>
+                                <RadioButton x:Name="RbFilterVideos" Content="Vídeos" Checked="BgFilter_Changed" Foreground="{DynamicResource TextPrimary}" Margin="0,0,12,0"/>
+                                <RadioButton x:Name="RbFilterImages" Content="Fotos" Checked="BgFilter_Changed" Foreground="{DynamicResource TextPrimary}"/>
                             </StackPanel>
-                            <ListBox x:Name="LstBackgrounds" SelectionChanged="LstBackgrounds_SelectionChanged" AllowDrop="True" Drop="LstBackgrounds_Drop" BorderThickness="0" Background="Transparent" ScrollViewer.HorizontalScrollBarVisibility="Disabled">
+                            <ListBox x:Name="LstBackgrounds" ItemContainerStyle="{DynamicResource AnimatedCardItemStyle}" SelectionChanged="LstBackgrounds_SelectionChanged" AllowDrop="True" Drop="LstBackgrounds_Drop" BorderThickness="0" Background="Transparent" ScrollViewer.HorizontalScrollBarVisibility="Disabled">
                                 <ListBox.ItemsPanel>
                                     <ItemsPanelTemplate>
                                         <WrapPanel Orientation="Horizontal"/>
@@ -679,17 +827,35 @@
                                 </ListBox.ItemsPanel>
                                 <ListBox.ItemTemplate>
                                     <DataTemplate>
-                                        <Border Background="{StaticResource CardBg}" BorderBrush="{StaticResource BorderDark}" BorderThickness="1" CornerRadius="6" Width="105" Height="75" Margin="4,4,8,8" ClipToBounds="True">
-                                            <Border.Effect>
-                                                <DropShadowEffect Color="Black" BlurRadius="6" ShadowDepth="2" Opacity="0.3"/>
-                                            </Border.Effect>
+                                        <Border Background="{DynamicResource CardBg}" BorderBrush="{DynamicResource BorderDark}" BorderThickness="1" CornerRadius="6" Width="105" Height="75" Margin="4,4,8,8" ClipToBounds="True" MouseEnter="BackgroundItem_MouseEnter" MouseLeave="BackgroundItem_MouseLeave">
                                             <Grid>
-                                                <Image Source="{Binding ThumbnailPath}" Stretch="UniformToFill" HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                                                <Border Background="#B21E293B" HorizontalAlignment="Right" VerticalAlignment="Top" Padding="4,2" CornerRadius="0,0,0,4">
-                                                    <TextBlock Text="{Binding IsVideo, Converter={x:Null}}" Foreground="{StaticResource AccentGold}" FontSize="9" FontWeight="Bold"/>
+                                                <Image Source="{Binding OptimizedThumbnail, IsAsync=True}" Stretch="UniformToFill" HorizontalAlignment="Center" VerticalAlignment="Center" RenderOptions.BitmapScalingMode="LowQuality"/>
+                                                <Border HorizontalAlignment="Right" VerticalAlignment="Top" Padding="5,2" CornerRadius="0,0,0,4">
+                                                    <Border.Style>
+                                                        <Style TargetType="Border">
+                                                            <Setter Property="Background" Value="#CC1E3A8A"/>
+                                                            <Style.Triggers>
+                                                                <DataTrigger Binding="{Binding IsVideo}" Value="True">
+                                                                    <Setter Property="Background" Value="#CC991B1B"/>
+                                                                </DataTrigger>
+                                                            </Style.Triggers>
+                                                        </Style>
+                                                    </Border.Style>
+                                                    <TextBlock Foreground="White" FontSize="9" FontWeight="Bold">
+                                                        <TextBlock.Style>
+                                                            <Style TargetType="TextBlock">
+                                                                <Setter Property="Text" Value="📷 FOTO"/>
+                                                                <Style.Triggers>
+                                                                    <DataTrigger Binding="{Binding IsVideo}" Value="True">
+                                                                        <Setter Property="Text" Value="🎬 VÍDEO"/>
+                                                                    </DataTrigger>
+                                                                </Style.Triggers>
+                                                            </Style>
+                                                        </TextBlock.Style>
+                                                    </TextBlock>
                                                 </Border>
-                                                <Border Background="#CC0A0F19" VerticalAlignment="Bottom" Padding="4,2">
-                                                    <TextBlock Text="{Binding Name}" Foreground="White" FontSize="10" TextTrimming="CharacterEllipsis" TextAlignment="Center"/>
+                                                <Border Background="#DD060A12" VerticalAlignment="Bottom" Padding="4,3">
+                                                    <TextBlock Text="{Binding Name}" Foreground="White" FontSize="10" TextTrimming="CharacterEllipsis" TextAlignment="Center" ToolTip="{Binding Name}"/>
                                                 </Border>
                                             </Grid>
                                         </Border>
@@ -701,15 +867,14 @@
                 </TabControl>
             </Border>
 
-            <!-- 5. PAINEL: GRUPO DE LOUVOR (Extrema Direita | Col 3, Ocupa 2 Linhas) -->
-            <Border x:Name="PanelWorshipTeam" Grid.Column="3" Grid.Row="0" Grid.RowSpan="2" Background="{StaticResource PanelBg}" BorderBrush="{StaticResource BorderDark}" BorderThickness="1" CornerRadius="8" Padding="12" Margin="4">
+            <!-- 5. PAINEL: GRUPO DE LOUVOR (MANTIDO) -->
+            <Border x:Name="PanelWorshipTeam" Grid.Column="3" Grid.Row="0" Grid.RowSpan="2" Background="{DynamicResource PanelBg}" BorderBrush="{DynamicResource BorderDark}" BorderThickness="1" CornerRadius="8" Padding="12" Margin="4">
                 <DockPanel LastChildFill="True">
                     <DockPanel DockPanel.Dock="Top" Margin="0,0,0,8">
                         <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                            <TextBlock FontFamily="Segoe Fluent Icons" Text="&#xE1D6;" Foreground="{StaticResource AccentGold}" FontSize="14" Margin="0,0,6,0" VerticalAlignment="Center"/>
-                            <TextBlock Text="Equipa" FontWeight="Bold" FontSize="14" Foreground="{StaticResource AccentGold}" VerticalAlignment="Center"/>
+                            <TextBlock FontFamily="Segoe Fluent Icons" Text="&#xE1D6;" Foreground="{DynamicResource AccentColor}" FontSize="14" Margin="0,0,6,0" VerticalAlignment="Center"/>
+                            <TextBlock Text="Equipa" FontWeight="Bold" FontSize="14" Foreground="{DynamicResource AccentColor}" VerticalAlignment="Center"/>
                         </StackPanel>
-                        <TextBlock Text="Mic/Retorno" FontSize="11" Foreground="{StaticResource TextMuted}" VerticalAlignment="Center" HorizontalAlignment="Right"/>
                     </DockPanel>
                     <Grid DockPanel.Dock="Top" Margin="0,0,0,8">
                         <Grid.ColumnDefinitions>
@@ -719,36 +884,31 @@
                         <ComboBox x:Name="CmbPresetMembers" Height="30" VerticalContentAlignment="Center">
                             <ComboBox.ItemTemplate>
                                 <DataTemplate>
-                                    <TextBlock Text="{Binding Name}" Foreground="#F8FAFC" FontWeight="Medium"/>
+                                    <TextBlock Text="{Binding Name}" Foreground="#F8FAFC" FontWeight="Medium" TextTrimming="CharacterEllipsis"/>
                                 </DataTemplate>
                             </ComboBox.ItemTemplate>
                         </ComboBox>
-                        <Button Grid.Column="1" Click="BtnAddTeamMember_Click" Style="{StaticResource GoldButton}" Padding="10,4" Margin="6,0,0,0" ToolTip="Adicionar Membro">
+                        <Button Grid.Column="1" Click="BtnAddTeamMember_Click" Style="{DynamicResource GoldButton}" Padding="10,4" Margin="6,0,0,0" ToolTip="Adicionar Membro">
                             <TextBlock FontFamily="Segoe Fluent Icons" Text="&#xE710;" FontSize="12"/>
                         </Button>
                     </Grid>
-                    <ListBox x:Name="LstActiveTeam" BorderThickness="0" Background="Transparent">
+
+                    <ListBox x:Name="LstActiveTeam" ItemContainerStyle="{DynamicResource AnimatedCardItemStyle}" BorderThickness="0" Background="Transparent" 
+                             ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                             ScrollViewer.VerticalScrollBarVisibility="Auto">
                         <ListBox.ItemTemplate>
                             <DataTemplate>
-                                <Border Background="{StaticResource CardBg}" BorderBrush="{StaticResource BorderDark}" BorderThickness="1" CornerRadius="6" Padding="8,6" Margin="4,4,10,4">
+                                <Border x:Name="CardBorder" Background="{DynamicResource CardBg}" BorderBrush="{DynamicResource BorderDark}" BorderThickness="1" CornerRadius="6" Padding="8,6" Margin="0,3,4,4">
                                     <Border.Effect>
-                                        <DropShadowEffect Color="Black" BlurRadius="6" ShadowDepth="2" Opacity="0.2"/>
+                                        <DropShadowEffect x:Name="Shadow" Color="Black" BlurRadius="6" ShadowDepth="2" Opacity="0.2"/>
                                     </Border.Effect>
                                     <DockPanel LastChildFill="True">
-                                        <Button Click="BtnEditTeamMember_Click" DockPanel.Dock="Right" Focusable="False" Background="Transparent" Foreground="#D4AF37" BorderThickness="0" FontSize="13" Width="30" Height="30" Cursor="Hand" ToolTip="Editar">
+                                        <Button Click="BtnEditTeamMember_Click" DockPanel.Dock="Right" Focusable="False" Background="Transparent" Foreground="{DynamicResource AccentColor}" BorderThickness="0" FontSize="13" Width="26" Height="26" Cursor="Hand" ToolTip="Editar" Margin="4,0,0,0">
                                             <TextBlock FontFamily="Segoe Fluent Icons" Text="&#xE70F;"/>
                                         </Button>
-                                        <StackPanel Orientation="Horizontal" DockPanel.Dock="Right" VerticalAlignment="Center" Margin="0,0,8,0">
-                                            <Border Background="#1E3A8A" CornerRadius="4" Padding="6,2" Margin="0,0,4,0">
-                                                <TextBlock Text="{Binding Microphone}" Foreground="#93C5FD" FontSize="11" FontWeight="Bold"/>
-                                            </Border>
-                                            <Border Background="#064E3B" CornerRadius="4" Padding="6,2">
-                                                <TextBlock Text="{Binding InEarReturn}" Foreground="#6EE7B7" FontSize="11" FontWeight="Bold"/>
-                                            </Border>
-                                        </StackPanel>
                                         <StackPanel VerticalAlignment="Center">
-                                            <TextBlock Text="{Binding Name}" FontWeight="Bold" Foreground="{StaticResource TextPrimary}" FontSize="13"/>
-                                            <TextBlock Text="{Binding Role}" Foreground="{StaticResource TextMuted}" FontSize="10"/>
+                                            <TextBlock Text="{Binding Name}" FontWeight="Bold" Foreground="{DynamicResource TextPrimary}" FontSize="12" TextTrimming="CharacterEllipsis"/>
+                                            <TextBlock Text="{Binding Role}" Foreground="{DynamicResource TextMuted}" FontSize="10" TextTrimming="CharacterEllipsis"/>
                                         </StackPanel>
                                     </DockPanel>
                                 </Border>

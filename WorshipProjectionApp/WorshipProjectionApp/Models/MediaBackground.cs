@@ -1,13 +1,48 @@
-﻿using System.IO;
+﻿using System;
+using System.Text.Json.Serialization;
+using System.Windows.Media.Imaging;
 
-namespace WorshipProjectionApp.Models;
-
-public class MediaBackground
+namespace WorshipProjectionApp.Models
 {
-    public string Name { get; set; } = string.Empty;
-    public string FilePath { get; set; } = string.Empty;
-    public bool IsVideo { get; set; }
+    public class MediaBackground
+    {
+        public string Name { get; set; }
+        public string FilePath { get; set; }
+        public string ThumbnailPath { get; set; }
+        public bool IsVideo { get; set; }
 
-    // Usado pela interface para exibir miniatura (se for imagem mostra a própria imagem)
-    public string ThumbnailPath => IsVideo ? string.Empty : FilePath;
+        // A cache interna da imagem para não ser lida do disco repetidamente
+        private BitmapImage? _optimizedThumb;
+
+        // [JsonIgnore] impede que a app tente guardar esta imagem pesada no ficheiro de texto
+        [JsonIgnore]
+        public BitmapImage? OptimizedThumbnail
+        {
+            get
+            {
+                if (_optimizedThumb != null) return _optimizedThumb;
+                if (string.IsNullOrEmpty(ThumbnailPath) || !System.IO.File.Exists(ThumbnailPath)) return null;
+
+                try
+                {
+                    _optimizedThumb = new BitmapImage();
+                    _optimizedThumb.BeginInit();
+                    _optimizedThumb.CacheOption = BitmapCacheOption.OnLoad;
+                    _optimizedThumb.UriSource = new Uri(ThumbnailPath, UriKind.Absolute);
+
+                    // O SEGREDO DA MEMÓRIA: Reduz a leitura para 150px de largura
+                    _optimizedThumb.DecodePixelWidth = 150;
+
+                    _optimizedThumb.EndInit();
+                    _optimizedThumb.Freeze(); // Liberta a imagem para correr noutras threads
+                }
+                catch
+                {
+                    return null;
+                }
+
+                return _optimizedThumb;
+            }
+        }
+    }
 }

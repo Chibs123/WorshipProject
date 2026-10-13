@@ -14,6 +14,7 @@ public partial class AlertWindow : Window
         InitializeComponent();
     }
 
+    private void BtnClose_Click(object sender, RoutedEventArgs e) => this.Close();
     private void BtnShow_Click(object sender, RoutedEventArgs e)
     {
         MessageText = TxtAlertMessage.Text.Trim();

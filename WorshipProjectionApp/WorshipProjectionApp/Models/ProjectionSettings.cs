@@ -6,7 +6,7 @@ using System.Windows.Media;
 namespace WorshipProjectionApp.Models;
 
 public class ProjectionSettings
-{
+{    public string AppThemeColorHex { get; set; } = "#D4AF37";
     public string FontFamily { get; set; } = "Segoe UI";
     public double FontSize { get; set; } = 48;
     public string FontColorHex { get; set; } = "#FFFFFF";
@@ -17,8 +17,7 @@ public class ProjectionSettings
     public int MarginPercent { get; set; } = 8;
     public double ShadowBlurRadius { get; set; } = 14;
     public double ShadowOpacity { get; set; } = 0.95;
-    public int ScreenIndex { get; internal set; }
-
+    public int ScreenIndex { get; set; } = 1;
     private static readonly string SettingsPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "projection_settings.json");
 
     public static ProjectionSettings Load()

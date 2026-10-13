@@ -11,7 +11,8 @@
           "Dapper": "2.1.89",
           "LibVLCSharp": "3.10.1",
           "LibVLCSharp.WPF": "3.10.1",
-          "Microsoft.Data.Sqlite": "10.0.12"
+          "Microsoft.Data.Sqlite": "10.0.12",
+          "NReco.VideoConverter": "1.2.1"
         },
         "runtime": {
           "WorshipProjectionApp.dll": {}
@@ -59,6 +60,14 @@
           "lib/net8.0/Microsoft.Data.Sqlite.dll": {
             "assemblyVersion": "10.0.12.0",
             "fileVersion": "10.0.1226.42308"
+          }
+        }
+      },
+      "NReco.VideoConverter/1.2.1": {
+        "runtime": {
+          "lib/netstandard2.0/NReco.VideoConverter.dll": {
+            "assemblyVersion": "1.2.1.0",
+            "fileVersion": "1.2.1.0"
           }
         }
       },
@@ -249,6 +258,13 @@
       "sha512": "sha512-2aL9eL5HQr0V4b8V909SD+jQAx6qnTTl7sT/v3D8dIvmr2UGdpZIQxqm1pj2Js3e4EYTvpw0oMH7DjapJJuPPw==",
       "path": "microsoft.data.sqlite.core/10.0.12",
       "hashPath": "microsoft.data.sqlite.core.10.0.12.nupkg.sha512"
+    },
+    "NReco.VideoConverter/1.2.1": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-d/V78hRW6Iqi9+lNrivCWL9qMiiJ8WCrwN1wpEvGq+3mE3uIy7VYhkgHrJBkUzx4RRQKEJ9UvCvVb+0ELIbGWg==",
+      "path": "nreco.videoconverter/1.2.1",
+      "hashPath": "nreco.videoconverter.1.2.1.nupkg.sha512"
     },
     "SQLitePCLRaw.bundle_e_sqlite3/2.1.12": {
       "type": "package",

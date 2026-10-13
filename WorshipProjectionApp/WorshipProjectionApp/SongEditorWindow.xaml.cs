@@ -20,6 +20,7 @@ public partial class SongEditorWindow : Window
         }
     }
 
+    private void BtnClose_Click(object sender, RoutedEventArgs e) => this.Close();
     private void BtnSave_Click(object sender, RoutedEventArgs e)
     {
         if (string.IsNullOrWhiteSpace(TxtTitle.Text))

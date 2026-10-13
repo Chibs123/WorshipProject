@@ -5,163 +5,127 @@
         Height="600" Width="800"
         WindowStartupLocation="CenterOwner"
         ResizeMode="NoResize"
-        Background="#0F172A"
-        Foreground="#F8FAFC"
+        Background="{DynamicResource BgCanvas}"
+        Foreground="{DynamicResource TextPrimary}"
         FontFamily="Segoe UI">
 
-    <Window.Resources>
-        <SolidColorBrush x:Key="AccentGold" Color="#D4AF37"/>
-        <SolidColorBrush x:Key="PanelBg" Color="#162032"/>
-        <SolidColorBrush x:Key="BorderDark" Color="#2A384F"/>
+    <WindowChrome.WindowChrome>
+        <WindowChrome CaptionHeight="40" ResizeBorderThickness="6" CornerRadius="0" GlassFrameThickness="0" UseAeroCaptionButtons="False"/>
+    </WindowChrome.WindowChrome>
 
-        <Style x:Key="GoldButton" TargetType="Button">
-            <Setter Property="Background" Value="{StaticResource AccentGold}"/>
-            <Setter Property="Foreground" Value="#0F172A"/>
-            <Setter Property="FontWeight" Value="SemiBold"/>
-            <Setter Property="Padding" Value="14,6"/>
-            <Setter Property="BorderThickness" Value="0"/>
-            <Setter Property="Cursor" Value="Hand"/>
-            <Setter Property="Template">
-                <Setter.Value>
-                    <ControlTemplate TargetType="Button">
-                        <Border Background="{TemplateBinding Background}" CornerRadius="6" Padding="{TemplateBinding Padding}">
-                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                        </Border>
-                    </ControlTemplate>
-                </Setter.Value>
-            </Setter>
-        </Style>
-
-        <Style x:Key="NavyButton" TargetType="Button">
-            <Setter Property="Background" Value="#24344D"/>
-            <Setter Property="Foreground" Value="#F8FAFC"/>
-            <Setter Property="Padding" Value="12,6"/>
-            <Setter Property="BorderThickness" Value="0"/>
-            <Setter Property="Cursor" Value="Hand"/>
-            <Setter Property="Template">
-                <Setter.Value>
-                    <ControlTemplate TargetType="Button">
-                        <Border Background="{TemplateBinding Background}" CornerRadius="6" Padding="{TemplateBinding Padding}">
-                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                        </Border>
-                    </ControlTemplate>
-                </Setter.Value>
-            </Setter>
-        </Style>
-    </Window.Resources>
-
-    <Grid Margin="18">
+    <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
-            <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
-        <TextBlock Grid.Row="0" Text="🧩 Construtor Lego: Matriz 4x4" FontWeight="Bold" FontSize="16" Foreground="{StaticResource AccentGold}"/>
-        <TextBlock Grid.Row="1" Text="Personaliza a posição (linha e coluna) e a dimensão (largura e altura) de cada bloco no ecrã." Foreground="#94A3B8" FontSize="12" Margin="0,4,0,14"/>
+        <Border Grid.Row="0" Background="#060A12" Padding="14,6,6,6" BorderBrush="{DynamicResource BorderDark}" BorderThickness="0,0,0,1" WindowChrome.IsHitTestVisibleInChrome="True">
+            <DockPanel>
+                <TextBlock Text="🧩 Construtor Lego: Matriz 4x4" Foreground="{DynamicResource AccentColor}" FontWeight="Bold" FontSize="14" VerticalAlignment="Center"/>
+                <Button Click="BtnClose_Click" Style="{DynamicResource WindowCloseButton}" HorizontalAlignment="Right" DockPanel.Dock="Right">
+                    <TextBlock FontFamily="Segoe Fluent Icons" Text="&#xE8BB;" FontSize="10" VerticalAlignment="Center"/>
+                </Button>
+            </DockPanel>
+        </Border>
 
-        <!-- Painel Central -->
-        <Grid Grid.Row="2">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="290"/>
-                <ColumnDefinition Width="*"/>
-            </Grid.ColumnDefinitions>
+        <Grid Grid.Row="1" Margin="18">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
 
-            <!-- Controlos da Peça -->
-            <Border Grid.Column="0" Background="{StaticResource PanelBg}" BorderBrush="{StaticResource BorderDark}" BorderThickness="1" CornerRadius="8" Padding="12" Margin="0,0,12,0">
-                <ScrollViewer VerticalScrollBarVisibility="Auto">
-                    <StackPanel>
-                        <TextBlock Text="1. Seleciona a Peça:" FontWeight="Bold" Margin="0,0,0,6"/>
-                        <ListBox x:Name="LstPieces" Height="110" Background="#0B0F19" BorderBrush="{StaticResource BorderDark}" SelectionChanged="LstPieces_SelectionChanged">
-                            <ListBox.ItemTemplate>
-                                <DataTemplate>
-                                    <TextBlock Text="{Binding Title}" Foreground="White" Padding="4,2"/>
-                                </DataTemplate>
-                            </ListBox.ItemTemplate>
-                        </ListBox>
+            <TextBlock Grid.Row="0" Text="Personaliza a posição e a dimensão de cada bloco no ecrã." Foreground="{DynamicResource TextMuted}" FontSize="12" Margin="0,0,0,14"/>
 
-                        <TextBlock Text="2. Posição Inicial:" FontWeight="Bold" Margin="0,14,0,6"/>
+            <Grid Grid.Row="1">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="290"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
 
-                        <!-- Linha Inicial (0 a 3) -->
-                        <DockPanel Margin="0,0,0,6">
-                            <TextBlock Text="Linha Inicial:" VerticalAlignment="Center" Width="95"/>
-                            <ComboBox x:Name="CmbRow" SelectionChanged="ParamChanged">
-                                <ComboBoxItem Content="Linha 1 (Topo)"/>
-                                <ComboBoxItem Content="Linha 2"/>
-                                <ComboBoxItem Content="Linha 3"/>
-                                <ComboBoxItem Content="Linha 4 (Fundo)"/>
-                            </ComboBox>
-                        </DockPanel>
+                <Border Grid.Column="0" Background="{DynamicResource PanelBg}" BorderBrush="{DynamicResource BorderDark}" BorderThickness="1" CornerRadius="8" Padding="12" Margin="0,0,12,0">
+                    <ScrollViewer VerticalScrollBarVisibility="Auto">
+                        <StackPanel>
+                            <TextBlock Text="1. Seleciona a Peça:" FontWeight="Bold" Margin="0,0,0,6"/>
+                            <ListBox x:Name="LstPieces" Height="110" Background="#0B0F19" BorderBrush="{DynamicResource BorderDark}" SelectionChanged="LstPieces_SelectionChanged">
+                                <ListBox.ItemTemplate>
+                                    <DataTemplate>
+                                        <TextBlock Text="{Binding Title}" Foreground="White" Padding="4,2"/>
+                                    </DataTemplate>
+                                </ListBox.ItemTemplate>
+                            </ListBox>
 
-                        <!-- Coluna Inicial (0 a 3) -->
-                        <DockPanel Margin="0,0,0,12">
-                            <TextBlock Text="Coluna Inicial:" VerticalAlignment="Center" Width="95"/>
-                            <ComboBox x:Name="CmbCol" SelectionChanged="ParamChanged">
-                                <ComboBoxItem Content="Coluna 1 (Esq.)"/>
-                                <ComboBoxItem Content="Coluna 2"/>
-                                <ComboBoxItem Content="Coluna 3"/>
-                                <ComboBoxItem Content="Coluna 4 (Dir.)"/>
-                            </ComboBox>
-                        </DockPanel>
+                            <TextBlock Text="2. Posição Inicial:" FontWeight="Bold" Margin="0,14,0,6"/>
+                            <DockPanel Margin="0,0,0,6">
+                                <TextBlock Text="Linha Inicial:" VerticalAlignment="Center" Width="95"/>
+                                <ComboBox x:Name="CmbRow" SelectionChanged="ParamChanged">
+                                    <ComboBoxItem Content="Linha 1 (Topo)"/>
+                                    <ComboBoxItem Content="Linha 2"/>
+                                    <ComboBoxItem Content="Linha 3"/>
+                                    <ComboBoxItem Content="Linha 4 (Fundo)"/>
+                                </ComboBox>
+                            </DockPanel>
+                            <DockPanel Margin="0,0,0,12">
+                                <TextBlock Text="Coluna Inicial:" VerticalAlignment="Center" Width="95"/>
+                                <ComboBox x:Name="CmbCol" SelectionChanged="ParamChanged">
+                                    <ComboBoxItem Content="Coluna 1 (Esq.)"/>
+                                    <ComboBoxItem Content="Coluna 2"/>
+                                    <ComboBoxItem Content="Coluna 3"/>
+                                    <ComboBoxItem Content="Coluna 4 (Dir.)"/>
+                                </ComboBox>
+                            </DockPanel>
 
-                        <TextBlock Text="3. Dimensões do Bloco:" FontWeight="Bold" Margin="0,4,0,6"/>
+                            <TextBlock Text="3. Dimensões do Bloco:" FontWeight="Bold" Margin="0,4,0,6"/>
+                            <DockPanel Margin="0,0,0,6">
+                                <TextBlock Text="Largura (Colunas):" VerticalAlignment="Center" Width="95"/>
+                                <ComboBox x:Name="CmbColSpan" SelectionChanged="ParamChanged">
+                                    <ComboBoxItem Content="1 Coluna"/>
+                                    <ComboBoxItem Content="2 Colunas"/>
+                                    <ComboBoxItem Content="3 Colunas"/>
+                                    <ComboBoxItem Content="4 Colunas (Total)"/>
+                                </ComboBox>
+                            </DockPanel>
+                            <DockPanel Margin="0,0,0,8">
+                                <TextBlock Text="Altura (Linhas):" VerticalAlignment="Center" Width="95"/>
+                                <ComboBox x:Name="CmbRowSpan" SelectionChanged="ParamChanged">
+                                    <ComboBoxItem Content="1 Linha"/>
+                                    <ComboBoxItem Content="2 Linhas"/>
+                                    <ComboBoxItem Content="3 Linhas"/>
+                                    <ComboBoxItem Content="4 Linhas (Total)"/>
+                                </ComboBox>
+                            </DockPanel>
+                        </StackPanel>
+                    </ScrollViewer>
+                </Border>
 
-                        <!-- Largura / ColumnSpan (1 a 4) -->
-                        <DockPanel Margin="0,0,0,6">
-                            <TextBlock Text="Largura (Colunas):" VerticalAlignment="Center" Width="95"/>
-                            <ComboBox x:Name="CmbColSpan" SelectionChanged="ParamChanged">
-                                <ComboBoxItem Content="1 Coluna"/>
-                                <ComboBoxItem Content="2 Colunas"/>
-                                <ComboBoxItem Content="3 Colunas"/>
-                                <ComboBoxItem Content="4 Colunas (Total)"/>
-                            </ComboBox>
-                        </DockPanel>
+                <Border Grid.Column="1" Background="{DynamicResource PanelBg}" BorderBrush="{DynamicResource BorderDark}" BorderThickness="1" CornerRadius="8" Padding="12">
+                    <DockPanel>
+                        <TextBlock DockPanel.Dock="Top" Text="Pré-visualização do Ecrã (4 Linhas x 4 Colunas):" FontWeight="Bold" Margin="0,0,0,8"/>
+                        <Grid x:Name="GridPreview" Background="#060A12">
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="*"/>
+                                <RowDefinition Height="*"/>
+                                <RowDefinition Height="*"/>
+                                <RowDefinition Height="*"/>
+                            </Grid.RowDefinitions>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                        </Grid>
+                    </DockPanel>
+                </Border>
+            </Grid>
 
-                        <!-- Altura / RowSpan (1 a 4) -->
-                        <DockPanel Margin="0,0,0,8">
-                            <TextBlock Text="Altura (Linhas):" VerticalAlignment="Center" Width="95"/>
-                            <ComboBox x:Name="CmbRowSpan" SelectionChanged="ParamChanged">
-                                <ComboBoxItem Content="1 Linha"/>
-                                <ComboBoxItem Content="2 Linhas"/>
-                                <ComboBoxItem Content="3 Linhas"/>
-                                <ComboBoxItem Content="4 Linhas (Total)"/>
-                            </ComboBox>
-                        </DockPanel>
-                    </StackPanel>
-                </ScrollViewer>
-            </Border>
-
-            <!-- Pré-visualização da Matriz 4x4 -->
-            <Border Grid.Column="1" Background="{StaticResource PanelBg}" BorderBrush="{StaticResource BorderDark}" BorderThickness="1" CornerRadius="8" Padding="12">
-                <DockPanel>
-                    <TextBlock DockPanel.Dock="Top" Text="Pré-visualização do Ecrã (4 Linhas x 4 Colunas):" FontWeight="Bold" Margin="0,0,0,8"/>
-
-                    <Grid x:Name="GridPreview" Background="#060A12">
-                        <Grid.RowDefinitions>
-                            <RowDefinition Height="*"/>
-                            <RowDefinition Height="*"/>
-                            <RowDefinition Height="*"/>
-                            <RowDefinition Height="*"/>
-                        </Grid.RowDefinitions>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="*"/>
-                        </Grid.ColumnDefinitions>
-                    </Grid>
-                </DockPanel>
-            </Border>
+            <DockPanel Grid.Row="2" Margin="0,14,0,0">
+                <Button Content="Restaurar Padrão" Click="BtnResetDefault_Click" Style="{DynamicResource NavyButton}" DockPanel.Dock="Left"/>
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" DockPanel.Dock="Right">
+                    <Button Content="Cancelar" Click="BtnCancel_Click" Style="{DynamicResource NavyButton}" Margin="0,0,8,0"/>
+                    <Button Content="Guardar e Aplicar" Click="BtnSave_Click" Style="{DynamicResource GoldButton}"/>
+                </StackPanel>
+            </DockPanel>
         </Grid>
-
-        <!-- Botões de Ação -->
-        <DockPanel Grid.Row="3" Margin="0,14,0,0">
-            <Button Content="Restaurar Padrão" Click="BtnResetDefault_Click" Style="{StaticResource NavyButton}" DockPanel.Dock="Left"/>
-            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" DockPanel.Dock="Right">
-                <Button Content="Cancelar" Click="BtnCancel_Click" Style="{StaticResource NavyButton}" Margin="0,0,8,0"/>
-                <Button Content="Guardar e Aplicar Layout" Click="BtnSave_Click" Style="{StaticResource GoldButton}"/>
-            </StackPanel>
-        </DockPanel>
     </Grid>
 </Window>

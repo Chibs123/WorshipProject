@@ -5,21 +5,21 @@ namespace WorshipProjectionApp.Models;
 
 public enum PanelType
 {
-    Resources, // Músicas & Bíblia
-    Schedule,  // Rol do Culto
-    Slides,    // Letras / Slides Ativos
-    Live,       // Em Direto / Monitor
-    WorshipTeam  // Grupo de Louvor & Áudio
+    Resources,
+    Schedule,
+    Slides,
+    Live,
+    WorshipTeam
 }
 
 public class PanelConfig
 {
     public PanelType Type { get; set; }
     public string Title { get; set; } = string.Empty;
-    public int Row { get; set; } = 0;        // Linha inicial: 0 a 3
-    public int Column { get; set; } = 0;     // Coluna inicial: 0 a 3
-    public int RowSpan { get; set; } = 2;    // Altura: 1 a 4
-    public int ColumnSpan { get; set; } = 2; // Largura: 1 a 4
+    public int Row { get; set; } = 0;
+    public int Column { get; set; } = 0;
+    public int RowSpan { get; set; } = 2;
+    public int ColumnSpan { get; set; } = 2;
     public bool IsVisible { get; set; } = true;
 }
 
@@ -35,11 +35,11 @@ public class LayoutSettings
         {
             Panels = new List<PanelConfig>
             {
-                new() { Type = PanelType.Resources, Title = "🎵 Recursos",   Row = 0, Column = 0, RowSpan = 2, ColumnSpan = 2 },
-                new() { Type = PanelType.Schedule,  Title = "📜 Rol Culto",  Row = 0, Column = 2, RowSpan = 2, ColumnSpan = 2 },
-                new() { Type = PanelType.Slides,    Title = "📑 Slides",     Row = 2, Column = 0, RowSpan = 2, ColumnSpan = 2 },
-                new() { Type = PanelType.Live,      Title = "🔴 Em Direto",  Row = 2, Column = 2, RowSpan = 2, ColumnSpan = 2 },
-                new() { Type = PanelType.WorshipTeam, Title = "🎤 Equipa Louvor", Row = 2, Column = 0, RowSpan = 2, ColumnSpan = 2 }
+                new() { Type = PanelType.Resources, Title = "Recursos",   Row = 0, Column = 0, RowSpan = 2, ColumnSpan = 2 },
+                new() { Type = PanelType.Schedule,  Title = "Rol Culto",  Row = 0, Column = 2, RowSpan = 2, ColumnSpan = 2 },
+                new() { Type = PanelType.Slides,    Title = "Slides",     Row = 2, Column = 0, RowSpan = 2, ColumnSpan = 2 },
+                new() { Type = PanelType.Live,      Title = "Em Direto",  Row = 2, Column = 2, RowSpan = 2, ColumnSpan = 2 },
+                new() { Type = PanelType.WorshipTeam, Title = "Equipa Louvor", Row = 2, Column = 0, RowSpan = 2, ColumnSpan = 2 }
             }
         };
     }

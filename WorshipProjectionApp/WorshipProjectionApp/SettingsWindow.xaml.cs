@@ -2,6 +2,7 @@
 using System.Windows;
 using System.Windows.Media;
 using WorshipProjectionApp.Models;
+using Application = System.Windows.Application;
 
 namespace WorshipProjectionApp;
 
@@ -69,6 +70,20 @@ public partial class SettingsWindow : Window
         else if (Settings.FontColorHex == "#E0F2FE") CmbTextColor.SelectedIndex = 2;
         else CmbTextColor.SelectedIndex = 0;
     }
+
+    private void BtnTheme_Click(object sender, RoutedEventArgs e)
+    {
+        if (sender is System.Windows.Controls.Button btn && btn.Background is SolidColorBrush brush)
+        {
+            // Muda a cor da app imediatamente!
+            Application.Current.Resources["AccentColor"] = brush;
+
+            // Guarda para não se esquecer quando fechar a janela
+            Settings.AppThemeColorHex = brush.Color.ToString();
+        }
+    }
+
+    private void BtnClose_Click(object sender, RoutedEventArgs e) => this.Close();
 
     private void SldMargin_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
     {

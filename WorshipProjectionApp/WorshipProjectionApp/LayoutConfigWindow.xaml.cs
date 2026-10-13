@@ -37,6 +37,7 @@ public partial class LayoutConfigWindow : Window
         RenderPreview();
     }
 
+    private void BtnClose_Click(object sender, RoutedEventArgs e) => this.Close();
     private void LstPieces_SelectionChanged(object sender, SelectionChangedEventArgs e)
     {
         if (LstPieces.SelectedItem is PanelConfig panel)

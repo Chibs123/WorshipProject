@@ -19,6 +19,8 @@ public partial class EditTeamMemberWindow : Window
         TxtReturn.Text = member.InEarReturn;
     }
 
+    private void BtnClose_Click(object sender, RoutedEventArgs e) => this.Close();
+
     private void BtnSave_Click(object sender, RoutedEventArgs e)
     {
         if (string.IsNullOrWhiteSpace(TxtName.Text))

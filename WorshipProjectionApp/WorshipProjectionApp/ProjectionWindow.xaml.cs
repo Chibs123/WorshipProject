@@ -20,6 +20,7 @@ public partial class ProjectionWindow : Window
         InitializeComponent();
     }
 
+    private void BtnClose_Click(object sender, RoutedEventArgs e) => this.Close();
     public void UpdateText(string newText)
     {
         if (_isBlackout) return;

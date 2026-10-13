@@ -6,11 +6,15 @@ using System.Windows.Controls;
 using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Media;
+using System.IO;
 using WorshipProjectionApp.Models;
 using WorshipProjectionApp.Services;
 using KeyEventArgs = System.Windows.Input.KeyEventArgs;
 using LayoutSettings = WorshipProjectionApp.Models.LayoutSettings;
+using Point = System.Windows.Point;
 using MessageBox = System.Windows.MessageBox;
+using Color = System.Windows.Media.Color;
+using MouseEventArgs = System.Windows.Input.MouseEventArgs;
 
 namespace WorshipProjectionApp;
 
@@ -22,7 +26,8 @@ public partial class MainWindow : Window
     private static readonly string AutoSavePath = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "autosave_schedule.json");
     private ProjectionSettings _projectionSettings = ProjectionSettings.Load();
     private LayoutSettings _layoutSettings = LayoutSettings.Load();
-
+    private Point _scheduleDragStartPoint;
+    private bool _isSchedulePotentialDrag;
     public ObservableCollection<ScheduleItem> ScheduleItems { get; set; } = new();
     public ObservableCollection<Song> FilteredSongs { get; set; } = new();
     public ObservableCollection<WorshipTeamMember> TeamCatalog { get; set; } = new();
@@ -33,11 +38,14 @@ public partial class MainWindow : Window
     private string? _logoFilePath;
     private ProjectionWindow? _projectionWindow;
     private string? _currentBackgroundPath;
-    private bool _isBlackout;
+    private Point _bibleDragStartPoint;
+    private bool _isBiblePotentialDrag;
     private readonly DatabaseService _dbService = new();
     private readonly BibleService _bibleService = new();
     private readonly BackgroundGalleryService _bgGalleryService = new();
     private List<Song> _allSongs = new();
+
+    private ScheduleItem? _itemToRename; // Guarda o item que está a ser renomeado
 
     public MainWindow()
     {
@@ -50,7 +58,6 @@ public partial class MainWindow : Window
         LstSongs.ItemsSource = FilteredSongs;
         LstSchedule.ItemsSource = ScheduleItems;
         LstActiveTeam.ItemsSource = ActiveTeam;
-        LstBackgrounds.ItemsSource = AvailableBackgrounds;
         LstBackgrounds.ItemsSource = FilteredBackgrounds;
 
         CmbPresetMembers.ItemsSource = TeamCatalog;
@@ -67,22 +74,16 @@ public partial class MainWindow : Window
         {
             Title = "Selecionar ficheiro(s) da Bíblia (SQLite / DB)",
             Filter = "Base de Dados SQLite (*.sqlite;*.db)|*.sqlite;*.db",
-            Multiselect = true // <-- Permite selecionar vários ficheiros de uma vez!
+            Multiselect = true
         };
 
         if (dialog.ShowDialog() == true)
         {
             int successCount = 0;
-
-            // Corre todos os ficheiros selecionados
             foreach (string file in dialog.FileNames)
             {
-                if (_bibleService.ImportBible(file))
-                {
-                    successCount++;
-                }
+                if (_bibleService.ImportBible(file)) successCount++;
             }
-
             LoadBibleVersions();
             MessageBox.Show($"{successCount} Bíblias importadas com sucesso!", "Importação Concluída", MessageBoxButton.OK, MessageBoxImage.Information);
         }
@@ -93,27 +94,19 @@ public partial class MainWindow : Window
         var versions = _bibleService.GetAvailableVersions();
         CmbBibleVersion.ItemsSource = versions;
 
-        if (versions.Count > 0)
-            CmbBibleVersion.SelectedIndex = 0;
-        else
-            CmbBibleVersion.ItemsSource = new List<string> { "Nenhuma Bíblia" };
+        if (versions.Count > 0) CmbBibleVersion.SelectedIndex = 0;
+        else CmbBibleVersion.ItemsSource = new List<string> { "Nenhuma Bíblia" };
     }
 
     private void LoadSampleData()
     {
         _allSongs = _dbService.GetAllSongs();
-
         if (_allSongs.Count == 0)
         {
-            _dbService.InsertSong("Porque Ele Vive", "Bill Gaither",
-                "[Verso 1]\nDeus enviou Seu Filho amado\nPara morrer no meu lugar\nNa cruz pagou por meus pecados\nMas o sepulcro vazio está\n\n[Coro]\nPorque Ele vive, posso crer no amanhã\nPorque Ele vive, temor não há\nMas eu bem sei, eu sei, que a minha vida\nEstá nas mãos do meu Jesus, que vivo está");
-
-            _dbService.InsertSong("Grandioso És Tu", "Stuart K. Hine",
-                "[Verso 1]\nSenhor meu Deus, quando eu maravilhado\nFico a pensar nas obras de Tuas mãos\nNo céu azul de estrelas pontilhado\nO Seu poder mostrando a criação\n\n[Coro]\nEntão a minha alma canta a Ti, Senhor\nGrandioso és Tu, grandioso és Tu!");
-
+            _dbService.InsertSong("Porque Ele Vive", "Bill Gaither", "[Verso 1]\nDeus enviou Seu Filho amado\nPara morrer no meu lugar\nNa cruz pagou por meus pecados\nMas o sepulcro vazio está\n\n[Coro]\nPorque Ele vive, posso crer no amanhã");
+            _dbService.InsertSong("Grandioso És Tu", "Stuart K. Hine", "[Verso 1]\nSenhor meu Deus, quando eu maravilhado\nFico a pensar nas obras de Tuas mãos\nNo céu azul de estrelas pontilhado\nO Seu poder mostrando a criação");
             _allSongs = _dbService.GetAllSongs();
         }
-
         UpdateSongFilter(string.Empty);
     }
 
@@ -122,11 +115,9 @@ public partial class MainWindow : Window
         var catalog = WorshipTeamCatalog.LoadCatalog();
         TeamCatalog.Clear();
         foreach (var c in catalog) TeamCatalog.Add(c);
-
         if (ActiveTeam.Count == 0 && TeamCatalog.Count >= 2)
         {
             ActiveTeam.Add(new WorshipTeamMember { Name = TeamCatalog[0].Name, Role = TeamCatalog[0].Role, Microphone = TeamCatalog[0].Microphone, InEarReturn = TeamCatalog[0].InEarReturn });
-            ActiveTeam.Add(new WorshipTeamMember { Name = TeamCatalog[1].Name, Role = TeamCatalog[1].Role, Microphone = TeamCatalog[1].Microphone, InEarReturn = TeamCatalog[1].InEarReturn });
         }
     }
 
@@ -135,30 +126,18 @@ public partial class MainWindow : Window
         var dlg = new AlertWindow { Owner = this };
         if (dlg.ShowDialog() == true)
         {
-            if (dlg.ShouldHide)
-            {
-                _projectionWindow?.HideAlert();
-            }
-            else
-            {
-                _projectionWindow?.ShowAlert(dlg.MessageText, dlg.ShowClock, dlg.CountdownMinutes);
-            }
+            if (dlg.ShouldHide) _projectionWindow?.HideAlert();
+            else _projectionWindow?.ShowAlert(dlg.MessageText, dlg.ShowClock, dlg.CountdownMinutes);
         }
     }
 
     private void LoadBackgroundGallery()
     {
         AvailableBackgrounds.Clear();
-        foreach (var bg in _bgGalleryService.GetBackgrounds())
-        {
-            AvailableBackgrounds.Add(bg);
-        }
+        foreach (var bg in _bgGalleryService.GetBackgrounds()) AvailableBackgrounds.Add(bg);
         ApplyBackgroundFilter();
     }
 
-    // ---------------------------------------------------------
-    // CRIAÇÃO E EDIÇÃO DE CANÇÕES
-    // ---------------------------------------------------------
     private void BtnNewSong_Click(object sender, RoutedEventArgs e)
     {
         var editor = new SongEditorWindow { Owner = this };
@@ -170,8 +149,21 @@ public partial class MainWindow : Window
         }
     }
 
+    private void BtnEditSong_Click(object sender, RoutedEventArgs e)
+    {
+        if (LstSongs.SelectedItem is Song selectedSong)
+        {
+            var editor = new SongEditorWindow(selectedSong) { Owner = this };
+            if (editor.ShowDialog() == true && editor.ResultSong != null)
+            {
+                _allSongs = _dbService.GetAllSongs();
+                UpdateSongFilter(TxtSearchSong.Text);
+            }
+        }
+    }
+
     // ---------------------------------------------------------
-    // DRAG & DROP (MÚSICAS, BÍBLIA E REORDENAÇÃO)
+    // DRAG & DROP DAS MÚSICAS PARA A PROGRAMAÇÃO
     // ---------------------------------------------------------
     private void LstSongs_PreviewMouseMove(object sender, System.Windows.Input.MouseEventArgs e)
     {
@@ -181,91 +173,101 @@ public partial class MainWindow : Window
             {
                 Title = selectedSong.Title,
                 Subtitle = string.IsNullOrWhiteSpace(selectedSong.Artist) ? "Música" : selectedSong.Artist,
+                ItemTypeIcon = "🎵",
                 Slides = selectedSong.ParseSlides()
             };
-
             StartDrag(LstSongs, item);
         }
     }
-
-
 
     private void ApplyBackgroundFilter()
     {
         FilteredBackgrounds.Clear();
         var list = AvailableBackgrounds.AsEnumerable();
 
-        if (RbFilterVideos?.IsChecked == true)
-        {
-            list = list.Where(b => b.IsVideo);
-        }
-        else if (RbFilterImages?.IsChecked == true)
-        {
-            list = list.Where(b => !b.IsVideo);
-        }
+        if (RbFilterVideos?.IsChecked == true) list = list.Where(b => b.IsVideo);
+        else if (RbFilterImages?.IsChecked == true) list = list.Where(b => !b.IsVideo);
 
-        foreach (var item in list)
-        {
-            FilteredBackgrounds.Add(item);
-        }
+        foreach (var item in list) FilteredBackgrounds.Add(item);
     }
 
-    private void BgFilter_Changed(object sender, RoutedEventArgs e)
-    {
-        ApplyBackgroundFilter();
-    }
+    private void BgFilter_Changed(object sender, RoutedEventArgs e) => ApplyBackgroundFilter();
 
-    private void LstBibleResults_PreviewMouseMove(object sender, System.Windows.Input.MouseEventArgs e)
-    {
-        if (e.LeftButton == MouseButtonState.Pressed && LstBibleResults.SelectedItem is BibleVerse verse)
-        {
-            var item = new ScheduleItem
-            {
-                Title = verse.Reference,
-                Subtitle = "Passagem Bíblica",
-                Slides = new List<SlideItem> { verse.ToSlideItem() }
-            };
-
-            StartDrag(LstBibleResults, item);
-        }
-    }
-
+    // ---------------------------------------------------------
+    // EVENTOS DE DRAG & DROP DA PROGRAMAÇÃO (SCHEDULE)
+    // ---------------------------------------------------------
     private void LstSchedule_DragOver(object sender, System.Windows.DragEventArgs e)
     {
-        if (e.Data.GetDataPresent(typeof(ScheduleItem)))
-        {
-            e.Effects = System.Windows.DragDropEffects.Copy;
-        }
-        else
-        {
-            e.Effects = System.Windows.DragDropEffects.None;
-        }
+        if (e.Data.GetDataPresent(typeof(ScheduleItem))) e.Effects = System.Windows.DragDropEffects.Move;
+        else e.Effects = System.Windows.DragDropEffects.None;
         e.Handled = true;
+    }
+
+    private void LstSchedule_PreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+    {
+        // Grava a posição exata onde o clique começou
+        _scheduleDragStartPoint = e.GetPosition(null);
+        _isSchedulePotentialDrag = true;
+    }
+
+    private void LstSchedule_PreviewMouseMove(object sender, System.Windows.Input.MouseEventArgs e)
+    {
+        if (e.LeftButton == MouseButtonState.Pressed && _isSchedulePotentialDrag && LstSchedule.SelectedItem is ScheduleItem item)
+        {
+            Point mousePos = e.GetPosition(null);
+            Vector diff = _scheduleDragStartPoint - mousePos;
+
+            // Só ativa o arrasto se o rato se mover uma distância real (evita falsos arrastos no clique)
+            if (Math.Abs(diff.X) > SystemParameters.MinimumHorizontalDragDistance ||
+                Math.Abs(diff.Y) > SystemParameters.MinimumVerticalDragDistance)
+            {
+                _isSchedulePotentialDrag = false;
+                DragDrop.DoDragDrop(LstSchedule, item, System.Windows.DragDropEffects.Move);
+            }
+        }
+    }
+
+    private void LstSchedule_PreviewMouseLeftButtonUp(object sender, MouseButtonEventArgs e)
+    {
+        _isSchedulePotentialDrag = false;
     }
 
     private void LstSchedule_Drop(object sender, System.Windows.DragEventArgs e)
     {
         if (e.Data.GetData(typeof(ScheduleItem)) is ScheduleItem item)
         {
-            // Se já existe na lista, move para o fim ou para o ponto de soltura
-            if (ScheduleItems.Contains(item))
+            int removeIndex = ScheduleItems.IndexOf(item);
+            int dropIndex = -1;
+
+            // Descobre em cima de que item o operador largou o cartão para inserir no local correto
+            if (e.OriginalSource is FrameworkElement fe && fe.DataContext is ScheduleItem targetItem)
             {
-                ScheduleItems.Remove(item);
+                dropIndex = ScheduleItems.IndexOf(targetItem);
             }
 
-            ScheduleItems.Add(item);
+            if (removeIndex != -1) // Reordenação (vem da própria lista)
+            {
+                // O WPF tem um método perfeito para isto (Move), garante que não há duplicações!
+                if (dropIndex != -1 && dropIndex != removeIndex)
+                {
+                    ScheduleItems.Move(removeIndex, dropIndex);
+                }
+                else if (dropIndex == -1) // Se largou no fundo vazio da lista
+                {
+                    ScheduleItems.Move(removeIndex, ScheduleItems.Count - 1);
+                }
+            }
+            else // Novo Item (vem das Músicas ou Bíblia)
+            {
+                if (dropIndex != -1) ScheduleItems.Insert(dropIndex, item);
+                else ScheduleItems.Add(item);
+            }
+
             LstSchedule.SelectedItem = item;
             SaveCurrentSession();
         }
     }
 
-    private void LstSchedule_PreviewMouseMove(object sender, System.Windows.Input.MouseEventArgs e)
-    {
-        if (e.LeftButton == MouseButtonState.Pressed && LstSchedule.SelectedItem is ScheduleItem item)
-        {
-            DragDrop.DoDragDrop(LstSchedule, item, System.Windows.DragDropEffects.Move);
-        }
-    }
 
     // ---------------------------------------------------------
     // GALERIA DE FUNDOS VISUAIS
@@ -281,14 +283,17 @@ public partial class MainWindow : Window
 
         if (dialog.ShowDialog() == true)
         {
+            bool addedNew = false;
             foreach (string file in dialog.FileNames)
             {
                 var imported = _bgGalleryService.ImportFile(file);
                 if (imported != null && !AvailableBackgrounds.Any(b => b.FilePath.Equals(imported.FilePath, StringComparison.OrdinalIgnoreCase)))
                 {
                     AvailableBackgrounds.Add(imported);
+                    addedNew = true;
                 }
             }
+            if (addedNew) ApplyBackgroundFilter();
         }
     }
 
@@ -297,15 +302,34 @@ public partial class MainWindow : Window
         if (e.Data.GetDataPresent(System.Windows.DataFormats.FileDrop))
         {
             string[] files = (string[])e.Data.GetData(System.Windows.DataFormats.FileDrop);
+            bool addedNew = false;
+
             foreach (string file in files)
             {
                 var imported = _bgGalleryService.ImportFile(file);
                 if (imported != null && !AvailableBackgrounds.Any(b => b.FilePath.Equals(imported.FilePath, StringComparison.OrdinalIgnoreCase)))
                 {
                     AvailableBackgrounds.Add(imported);
+                    addedNew = true;
                 }
             }
+            if (addedNew) ApplyBackgroundFilter();
         }
+    }
+
+    private void BackgroundItem_MouseEnter(object sender, MouseEventArgs e)
+    {
+        // HOVER PREVIEW: Mostra no ecrã de preview interno (mas não no Live)
+        if (sender is FrameworkElement el && el.DataContext is MediaBackground bg)
+        {
+            SetPreviewMediaBackground(bg.FilePath);
+        }
+    }
+
+    private void BackgroundItem_MouseLeave(object sender, MouseEventArgs e)
+    {
+        // Restaura a miniatura do fundo que está efetivamente selecionado
+        SetPreviewMediaBackground(_currentBackgroundPath);
     }
 
     private void LstBackgrounds_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -315,7 +339,6 @@ public partial class MainWindow : Window
             _currentBackgroundPath = bg.FilePath;
             SetPreviewMediaBackground(_currentBackgroundPath);
 
-            // Se o logo estiver ativo, não mudamos o background do projetor!
             if (_projectionWindow != null && _currentMode != ProjectionMode.Logo)
             {
                 _projectionWindow.SetMediaBackground(_currentBackgroundPath);
@@ -340,13 +363,7 @@ public partial class MainWindow : Window
         {
             if (!ActiveTeam.Any(m => m.Name.Equals(member.Name, StringComparison.OrdinalIgnoreCase)))
             {
-                ActiveTeam.Add(new WorshipTeamMember
-                {
-                    Name = member.Name,
-                    Microphone = member.Microphone,
-                    InEarReturn = member.InEarReturn,
-                    Role = member.Role
-                });
+                ActiveTeam.Add(new WorshipTeamMember { Name = member.Name, Microphone = member.Microphone, InEarReturn = member.InEarReturn, Role = member.Role });
             }
         }
     }
@@ -354,37 +371,18 @@ public partial class MainWindow : Window
     private void BtnEditTeamMember_Click(object sender, RoutedEventArgs e)
     {
         e.Handled = true;
-
         WorshipTeamMember? member = null;
-
-        if (sender is FrameworkElement element)
-        {
-            member = element.DataContext as WorshipTeamMember;
-        }
-
+        if (sender is FrameworkElement element) member = element.DataContext as WorshipTeamMember;
         if (member == null) return;
 
         var editDialog = new EditTeamMemberWindow(member) { Owner = this };
-
         if (editDialog.ShowDialog() == true)
         {
-            if (editDialog.IsDeleted)
-            {
-                ActiveTeam.Remove(member);
-            }
+            if (editDialog.IsDeleted) ActiveTeam.Remove(member);
             else
             {
                 int index = ActiveTeam.IndexOf(member);
-                if (index >= 0)
-                {
-                    ActiveTeam[index] = new WorshipTeamMember
-                    {
-                        Name = editDialog.Member.Name,
-                        Role = editDialog.Member.Role,
-                        Microphone = editDialog.Member.Microphone,
-                        InEarReturn = editDialog.Member.InEarReturn
-                    };
-                }
+                if (index >= 0) ActiveTeam[index] = new WorshipTeamMember { Name = editDialog.Member.Name, Role = editDialog.Member.Role, Microphone = editDialog.Member.Microphone, InEarReturn = editDialog.Member.InEarReturn };
             }
         }
     }
@@ -427,69 +425,33 @@ public partial class MainWindow : Window
         }
     }
 
-    private void BtnOpenBackgroundsFolder_Click(object sender, RoutedEventArgs e)
-    {
-        try
-        {
-            string backgroundsFolder = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Backgrounds");
-
-            if (!System.IO.Directory.Exists(backgroundsFolder))
-            {
-                System.IO.Directory.CreateDirectory(backgroundsFolder);
-            }
-
-            System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo()
-            {
-                FileName = backgroundsFolder,
-                UseShellExecute = true,
-                Verb = "open"
-            });
-        }
-        catch (Exception ex)
-        {
-            System.Windows.MessageBox.Show($"Erro ao abrir a pasta: {ex.Message}", "Erro");
-        }
-    }
-
     private void BtnOpenSettings_Click(object sender, RoutedEventArgs e)
     {
-        var settingsWindow = new SettingsWindow(_projectionSettings);
+        var settingsWindow = new SettingsWindow(_projectionSettings) { Owner = this };
         if (settingsWindow.ShowDialog() == true)
         {
             _projectionSettings = settingsWindow.Settings;
             _projectionWindow?.ApplySettings(_projectionSettings);
-
-            // Força a janela a saltar para o novo monitor se o utilizador trocou de ecrã!
             OpenProjectionWindow();
         }
     }
 
     private void SaveCurrentSession()
     {
-        try
-        {
-            var options = new JsonSerializerOptions { WriteIndented = true };
-            string json = JsonSerializer.Serialize(ScheduleItems, options);
-            System.IO.File.WriteAllText(AutoSavePath, json);
-        }
-        catch { }
+        try { File.WriteAllText(AutoSavePath, JsonSerializer.Serialize(ScheduleItems, new JsonSerializerOptions { WriteIndented = true })); } catch { }
     }
 
     private void RestoreLastSession()
     {
         try
         {
-            if (System.IO.File.Exists(AutoSavePath))
+            if (File.Exists(AutoSavePath))
             {
-                string json = System.IO.File.ReadAllText(AutoSavePath);
-                var items = JsonSerializer.Deserialize<List<ScheduleItem>>(json);
+                var items = JsonSerializer.Deserialize<List<ScheduleItem>>(File.ReadAllText(AutoSavePath));
                 if (items != null && items.Count > 0)
                 {
                     ScheduleItems.Clear();
-                    foreach (var item in items)
-                    {
-                        ScheduleItems.Add(item);
-                    }
+                    foreach (var item in items) ScheduleItems.Add(item);
                     LstSchedule.SelectedIndex = 0;
                 }
             }
@@ -497,20 +459,100 @@ public partial class MainWindow : Window
         catch { }
     }
 
+    // ---------------------------------------------------------
+    // BÍBLIA INTELIGENTE
+    // ---------------------------------------------------------
     private void TxtSearchBible_KeyDown(object sender, System.Windows.Input.KeyEventArgs e)
     {
         if (e.Key == System.Windows.Input.Key.Enter)
         {
             string version = CmbBibleVersion.SelectedItem?.ToString() ?? "";
-
-            if (version == "Nenhuma Bíblia" || string.IsNullOrEmpty(version))
-                return;
+            if (version == "Nenhuma Bíblia" || string.IsNullOrEmpty(version)) return;
 
             var results = _bibleService.Search(TxtSearchBible.Text, version);
             LstBibleResults.ItemsSource = results;
+
             if (results.Count > 0)
             {
-                LstBibleResults.SelectedIndex = 0;
+                if (TxtSearchBible.Text.Contains("-")) LstBibleResults.SelectAll();
+                else LstBibleResults.SelectedIndex = 0;
+
+                // Foco Automático para não precisares de clicar com o rato
+                Keyboard.ClearFocus();
+                LstBibleResults.Focus();
+            }
+        }
+    }
+
+    private void LstBibleResults_PreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+    {
+        _bibleDragStartPoint = e.GetPosition(null);
+        var item = ItemsControl.ContainerFromElement(LstBibleResults, e.OriginalSource as DependencyObject) as ListBoxItem;
+
+        if (item != null && item.IsSelected)
+        {
+            _isBiblePotentialDrag = true;
+            e.Handled = true;
+        }
+        else _isBiblePotentialDrag = false;
+    }
+
+    private void LstBibleResults_PreviewMouseMove(object sender, System.Windows.Input.MouseEventArgs e)
+    {
+        if (e.LeftButton == MouseButtonState.Pressed && _isBiblePotentialDrag && LstBibleResults.SelectedItems.Count > 0)
+        {
+            Point mousePos = e.GetPosition(null);
+            Vector diff = _bibleDragStartPoint - mousePos;
+
+            if (Math.Abs(diff.X) > SystemParameters.MinimumHorizontalDragDistance || Math.Abs(diff.Y) > SystemParameters.MinimumVerticalDragDistance)
+            {
+                _isBiblePotentialDrag = false;
+                var selectedVerses = LstBibleResults.SelectedItems.Cast<BibleVerse>().ToList();
+
+                if (selectedVerses.Count == 1)
+                {
+                    var verse = selectedVerses[0];
+                    var item = new ScheduleItem
+                    {
+                        Title = verse.Reference,
+                        Subtitle = "Passagem Bíblica",
+                        ItemTypeIcon = "📖",
+                        Slides = new List<SlideItem> { verse.ToSlideItem() }
+                    };
+                    StartDrag(LstBibleResults, item);
+                }
+                else
+                {
+                    var firstVerse = selectedVerses.First();
+                    var lastVerse = selectedVerses.Last();
+                    string titleRange = $"{firstVerse.Reference} a {lastVerse.Reference}";
+
+                    var slides = new List<SlideItem>();
+                    foreach (var verse in selectedVerses) slides.Add(verse.ToSlideItem());
+
+                    var item = new ScheduleItem
+                    {
+                        Title = titleRange,
+                        Subtitle = $"Leitura Bíblica ({selectedVerses.Count} versículos)",
+                        ItemTypeIcon = "📖",
+                        Slides = slides
+                    };
+                    StartDrag(LstBibleResults, item);
+                }
+            }
+        }
+    }
+
+    private void LstBibleResults_PreviewMouseLeftButtonUp(object sender, MouseButtonEventArgs e)
+    {
+        if (_isBiblePotentialDrag)
+        {
+            _isBiblePotentialDrag = false;
+            var item = ItemsControl.ContainerFromElement(LstBibleResults, e.OriginalSource as DependencyObject) as ListBoxItem;
+            if (item != null)
+            {
+                LstBibleResults.SelectedItems.Clear();
+                item.IsSelected = true;
             }
         }
     }
@@ -519,143 +561,162 @@ public partial class MainWindow : Window
     {
         if (!string.IsNullOrWhiteSpace(TxtSearchBible?.Text))
         {
-            // Força a pesquisa novamente se mudares de ARC para NVI, por exemplo
             TxtSearchBible_KeyDown(TxtSearchBible, new System.Windows.Input.KeyEventArgs(Keyboard.PrimaryDevice, Keyboard.PrimaryDevice.ActiveSource, 0, Key.Enter) { RoutedEvent = Keyboard.KeyDownEvent });
         }
     }
 
     private void LstBibleResults_SelectionChanged(object sender, SelectionChangedEventArgs e)
     {
-        if (LstBibleResults.SelectedItem is BibleVerse verse)
+        if (LstBibleResults.SelectedItems.Count > 0 && LstBibleResults.SelectedItems[0] is BibleVerse verse)
         {
             TxtSelectedSongTitle.Text = verse.Reference;
-
             var slide = verse.ToSlideItem();
             LstSlides.ItemsSource = new List<SlideItem> { slide };
             LstSlides.SelectedIndex = 0;
-
             SendToProjection(slide.Content);
         }
     }
 
+    // ---------------------------------------------------------
+    // LÓGICA DE APRESENTAÇÃO E "LIVE"
+    // ---------------------------------------------------------
     private void LstSchedule_SelectionChanged(object sender, SelectionChangedEventArgs e)
     {
         if (LstSchedule.SelectedItem is ScheduleItem item)
         {
             TxtSelectedSongTitle.Text = item.Title;
             LstSlides.ItemsSource = item.Slides;
-            if (item.Slides.Count > 0)
-            {
-                LstSlides.SelectedIndex = 0;
-            }
+            if (item.Slides.Count > 0) LstSlides.SelectedIndex = 0;
+
+            // Borda Ativa Dinâmica
+            foreach (var sch in ScheduleItems) sch.IsActive = (sch == item);
         }
     }
 
-    private void BtnNextSlide_Click(object sender, RoutedEventArgs e)
+    private void LstSchedule_MouseDoubleClick(object sender, MouseButtonEventArgs e)
     {
-        NextSlide();
-    }
-
-    private void BtnPrevSlide_Click(object sender, RoutedEventArgs e)
-    {
-        PrevSlide();
-    }
-
-    private void NextSlide()
-    {
-        if (LstSlides.Items.Count == 0) return;
-
-        if (LstSlides.SelectedIndex < LstSlides.Items.Count - 1)
+        // Duplo clique entra em Modo LIVE imediatamente
+        if (LstSchedule.SelectedItem is ScheduleItem)
         {
-            LstSlides.SelectedIndex++;
-        }
-        else
-        {
-            if (LstSchedule.SelectedIndex < LstSchedule.Items.Count - 1)
-            {
-                LstSchedule.SelectedIndex++;
-            }
+            SetProjectionMode(ProjectionMode.Live);
         }
     }
 
-    private void PrevSlide()
+    // ---------------------------------------------------------
+    // GRAVAR, CARREGAR, LIMPAR E RENOMEAR O CULTO
+    // ---------------------------------------------------------
+    private void MenuRenameScheduleItem_Click(object sender, RoutedEventArgs e)
     {
-        if (LstSlides.Items.Count == 0) return;
-
-        if (LstSlides.SelectedIndex > 0)
+        if (sender is MenuItem menuItem && menuItem.DataContext is ScheduleItem item)
         {
-            LstSlides.SelectedIndex--;
-        }
-        else
-        {
-            if (LstSchedule.SelectedIndex > 0)
-            {
-                LstSchedule.SelectedIndex--;
-                LstSlides.SelectedIndex = LstSlides.Items.Count - 1;
-            }
+            _itemToRename = item;
+            TxtRenameItem.Text = item.Title;
+            OverlayRename.Visibility = Visibility.Visible;
+            TxtRenameItem.Focus();
+            TxtRenameItem.SelectAll();
         }
     }
 
-    private void BtnImportEasyWorship_Click(object sender, RoutedEventArgs e)
+    private void BtnSaveRename_Click(object sender, RoutedEventArgs e)
     {
-        var dialog = new Microsoft.Win32.OpenFileDialog
+        if (_itemToRename != null && !string.IsNullOrWhiteSpace(TxtRenameItem.Text))
         {
-            Title = "Selecionar ficheiro Songs.db do EasyWorship",
-            Filter = "Base de Dados EasyWorship (Songs.db)|Songs.db|Ficheiros DB (*.db)|*.db",
-            InitialDirectory = @"C:\ProgramData\Softouch\Easyworship.v7\Databases\Data"
-        };
+            _itemToRename.Title = TxtRenameItem.Text;
+            SaveCurrentSession();
+        }
+        OverlayRename.Visibility = Visibility.Collapsed;
+        _itemToRename = null;
+    }
 
+    private void BtnCancelRename_Click(object sender, RoutedEventArgs e)
+    {
+        OverlayRename.Visibility = Visibility.Collapsed;
+        _itemToRename = null;
+    }
+
+    private void TxtRenameItem_KeyDown(object sender, KeyEventArgs e)
+    {
+        if (e.Key == Key.Enter) BtnSaveRename_Click(sender, e);
+        else if (e.Key == Key.Escape) BtnCancelRename_Click(sender, e);
+    }
+
+    private void BtnScheduleClearAll_Click(object sender, RoutedEventArgs e)
+    {
+        if (MessageBox.Show("Tem a certeza que deseja limpar toda a programação do culto?", "Limpar Culto", MessageBoxButton.YesNo, MessageBoxImage.Warning) == MessageBoxResult.Yes)
+        {
+            ScheduleItems.Clear();
+            LstSlides.ItemsSource = null;
+            TxtSelectedSongTitle.Text = "Nenhum item selecionado";
+            SaveCurrentSession();
+        }
+    }
+
+    private void BtnSavePlaylist_Click(object sender, RoutedEventArgs e)
+    {
+        var dialog = new Microsoft.Win32.SaveFileDialog { Title = "Gravar Culto", Filter = "Playlist (*.json)|*.json", FileName = "Culto_Domingo.json" };
+        if (dialog.ShowDialog() == true)
+        {
+            try { File.WriteAllText(dialog.FileName, JsonSerializer.Serialize(ScheduleItems, new JsonSerializerOptions { WriteIndented = true })); } catch { }
+        }
+    }
+
+    private void BtnLoadPlaylist_Click(object sender, RoutedEventArgs e)
+    {
+        var dialog = new Microsoft.Win32.OpenFileDialog { Title = "Abrir Culto", Filter = "Playlist (*.json)|*.json" };
         if (dialog.ShowDialog() == true)
         {
             try
             {
-                var imported = EasyWorshipImporter.ImportFromEasyWorshipSqlite(dialog.FileName);
-                if (imported.Count > 0)
+                var items = JsonSerializer.Deserialize<List<ScheduleItem>>(File.ReadAllText(dialog.FileName));
+                if (items != null)
                 {
-                    _dbService.InsertBatch(imported);
-                    _allSongs = _dbService.GetAllSongs();
-                    UpdateSongFilter(string.Empty);
+                    ScheduleItems.Clear();
+                    foreach (var item in items) ScheduleItems.Add(item);
+                }
+            }
+            catch { MessageBox.Show("Erro ao carregar o culto."); }
+        }
+    }
 
-                    System.Windows.MessageBox.Show(
-                        $"{imported.Count} músicas importadas com sucesso!",
-                        "Importação Concluída",
-                        MessageBoxButton.OK,
-                        MessageBoxImage.Information);
-                }
-                else
-                {
-                    System.Windows.MessageBox.Show(
-                        "Nenhuma música encontrada no ficheiro selecionado.",
-                        "Aviso",
-                        MessageBoxButton.OK,
-                        MessageBoxImage.Warning);
-                }
-            }
-            catch (Exception ex)
-            {
-                System.Windows.MessageBox.Show(
-                    $"Erro ao importar: {ex.Message}",
-                    "Erro",
-                    MessageBoxButton.OK,
-                    MessageBoxImage.Error);
-            }
+    // ---------------------------------------------------------
+    // OUTRAS FUNÇÕES DA PROGRAMAÇÃO E SLIDES
+    // ---------------------------------------------------------
+    private void BtnScheduleMoveUp_Click(object sender, RoutedEventArgs e)
+    {
+        int idx = LstSchedule.SelectedIndex;
+        if (idx > 0) { var i = ScheduleItems[idx]; ScheduleItems.RemoveAt(idx); ScheduleItems.Insert(idx - 1, i); LstSchedule.SelectedIndex = idx - 1; SaveCurrentSession(); }
+    }
+
+    private void BtnScheduleMoveDown_Click(object sender, RoutedEventArgs e)
+    {
+        int idx = LstSchedule.SelectedIndex;
+        if (idx >= 0 && idx < ScheduleItems.Count - 1) { var i = ScheduleItems[idx]; ScheduleItems.RemoveAt(idx); ScheduleItems.Insert(idx + 1, i); LstSchedule.SelectedIndex = idx + 1; SaveCurrentSession(); }
+    }
+
+    private void BtnScheduleRemove_Click(object sender, RoutedEventArgs e) { RemoveSelectedScheduleItem(); }
+
+    private void LstSchedule_KeyDown(object sender, KeyEventArgs e) { if (e.Key == Key.Delete || e.Key == Key.Back) { RemoveSelectedScheduleItem(); e.Handled = true; } }
+
+    private void RemoveSelectedScheduleItem()
+    {
+        int idx = LstSchedule.SelectedIndex;
+        if (idx >= 0)
+        {
+            ScheduleItems.RemoveAt(idx);
+            SaveCurrentSession();
+            if (ScheduleItems.Count > 0) LstSchedule.SelectedIndex = Math.Min(idx, ScheduleItems.Count - 1);
+            else { TxtSelectedSongTitle.Text = "Nenhum item selecionado"; LstSlides.ItemsSource = null; }
         }
     }
 
     private void UpdateSongFilter(string query)
     {
         FilteredSongs.Clear();
-        var matches = string.IsNullOrWhiteSpace(query)
-            ? _allSongs
-            : _allSongs.Where(s => s.Title.Contains(query, StringComparison.OrdinalIgnoreCase));
-
+        var matches = string.IsNullOrWhiteSpace(query) ? _allSongs : _allSongs.Where(s => s.Title.Contains(query, StringComparison.OrdinalIgnoreCase));
         foreach (var song in matches) FilteredSongs.Add(song);
     }
 
-    private void TxtSearchSong_TextChanged(object sender, TextChangedEventArgs e)
-    {
-        UpdateSongFilter(TxtSearchSong.Text);
-    }
+    private void TxtSearchSong_TextChanged(object sender, TextChangedEventArgs e) => UpdateSongFilter(TxtSearchSong.Text);
 
     private void LstSongs_SelectionChanged(object sender, SelectionChangedEventArgs e)
     {
@@ -663,30 +724,19 @@ public partial class MainWindow : Window
         {
             TxtSelectedSongTitle.Text = selectedSong.Title;
             LstSlides.ItemsSource = selectedSong.ParseSlides();
-            if (LstSlides.Items.Count > 0)
-            {
-                LstSlides.SelectedIndex = 0;
-            }
+            if (LstSlides.Items.Count > 0) LstSlides.SelectedIndex = 0;
         }
     }
 
     private void LstSlides_SelectionChanged(object sender, SelectionChangedEventArgs e)
     {
-        if (LstSlides.SelectedItem is SlideItem slide)
-        {
-            SendToProjection(slide.Content);
-        }
+        if (LstSlides.SelectedItem is SlideItem slide) SendToProjection(slide.Content);
     }
 
     private void SendToProjection(string text)
     {
         TxtPreview.Text = text;
-
-        // Só envia texto se o modo estiver a LIVE
-        if (_projectionWindow != null && _currentMode == ProjectionMode.Live)
-        {
-            _projectionWindow.UpdateText(text);
-        }
+        if (_projectionWindow != null && _currentMode == ProjectionMode.Live) _projectionWindow.UpdateText(text);
     }
 
     // ---------------------------------------------------------
@@ -698,64 +748,49 @@ public partial class MainWindow : Window
 
     private void MenuSetLogo_Click(object sender, RoutedEventArgs e)
     {
-        var dialog = new Microsoft.Win32.OpenFileDialog
-        {
-            Title = "Selecionar Ficheiro do Logo",
-            Filter = "Imagens/Vídeos (*.jpg;*.png;*.mp4)|*.jpg;*.jpeg;*.png;*.mp4;*.mov"
-        };
+        var dialog = new Microsoft.Win32.OpenFileDialog { Title = "Selecionar Ficheiro do Logo", Filter = "Imagens/Vídeos (*.jpg;*.png;*.mp4)|*.jpg;*.jpeg;*.png;*.mp4;*.mov" };
         if (dialog.ShowDialog() == true)
         {
             _logoFilePath = dialog.FileName;
-            if (_currentMode == ProjectionMode.Logo)
-            {
-                SetProjectionMode(ProjectionMode.Logo); // Recarrega o logo se já estiver no modo Logo
-            }
+            if (_currentMode == ProjectionMode.Logo) SetProjectionMode(ProjectionMode.Logo);
         }
     }
 
     private void SetProjectionMode(ProjectionMode mode)
     {
-        OpenProjectionWindow(); // Garante que o projetor está ligado
+        OpenProjectionWindow();
         _currentMode = mode;
 
-        // 1. Atualizar visual dos botões no topo (O ativo fica a Ouro, os outros a Azul Escuro)
         BtnModeLogo.Style = (Style)FindResource(mode == ProjectionMode.Logo ? "GoldButton" : "NavyButton");
         BtnModeClear.Style = (Style)FindResource(mode == ProjectionMode.Clear ? "GoldButton" : "NavyButton");
         BtnModeLive.Style = (Style)FindResource(mode == ProjectionMode.Live ? "GoldButton" : "NavyButton");
 
-        // 2. Controlar Cores e Ações no Projetor e no Em Direto
         if (mode == ProjectionMode.Live)
         {
-            // VERDE - Estamos a transmitir Letra + Fundo
-            BadgeLiveDot.Fill = new SolidColorBrush(System.Windows.Media.Color.FromRgb(16, 185, 129));
-            BadgeLiveText.Foreground = new SolidColorBrush(System.Windows.Media.Color.FromRgb(16, 185, 129));
-            BadgeLiveBorder.BorderBrush = new SolidColorBrush(System.Windows.Media.Color.FromArgb(51, 16, 185, 129));
+            BadgeLiveDot.Fill = new SolidColorBrush(Color.FromRgb(16, 185, 129));
+            BadgeLiveText.Foreground = new SolidColorBrush(Color.FromRgb(16, 185, 129));
+            BadgeLiveBorder.BorderBrush = new SolidColorBrush(Color.FromArgb(51, 16, 185, 129));
             BadgeLiveText.Text = "EM DIRETO";
-
             _projectionWindow?.SetBlackout(false);
             _projectionWindow?.SetMediaBackground(_currentBackgroundPath);
             _projectionWindow?.UpdateText(TxtPreview.Text);
         }
         else if (mode == ProjectionMode.Clear)
         {
-            // VERMELHO - Fundo mantém-se, mas texto apagado
-            BadgeLiveDot.Fill = new SolidColorBrush(System.Windows.Media.Color.FromRgb(239, 68, 68));
-            BadgeLiveText.Foreground = new SolidColorBrush(System.Windows.Media.Color.FromRgb(239, 68, 68));
-            BadgeLiveBorder.BorderBrush = new SolidColorBrush(System.Windows.Media.Color.FromArgb(51, 239, 68, 68));
+            BadgeLiveDot.Fill = new SolidColorBrush(Color.FromRgb(239, 68, 68));
+            BadgeLiveText.Foreground = new SolidColorBrush(Color.FromRgb(239, 68, 68));
+            BadgeLiveBorder.BorderBrush = new SolidColorBrush(Color.FromArgb(51, 239, 68, 68));
             BadgeLiveText.Text = "SÓ FUNDO (CLEAR)";
-
             _projectionWindow?.SetBlackout(false);
             _projectionWindow?.SetMediaBackground(_currentBackgroundPath);
             _projectionWindow?.ClearScreen();
         }
         else if (mode == ProjectionMode.Logo)
         {
-            // VERMELHO - Corta tudo e põe a imagem/vídeo do Logo
-            BadgeLiveDot.Fill = new SolidColorBrush(System.Windows.Media.Color.FromRgb(239, 68, 68));
-            BadgeLiveText.Foreground = new SolidColorBrush(System.Windows.Media.Color.FromRgb(239, 68, 68));
-            BadgeLiveBorder.BorderBrush = new SolidColorBrush(System.Windows.Media.Color.FromArgb(51, 239, 68, 68));
+            BadgeLiveDot.Fill = new SolidColorBrush(Color.FromRgb(239, 68, 68));
+            BadgeLiveText.Foreground = new SolidColorBrush(Color.FromRgb(239, 68, 68));
+            BadgeLiveBorder.BorderBrush = new SolidColorBrush(Color.FromArgb(51, 239, 68, 68));
             BadgeLiveText.Text = "LOGO ATIVO";
-
             _projectionWindow?.SetBlackout(false);
             _projectionWindow?.SetMediaBackground(_logoFilePath);
             _projectionWindow?.ClearScreen();
@@ -766,36 +801,24 @@ public partial class MainWindow : Window
     {
         var screens = System.Windows.Forms.Screen.AllScreens;
         int savedScreenIndex = _projectionSettings.ScreenIndex;
-
-        // 1. Descobre qual é o ecrã de destino atualizado
-        var targetScreen = (savedScreenIndex >= 0 && savedScreenIndex < screens.Length)
-                            ? screens[savedScreenIndex]
-                            : (screens.FirstOrDefault(s => !s.Primary) ?? screens.First());
-
+        var targetScreen = (savedScreenIndex >= 0 && savedScreenIndex < screens.Length) ? screens[savedScreenIndex] : (screens.FirstOrDefault(s => !s.Primary) ?? screens.First());
         var bounds = targetScreen.Bounds;
 
-        // 2. A SOLUÇÃO ROBUSTA: Se a janela já existe mas está no ecrã errado,
-        // temos de a fechar e reabrir. É a única forma 100% segura no WPF.
         if (_projectionWindow != null && _projectionWindow.IsLoaded)
         {
-            // Usamos uma margem de tolerância (50px) para lidar com escalas do Windows (DPI)
-            if (Math.Abs(_projectionWindow.Left - bounds.Left) > 50 ||
-                Math.Abs(_projectionWindow.Top - bounds.Top) > 50)
+            if (Math.Abs(_projectionWindow.Left - bounds.Left) > 50 || Math.Abs(_projectionWindow.Top - bounds.Top) > 50)
             {
                 _projectionWindow.Close();
-                _projectionWindow = null; // Força a recriação da janela no monitor certo
+                _projectionWindow = null;
             }
         }
 
         bool isNewWindow = (_projectionWindow == null);
 
-        // 3. Cria e posiciona a janela (se for nova ou tiver sido fechada no passo anterior)
         if (isNewWindow)
         {
             _projectionWindow = new ProjectionWindow();
             _projectionWindow.WindowStartupLocation = WindowStartupLocation.Manual;
-
-            // É obrigatório definir a posição ANTES de fazer o Show()
             _projectionWindow.Left = bounds.Left;
             _projectionWindow.Top = bounds.Top;
             _projectionWindow.Width = bounds.Width;
@@ -810,26 +833,17 @@ public partial class MainWindow : Window
             }
             else
             {
-                // Em ecrãs duplos, garantimos que ela nasce "Normal" para o Windows a colocar 
-                // nas coordenadas certas e só depois a maximizamos.
                 _projectionWindow.WindowStyle = WindowStyle.None;
                 _projectionWindow.ResizeMode = ResizeMode.NoResize;
                 _projectionWindow.WindowState = WindowState.Normal;
             }
 
             _projectionWindow.Show();
-
-            if (screens.Length > 1)
-            {
-                // Maximiza-se na perfeição no novo monitor
-                _projectionWindow.WindowState = WindowState.Maximized;
-            }
+            if (screens.Length > 1) _projectionWindow.WindowState = WindowState.Maximized;
         }
 
-        // 4. Aplica as novas definições (fontes, cores, sombras)
         _projectionWindow.ApplySettings(_projectionSettings);
 
-        // 5. RESTAURA A TRANSMISSÃO (Para a música e o fundo não desaparecerem ao trocar de ecrã)
         if (isNewWindow)
         {
             if (_currentMode == ProjectionMode.Live)
@@ -857,31 +871,25 @@ public partial class MainWindow : Window
     {
         if (e.OriginalSource is System.Windows.Controls.TextBox) return;
 
-        if (e.Key == Key.Escape)
-        {
-            SetProjectionMode(ProjectionMode.Clear);
-            e.Handled = true;
-        }
-        else if (e.Key == Key.F6)
-        {
-            SetProjectionMode(ProjectionMode.Logo);
-            e.Handled = true;
-        }
-        else if (e.Key == System.Windows.Input.Key.F5)
-        {
-            SetProjectionMode(ProjectionMode.Live);
-            e.Handled = true;
-        }
-        else if (e.Key == Key.Down || e.Key == Key.Space || e.Key == Key.PageDown)
-        {
-            NextSlide();
-            e.Handled = true;
-        }
-        else if (e.Key == Key.Up || e.Key == Key.PageUp)
-        {
-            PrevSlide();
-            e.Handled = true;
-        }
+        if (e.Key == Key.Escape) { SetProjectionMode(ProjectionMode.Clear); e.Handled = true; }
+        else if (e.Key == Key.F6) { SetProjectionMode(ProjectionMode.Logo); e.Handled = true; }
+        else if (e.Key == System.Windows.Input.Key.F5) { SetProjectionMode(ProjectionMode.Live); e.Handled = true; }
+        else if (e.Key == Key.Down || e.Key == Key.Space || e.Key == Key.PageDown) { NextSlide(); e.Handled = true; }
+        else if (e.Key == Key.Up || e.Key == Key.PageUp) { PrevSlide(); e.Handled = true; }
+    }
+
+    private void NextSlide()
+    {
+        if (LstSlides.Items.Count == 0) return;
+        if (LstSlides.SelectedIndex < LstSlides.Items.Count - 1) LstSlides.SelectedIndex++;
+        else if (LstSchedule.SelectedIndex < LstSchedule.Items.Count - 1) LstSchedule.SelectedIndex++;
+    }
+
+    private void PrevSlide()
+    {
+        if (LstSlides.Items.Count == 0) return;
+        if (LstSlides.SelectedIndex > 0) LstSlides.SelectedIndex--;
+        else if (LstSchedule.SelectedIndex > 0) { LstSchedule.SelectedIndex--; LstSlides.SelectedIndex = LstSlides.Items.Count - 1; }
     }
 
     private void SetPreviewMediaBackground(string? filePath)
@@ -922,144 +930,21 @@ public partial class MainWindow : Window
                 bitmap.EndInit();
                 PreviewBackgroundImage.Source = bitmap;
             }
-            catch
-            {
-                PreviewBackgroundImage.Source = null;
-            }
+            catch { PreviewBackgroundImage.Source = null; }
         }
     }
 
-
-
-    private void PreviewVideo_MediaEnded(object sender, RoutedEventArgs e)
-    {
-        PreviewVideo.Position = TimeSpan.Zero;
-        PreviewVideo.Play();
-    }
-
-    private void BtnMinimize_Click(object sender, RoutedEventArgs e)
-    {
-        this.WindowState = WindowState.Minimized;
-    }
-
-    private void BtnMaximize_Click(object sender, RoutedEventArgs e)
-    {
-        this.WindowState = this.WindowState == WindowState.Maximized
-            ? WindowState.Normal
-            : WindowState.Maximized;
-    }
-
-    private void BtnClose_Click(object sender, RoutedEventArgs e)
-    {
-        this.Close();
-    }
-
-    protected override void OnClosed(EventArgs e)
-    {
-        SaveCurrentSession();
-        _projectionWindow?.Close();
-        base.OnClosed(e);
-    }
-
-    private Border CreateDragVisual(string title, string subtitle)
-    {
-        var border = new Border
-        {
-            Background = new SolidColorBrush(System.Windows.Media.Color.FromArgb(220, 22, 32, 50)),
-            BorderBrush = new SolidColorBrush(System.Windows.Media.Color.FromRgb(212, 175, 55)),
-            BorderThickness = new Thickness(1),
-            CornerRadius = new CornerRadius(6),
-            Padding = new Thickness(10, 6, 10, 6),
-            IsHitTestVisible = false
-        };
-
-        var sp = new StackPanel();
-        sp.Children.Add(new TextBlock
-        {
-            Text = "📄 " + title,
-            FontWeight = FontWeights.Bold,
-            Foreground = System.Windows.Media.Brushes.White,
-            FontSize = 13
-        });
-        sp.Children.Add(new TextBlock
-        {
-            Text = subtitle,
-            Foreground = new SolidColorBrush(System.Windows.Media.Color.FromRgb(148, 163, 184)),
-            FontSize = 11
-        });
-
-        border.Child = sp;
-        return border;
-    }
+    private void PreviewVideo_MediaEnded(object sender, RoutedEventArgs e) { PreviewVideo.Position = TimeSpan.Zero; PreviewVideo.Play(); }
+    private void BtnMinimize_Click(object sender, RoutedEventArgs e) { this.WindowState = WindowState.Minimized; }
+    private void BtnMaximize_Click(object sender, RoutedEventArgs e) { this.WindowState = this.WindowState == WindowState.Maximized ? WindowState.Normal : WindowState.Maximized; }
+    private void BtnClose_Click(object sender, RoutedEventArgs e) { this.Close(); }
+    protected override void OnClosed(EventArgs e) { SaveCurrentSession(); _projectionWindow?.Close(); base.OnClosed(e); }
 
     // ---------------------------------------------------------
-    // CONTROLOS DA PROGRAMAÇÃO (MOVER, REMOVER, LIMPAR)
+    // DRAG ADORNER (EFEITO VISUAL AO ARRASTAR DE FORA DA PROGRAMAÇÃO)
     // ---------------------------------------------------------
-    private void BtnScheduleMoveUp_Click(object sender, RoutedEventArgs e)
-    {
-        int index = LstSchedule.SelectedIndex;
-        if (index > 0)
-        {
-            var item = ScheduleItems[index];
-            ScheduleItems.RemoveAt(index);
-            ScheduleItems.Insert(index - 1, item);
-            LstSchedule.SelectedIndex = index - 1;
-            SaveCurrentSession();
-        }
-    }
-
-    private void BtnScheduleMoveDown_Click(object sender, RoutedEventArgs e)
-    {
-        int index = LstSchedule.SelectedIndex;
-        if (index >= 0 && index < ScheduleItems.Count - 1)
-        {
-            var item = ScheduleItems[index];
-            ScheduleItems.RemoveAt(index);
-            ScheduleItems.Insert(index + 1, item);
-            LstSchedule.SelectedIndex = index + 1;
-            SaveCurrentSession();
-        }
-    }
-
-    private void BtnScheduleRemove_Click(object sender, RoutedEventArgs e)
-    {
-        RemoveSelectedScheduleItem();
-    }
-
-    private void LstSchedule_KeyDown(object sender, KeyEventArgs e)
-    {
-        // Permite apagar a música da programação pressionando a tecla Delete ou Backspace
-        if (e.Key == Key.Delete || e.Key == Key.Back)
-        {
-            RemoveSelectedScheduleItem();
-            e.Handled = true;
-        }
-    }
-
-    private void RemoveSelectedScheduleItem()
-    {
-        int index = LstSchedule.SelectedIndex;
-        if (index >= 0)
-        {
-            ScheduleItems.RemoveAt(index);
-            SaveCurrentSession();
-
-            // Seleciona automaticamente o item anterior ou o próximo para manter o fluxo
-            if (ScheduleItems.Count > 0)
-            {
-                LstSchedule.SelectedIndex = Math.Min(index, ScheduleItems.Count - 1);
-            }
-            else
-            {
-                TxtSelectedSongTitle.Text = "Nenhum item selecionado";
-                LstSlides.ItemsSource = null;
-            }
-        }
-    }
-
     private void StartDrag(UIElement source, ScheduleItem item)
     {
-        // 1. O truque: ancorar o Adorner ao conteúdo da janela (o Grid principal) e não à Window!
         UIElement rootElement = (UIElement)this.Content;
         _adornerLayer = AdornerLayer.GetAdornerLayer(rootElement);
 
@@ -1070,35 +955,27 @@ public partial class MainWindow : Window
             _adornerLayer.Add(_dragAdorner);
         }
 
-        // 2. Forçar a janela a rastrear o arrasto em toda a sua superfície
         this.AllowDrop = true;
         this.PreviewDragOver += MainWindow_PreviewDragOver;
         this.QueryContinueDrag += MainWindow_QueryContinueDrag;
 
-        // 3. Inicia o bloqueio de Drag & Drop
         System.Windows.DragDrop.DoDragDrop(source, item, System.Windows.DragDropEffects.Copy | System.Windows.DragDropEffects.Move);
 
-        // 4. Limpeza quando o arrasto termina
         RemoveDragAdorner();
-        this.AllowDrop = false; // Restaura o estado normal
+        this.AllowDrop = false;
     }
 
     private void MainWindow_PreviewDragOver(object sender, System.Windows.DragEventArgs e)
     {
         if (_dragAdorner != null)
         {
-            // Calcula a posição do rato relativa ao conteúdo interno
             var position = e.GetPosition((UIElement)this.Content);
-
-            // O +15 serve para a etiqueta flutuante não ficar debaixo da ponta do rato, 
-            // permitindo que o evento de largar seja detetado pela lista correta.
             _dragAdorner.UpdatePosition(new System.Windows.Point(position.X + 15, position.Y + 15));
         }
     }
 
     private void MainWindow_QueryContinueDrag(object sender, System.Windows.QueryContinueDragEventArgs e)
     {
-        // Se a tecla ESC for premida ou o item for largado, limpamos a interface
         if (e.EscapePressed || e.Action == System.Windows.DragAction.Drop || e.Action == System.Windows.DragAction.Cancel)
         {
             RemoveDragAdorner();
@@ -1114,6 +991,45 @@ public partial class MainWindow : Window
         {
             _adornerLayer.Remove(_dragAdorner);
             _dragAdorner = null;
+        }
+    }
+
+    private Border CreateDragVisual(string title, string subtitle)
+    {
+        var border = new Border
+        {
+            Background = new SolidColorBrush(Color.FromArgb(220, 22, 32, 50)),
+            BorderBrush = new SolidColorBrush(Color.FromRgb(212, 175, 55)),
+            BorderThickness = new Thickness(1),
+            CornerRadius = new CornerRadius(6),
+            Padding = new Thickness(10, 6, 10, 6),
+            IsHitTestVisible = false
+        };
+
+        var sp = new StackPanel();
+        sp.Children.Add(new TextBlock { Text = "📄 " + title, FontWeight = FontWeights.Bold, Foreground = System.Windows.Media.Brushes.White, FontSize = 13 });
+        sp.Children.Add(new TextBlock { Text = subtitle, Foreground = new SolidColorBrush(Color.FromRgb(148, 163, 184)), FontSize = 11 });
+        border.Child = sp;
+        return border;
+    }
+
+    private void BtnImportEasyWorship_Click(object sender, RoutedEventArgs e)
+    {
+        var dialog = new Microsoft.Win32.OpenFileDialog { Title = "Selecionar ficheiro Songs.db", Filter = "Base de Dados EasyWorship (Songs.db)|Songs.db" };
+        if (dialog.ShowDialog() == true)
+        {
+            try
+            {
+                var imported = EasyWorshipImporter.ImportFromEasyWorshipSqlite(dialog.FileName);
+                if (imported.Count > 0)
+                {
+                    _dbService.InsertBatch(imported);
+                    _allSongs = _dbService.GetAllSongs();
+                    UpdateSongFilter(string.Empty);
+                    MessageBox.Show($"{imported.Count} músicas importadas!");
+                }
+            }
+            catch { }
         }
     }
 }

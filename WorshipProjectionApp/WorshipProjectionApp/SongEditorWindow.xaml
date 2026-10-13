@@ -5,102 +5,66 @@
         Height="540" Width="520"
         WindowStartupLocation="CenterOwner"
         ResizeMode="NoResize"
-        Background="#0F172A"
-        Foreground="#F8FAFC"
+        Background="{DynamicResource BgCanvas}"
+        Foreground="{DynamicResource TextPrimary}"
         FontFamily="Segoe UI">
 
-    <Window.Resources>
-        <SolidColorBrush x:Key="AccentGold" Color="#D4AF37"/>
-        <SolidColorBrush x:Key="PanelBg" Color="#162032"/>
-        <SolidColorBrush x:Key="BorderDark" Color="#2A384F"/>
+    <WindowChrome.WindowChrome>
+        <WindowChrome CaptionHeight="40" ResizeBorderThickness="6" CornerRadius="0" GlassFrameThickness="0" UseAeroCaptionButtons="False"/>
+    </WindowChrome.WindowChrome>
 
-        <Style x:Key="GoldButton" TargetType="Button">
-            <Setter Property="Background" Value="{StaticResource AccentGold}"/>
-            <Setter Property="Foreground" Value="#0F172A"/>
-            <Setter Property="FontWeight" Value="SemiBold"/>
-            <Setter Property="Padding" Value="14,6"/>
-            <Setter Property="BorderThickness" Value="0"/>
-            <Setter Property="Cursor" Value="Hand"/>
-            <Setter Property="Template">
-                <Setter.Value>
-                    <ControlTemplate TargetType="Button">
-                        <Border Background="{TemplateBinding Background}" CornerRadius="6" Padding="{TemplateBinding Padding}">
-                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                        </Border>
-                    </ControlTemplate>
-                </Setter.Value>
-            </Setter>
-        </Style>
-
-        <Style x:Key="NavyButton" TargetType="Button">
-            <Setter Property="Background" Value="#24344D"/>
-            <Setter Property="Foreground" Value="#F8FAFC"/>
-            <Setter Property="Padding" Value="12,6"/>
-            <Setter Property="BorderThickness" Value="0"/>
-            <Setter Property="Cursor" Value="Hand"/>
-            <Setter Property="Template">
-                <Setter.Value>
-                    <ControlTemplate TargetType="Button">
-                        <Border Background="{TemplateBinding Background}" CornerRadius="6" Padding="{TemplateBinding Padding}">
-                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                        </Border>
-                    </ControlTemplate>
-                </Setter.Value>
-            </Setter>
-        </Style>
-
-        <Style x:Key="DarkTextBox" TargetType="TextBox">
-            <Setter Property="Background" Value="#0B0F19"/>
-            <Setter Property="Foreground" Value="White"/>
-            <Setter Property="BorderBrush" Value="{StaticResource BorderDark}"/>
-            <Setter Property="BorderThickness" Value="1"/>
-            <Setter Property="Padding" Value="8,5"/>
-            <Setter Property="CaretBrush" Value="{StaticResource AccentGold}"/>
-        </Style>
-    </Window.Resources>
-
-    <Grid Margin="18">
+    <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
-            <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
-        <TextBlock Grid.Row="0" Text="🎵 Editor de Letras &amp; Estrofes" FontWeight="Bold" FontSize="16" Foreground="{StaticResource AccentGold}" Margin="0,0,0,12"/>
-
-        <Border Grid.Row="1" Background="{StaticResource PanelBg}" BorderBrush="{StaticResource BorderDark}" BorderThickness="1" CornerRadius="8" Padding="14">
-            <Grid>
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="*"/>
-                </Grid.RowDefinitions>
-
-                <!-- Título -->
-                <StackPanel Grid.Row="0" Margin="0,0,0,10">
-                    <TextBlock Text="Título da Canção:" FontSize="12" Foreground="#94A3B8" Margin="0,0,0,4"/>
-                    <TextBox x:Name="TxtTitle" Style="{StaticResource DarkTextBox}"/>
-                </StackPanel>
-
-                <!-- Autor / Artista -->
-                <StackPanel Grid.Row="1" Margin="0,0,0,10">
-                    <TextBlock Text="Autor / Artista:" FontSize="12" Foreground="#94A3B8" Margin="0,0,0,4"/>
-                    <TextBox x:Name="TxtArtist" Style="{StaticResource DarkTextBox}"/>
-                </StackPanel>
-
-                <!-- Letra com Tags [Verso 1], [Coro], etc. -->
-                <DockPanel Grid.Row="2">
-                    <TextBlock DockPanel.Dock="Top" Text="Letra (separa estrofes com linha em branco ou [Verso], [Coro]):" FontSize="12" Foreground="#94A3B8" Margin="0,0,0,4"/>
-                    <TextBox x:Name="TxtLyrics" Style="{StaticResource DarkTextBox}" AcceptsReturn="True" VerticalScrollBarVisibility="Auto" TextWrapping="Wrap"/>
-                </DockPanel>
-            </Grid>
+        <Border Grid.Row="0" Background="#060A12" Padding="14,6,6,6" BorderBrush="{DynamicResource BorderDark}" BorderThickness="0,0,0,1" WindowChrome.IsHitTestVisibleInChrome="True">
+            <DockPanel>
+                <TextBlock Text="🎵 Editor de Letras &amp; Estrofes" Foreground="{DynamicResource AccentColor}" FontWeight="Bold" FontSize="14" VerticalAlignment="Center"/>
+                <Button Click="BtnClose_Click" Style="{DynamicResource WindowCloseButton}" HorizontalAlignment="Right" DockPanel.Dock="Right">
+                    <TextBlock FontFamily="Segoe Fluent Icons" Text="&#xE8BB;" FontSize="10" VerticalAlignment="Center"/>
+                </Button>
+            </DockPanel>
         </Border>
 
-        <DockPanel Grid.Row="2" Margin="0,14,0,0">
-            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" DockPanel.Dock="Right">
-                <Button Content="Cancelar" Click="BtnCancel_Click" Style="{StaticResource NavyButton}" Margin="0,0,8,0"/>
-                <Button Content="Guardar Canção" Click="BtnSave_Click" Style="{StaticResource GoldButton}"/>
-            </StackPanel>
-        </DockPanel>
+        <Grid Grid.Row="1" Margin="18">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+
+            <Border Grid.Row="0" Background="{DynamicResource PanelBg}" BorderBrush="{DynamicResource BorderDark}" BorderThickness="1" CornerRadius="8" Padding="14">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+
+                    <StackPanel Grid.Row="0" Margin="0,0,0,10">
+                        <TextBlock Text="Título da Canção:" FontSize="12" Foreground="{DynamicResource TextMuted}" Margin="0,0,0,4"/>
+                        <TextBox x:Name="TxtTitle" Style="{DynamicResource DarkTextBox}"/>
+                    </StackPanel>
+
+                    <StackPanel Grid.Row="1" Margin="0,0,0,10">
+                        <TextBlock Text="Autor / Artista:" FontSize="12" Foreground="{DynamicResource TextMuted}" Margin="0,0,0,4"/>
+                        <TextBox x:Name="TxtArtist" Style="{DynamicResource DarkTextBox}"/>
+                    </StackPanel>
+
+                    <DockPanel Grid.Row="2">
+                        <TextBlock DockPanel.Dock="Top" Text="Letra (separa estrofes com linha em branco ou [Verso], [Coro]):" FontSize="12" Foreground="{DynamicResource TextMuted}" Margin="0,0,0,4"/>
+                        <TextBox x:Name="TxtLyrics" Style="{DynamicResource DarkTextBox}" AcceptsReturn="True" VerticalScrollBarVisibility="Auto" TextWrapping="Wrap"/>
+                    </DockPanel>
+                </Grid>
+            </Border>
+
+            <DockPanel Grid.Row="1" Margin="0,14,0,0">
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" DockPanel.Dock="Right">
+                    <Button Content="Cancelar" Click="BtnCancel_Click" Style="{DynamicResource NavyButton}" Margin="0,0,8,0"/>
+                    <Button Content="Guardar Canção" Click="BtnSave_Click" Style="{DynamicResource GoldButton}"/>
+                </StackPanel>
+            </DockPanel>
+        </Grid>
     </Grid>
 </Window>

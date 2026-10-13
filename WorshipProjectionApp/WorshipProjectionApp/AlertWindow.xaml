@@ -5,89 +5,57 @@
         Height="360" Width="460"
         WindowStartupLocation="CenterOwner"
         ResizeMode="NoResize"
-        Background="#0F172A"
-        Foreground="#F8FAFC"
+        Background="{DynamicResource BgCanvas}"
+        Foreground="{DynamicResource TextPrimary}"
         FontFamily="Segoe UI">
 
-    <Window.Resources>
-        <SolidColorBrush x:Key="AccentGold" Color="#D4AF37"/>
-        <SolidColorBrush x:Key="PanelBg" Color="#162032"/>
-        <SolidColorBrush x:Key="BorderDark" Color="#2A384F"/>
+    <WindowChrome.WindowChrome>
+        <WindowChrome CaptionHeight="40" ResizeBorderThickness="6" CornerRadius="0" GlassFrameThickness="0" UseAeroCaptionButtons="False"/>
+    </WindowChrome.WindowChrome>
 
-        <Style x:Key="GoldButton" TargetType="Button">
-            <Setter Property="Background" Value="{StaticResource AccentGold}"/>
-            <Setter Property="Foreground" Value="#0F172A"/>
-            <Setter Property="FontWeight" Value="SemiBold"/>
-            <Setter Property="Padding" Value="14,6"/>
-            <Setter Property="BorderThickness" Value="0"/>
-            <Setter Property="Cursor" Value="Hand"/>
-            <Setter Property="Template">
-                <Setter.Value>
-                    <ControlTemplate TargetType="Button">
-                        <Border Background="{TemplateBinding Background}" CornerRadius="6" Padding="{TemplateBinding Padding}">
-                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                        </Border>
-                    </ControlTemplate>
-                </Setter.Value>
-            </Setter>
-        </Style>
-
-        <Style x:Key="DangerButton" TargetType="Button">
-            <Setter Property="Background" Value="#991B1B"/>
-            <Setter Property="Foreground" Value="#F8FAFC"/>
-            <Setter Property="Padding" Value="14,6"/>
-            <Setter Property="BorderThickness" Value="0"/>
-            <Setter Property="Cursor" Value="Hand"/>
-            <Setter Property="Template">
-                <Setter.Value>
-                    <ControlTemplate TargetType="Button">
-                        <Border Background="{TemplateBinding Background}" CornerRadius="6" Padding="{TemplateBinding Padding}">
-                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                        </Border>
-                    </ControlTemplate>
-                </Setter.Value>
-            </Setter>
-        </Style>
-
-        <Style x:Key="DarkTextBox" TargetType="TextBox">
-            <Setter Property="Background" Value="#0B0F19"/>
-            <Setter Property="Foreground" Value="White"/>
-            <Setter Property="BorderBrush" Value="{StaticResource BorderDark}"/>
-            <Setter Property="BorderThickness" Value="1"/>
-            <Setter Property="Padding" Value="8,5"/>
-            <Setter Property="CaretBrush" Value="{StaticResource AccentGold}"/>
-        </Style>
-    </Window.Resources>
-
-    <Grid Margin="18">
+    <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
-            <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
-        <TextBlock Grid.Row="0" Text="📢 Avisos &amp; Controlo de Tempo" FontWeight="Bold" FontSize="16" Foreground="{StaticResource AccentGold}" Margin="0,0,0,12"/>
-
-        <Border Grid.Row="1" Background="{StaticResource PanelBg}" BorderBrush="{StaticResource BorderDark}" BorderThickness="1" CornerRadius="8" Padding="14">
-            <StackPanel>
-                <TextBlock Text="Mensagem de Aviso (ex: Berçário 12, Matrícula 00-AA-00):" FontSize="12" Foreground="#94A3B8" Margin="0,0,0,4"/>
-                <TextBox x:Name="TxtAlertMessage" Style="{StaticResource DarkTextBox}" Margin="0,0,0,12"/>
-
-                <TextBlock Text="Opções de Hora / Cronómetro:" FontSize="12" Foreground="#94A3B8" Margin="0,0,0,6"/>
-                <RadioButton x:Name="RbNone" Content="Apenas texto (sem hora)" IsChecked="True" Foreground="#F8FAFC" Margin="0,0,0,4"/>
-                <RadioButton x:Name="RbClock" Content="Mostrar Relógio Atual (HH:mm)" Foreground="#F8FAFC" Margin="0,0,0,4"/>
-
-                <StackPanel Orientation="Horizontal" Margin="0,4,0,0">
-                    <RadioButton x:Name="RbCountdown" Content="Contagem Decrescente:" Foreground="#F8FAFC" VerticalAlignment="Center"/>
-                    <TextBox x:Name="TxtMinutes" Text="35" Width="45" Style="{StaticResource DarkTextBox}" Margin="8,0,4,0" TextAlignment="Center"/>
-                    <TextBlock Text="minutos" VerticalAlignment="Center" Foreground="#94A3B8" FontSize="12"/>
-                </StackPanel>
-            </StackPanel>
+        <!-- Barra de Título Customizada -->
+        <Border Grid.Row="0" Background="#060A12" Padding="14,6,6,6" BorderBrush="{DynamicResource BorderDark}" BorderThickness="0,0,0,1" WindowChrome.IsHitTestVisibleInChrome="True">
+            <DockPanel>
+                <TextBlock Text="📢 Avisos &amp; Controlo de Tempo" Foreground="{DynamicResource AccentColor}" FontWeight="Bold" FontSize="14" VerticalAlignment="Center"/>
+                <Button Click="BtnClose_Click" Style="{DynamicResource WindowCloseButton}" HorizontalAlignment="Right" DockPanel.Dock="Right">
+                    <TextBlock FontFamily="Segoe Fluent Icons" Text="&#xE8BB;" FontSize="10" VerticalAlignment="Center"/>
+                </Button>
+            </DockPanel>
         </Border>
 
-        <DockPanel Grid.Row="2" Margin="0,14,0,0">
-            <Button Content="Ocultar Aviso" Click="BtnHide_Click" Style="{StaticResource DangerButton}" DockPanel.Dock="Left"/>
-            <Button Content="Projetar Aviso" Click="BtnShow_Click" Style="{StaticResource GoldButton}" DockPanel.Dock="Right"/>
-        </DockPanel>
+        <Grid Grid.Row="1" Margin="18">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+
+            <Border Grid.Row="0" Background="{DynamicResource PanelBg}" BorderBrush="{DynamicResource BorderDark}" BorderThickness="1" CornerRadius="8" Padding="14">
+                <StackPanel>
+                    <TextBlock Text="Mensagem de Aviso (ex: Berçário 12, Matrícula 00-AA-00):" FontSize="12" Foreground="{DynamicResource TextMuted}" Margin="0,0,0,4"/>
+                    <TextBox x:Name="TxtAlertMessage" Style="{DynamicResource DarkTextBox}" Margin="0,0,0,12"/>
+
+                    <TextBlock Text="Opções de Hora / Cronómetro:" FontSize="12" Foreground="{DynamicResource TextMuted}" Margin="0,0,0,6"/>
+                    <RadioButton x:Name="RbNone" Content="Apenas texto (sem hora)" IsChecked="True" Foreground="{DynamicResource TextPrimary}" Margin="0,0,0,4"/>
+                    <RadioButton x:Name="RbClock" Content="Mostrar Relógio Atual (HH:mm)" Foreground="{DynamicResource TextPrimary}" Margin="0,0,0,4"/>
+
+                    <StackPanel Orientation="Horizontal" Margin="0,4,0,0">
+                        <RadioButton x:Name="RbCountdown" Content="Contagem Decrescente:" Foreground="{DynamicResource TextPrimary}" VerticalAlignment="Center"/>
+                        <TextBox x:Name="TxtMinutes" Text="35" Width="45" Style="{DynamicResource DarkTextBox}" Margin="8,0,4,0" TextAlignment="Center"/>
+                        <TextBlock Text="minutos" VerticalAlignment="Center" Foreground="{DynamicResource TextMuted}" FontSize="12"/>
+                    </StackPanel>
+                </StackPanel>
+            </Border>
+
+            <DockPanel Grid.Row="1" Margin="0,14,0,0">
+                <Button Content="Ocultar Aviso" Click="BtnHide_Click" Style="{DynamicResource DangerButton}" DockPanel.Dock="Left"/>
+                <Button Content="Projetar Aviso" Click="BtnShow_Click" Style="{DynamicResource GoldButton}" DockPanel.Dock="Right"/>
+            </DockPanel>
+        </Grid>
     </Grid>
 </Window>
