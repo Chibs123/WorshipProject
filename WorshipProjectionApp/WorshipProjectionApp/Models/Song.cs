@@ -1,49 +1,49 @@
-﻿using System.Text.RegularExpressions;
+﻿using System;
+using System.Collections.Generic;
+using System.Text.Json;
 
-namespace WorshipProjectionApp.Models;
-
-public class Song
+namespace WorshipProjectionApp.Models
 {
-    public int Id { get; set; }
-    public string Title { get; set; } = string.Empty;
-    public string? Artist { get; set; }
-    public string RawLyrics { get; set; } = string.Empty;
-
-    public List<SlideItem> ParseSlides()
+    public class Song
     {
-        var slides = new List<SlideItem>();
-        if (string.IsNullOrWhiteSpace(RawLyrics)) return slides;
+        public int Id { get; set; }
+        public string Title { get; set; } = string.Empty;
+        public string Artist { get; set; } = string.Empty;
 
-        // Normaliza quebras de linha e separa por blocos de linha dupla
-        var blocks = Regex.Split(RawLyrics.Trim(), @"(?:\r?\n){2,}");
+        // Agora esta coluna na DB vai guardar o formato JSON dos slides
+        public string RawLyrics { get; set; } = string.Empty;
 
-        int index = 1;
-        foreach (var block in blocks)
+        public List<SlideItem> ParseSlides()
         {
-            var lines = block.Trim().Split(new[] { "\r\n", "\r", "\n" }, StringSplitOptions.None);
-            if (lines.Length == 0) continue;
+            var slides = new List<SlideItem>();
+            if (string.IsNullOrWhiteSpace(RawLyrics)) return slides;
 
-            string header;
-            string content;
-
-            // Se a primeira linha tiver formato de tag [Coro], [Verso], usa-a como cabeçalho
-            if (lines[0].Trim().StartsWith("[") && lines[0].Trim().EndsWith("]"))
+            // 1. Tenta decifrar como o NOVO formato PowerPoint (JSON)
+            if (RawLyrics.TrimStart().StartsWith("["))
             {
-                header = lines[0].Trim().Trim('[', ']');
-                content = string.Join(Environment.NewLine, lines.Skip(1)).Trim();
-            }
-            else
-            {
-                header = $"Parte {index++}";
-                content = block.Trim();
+                try
+                {
+                    var parsed = JsonSerializer.Deserialize<List<SlideItem>>(RawLyrics);
+                    if (parsed != null) return parsed;
+                }
+                catch { /* Falhou, avança para a leitura em texto antigo */ }
             }
 
-            if (!string.IsNullOrWhiteSpace(content))
+            // 2. RETROCOMPATIBILIDADE: Se for uma música antiga (texto corrido), 
+            // divide por parágrafos duplos e converte em slides automaticamente.
+            var blocks = RawLyrics.Split(new[] { "\n\n", "\r\n\r\n" }, StringSplitOptions.RemoveEmptyEntries);
+            int slideNum = 1;
+
+            foreach (var block in blocks)
             {
-                slides.Add(new SlideItem { Header = header, Content = content });
+                slides.Add(new SlideItem
+                {
+                    Header = $"Slide {slideNum++}",
+                    Content = block.Trim()
+                });
             }
+
+            return slides;
         }
-
-        return slides;
     }
 }

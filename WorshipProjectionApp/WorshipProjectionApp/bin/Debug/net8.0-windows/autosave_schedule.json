@@ -1,17 +1,21 @@
 [
   {
-    "Title": "Porque Ele Vive",
-    "Subtitle": "Bill Gaither",
+    "Title": "Grandioso \u00C9s Tu",
+    "Subtitle": "Stuart K. Hine",
     "ItemTypeIcon": "\uD83C\uDFB5",
     "IsActive": true,
     "Slides": [
       {
-        "Header": "Verso 1",
-        "Content": "Deus enviou Seu Filho amado\r\nPara morrer no meu lugar\r\nNa cruz pagou por meus pecados\r\nMas o sepulcro vazio est\u00E1"
+        "Header": "Slide 1",
+        "Content": "[Verso 1]\nSenhor meu Deus, quando eu maravilhado\nFico a pensar nas obras de Tuas m\u00E3os\nNo c\u00E9u azul de estrelas pontilhado\nO Seu poder mostrando a cria\u00E7\u00E3o",
+        "BackgroundPath": null,
+        "HasCustomBackground": false
       },
       {
-        "Header": "Coro",
-        "Content": "Porque Ele vive, posso crer no amanh\u00E3\r\nPorque Ele vive, temor n\u00E3o h\u00E1\r\nMas eu bem sei, eu sei, que a minha vida\r\nEst\u00E1 nas m\u00E3os do meu Jesus, que vivo est\u00E1"
+        "Header": "Slide 2",
+        "Content": "[Coro]\nEnt\u00E3o a minha alma canta a Ti, Senhor\nGrandioso \u00E9s Tu, grandioso \u00E9s Tu!",
+        "BackgroundPath": null,
+        "HasCustomBackground": false
       }
     ]
   }

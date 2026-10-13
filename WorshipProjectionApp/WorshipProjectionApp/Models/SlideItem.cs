@@ -1,9 +1,32 @@
-﻿namespace WorshipProjectionApp.Models;
+﻿using System.ComponentModel;
+using System.Runtime.CompilerServices;
 
-public class SlideItem
+namespace WorshipProjectionApp.Models
 {
-    public string Header { get; set; } = string.Empty; // Ex: "Verso 1", "Refrão", "João 3:16"
-    public string Content { get; set; } = string.Empty;
+    public class SlideItem : INotifyPropertyChanged
+    {
+        public string Header { get; set; } = string.Empty;
+        public string Content { get; set; } = string.Empty;
 
-    public override string ToString() => string.IsNullOrWhiteSpace(Header) ? Content : $"[{Header}]\n{Content}";
+        private string? _backgroundPath;
+        public string? BackgroundPath
+        {
+            get => _backgroundPath;
+            set
+            {
+                _backgroundPath = value;
+                OnPropertyChanged();
+                OnPropertyChanged(nameof(HasCustomBackground));
+            }
+        }
+
+        // Usado para mostrar o ícone "🖼️" no ecrã
+        public bool HasCustomBackground => !string.IsNullOrEmpty(BackgroundPath);
+
+        public event PropertyChangedEventHandler? PropertyChanged;
+        protected void OnPropertyChanged([CallerMemberName] string? name = null)
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
+        }
+    }
 }

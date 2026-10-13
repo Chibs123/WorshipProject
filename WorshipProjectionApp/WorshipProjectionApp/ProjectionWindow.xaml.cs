@@ -90,7 +90,7 @@ public partial class ProjectionWindow : Window
                 bmp.UriSource = new Uri(filePath, UriKind.Absolute);
                 bmp.CacheOption = BitmapCacheOption.OnLoad;
                 bmp.EndInit();
-
+                bmp.Freeze();
                 MediaBgImage.Source = bmp;
                 FadeInElement(MediaBgImage);
             }

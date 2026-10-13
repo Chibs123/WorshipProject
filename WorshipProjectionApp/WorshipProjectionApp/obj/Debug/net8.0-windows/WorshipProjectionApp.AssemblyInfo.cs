@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("WorshipProjectionApp")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+82d44a565f4552cbe294f8fd870e5ff92cc39f6d")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+d29bf7416ea9e02b603918858544c5d6963ce74e")]
 [assembly: System.Reflection.AssemblyProductAttribute("WorshipProjectionApp")]
 [assembly: System.Reflection.AssemblyTitleAttribute("WorshipProjectionApp")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

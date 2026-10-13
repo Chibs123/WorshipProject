@@ -34,7 +34,7 @@ namespace WorshipProjectionApp.Models
                     _optimizedThumb.DecodePixelWidth = 150;
 
                     _optimizedThumb.EndInit();
-                    _optimizedThumb.Freeze(); // Liberta a imagem para correr noutras threads
+                    _optimizedThumb.Freeze();
                 }
                 catch
                 {

@@ -66,6 +66,18 @@ public partial class MainWindow : Window
         ApplyLayout(_layoutSettings);
         LoadBibleVersions();
         this.KeyDown += MainWindow_KeyDown;
+
+        // --- CÓDIGO NOVO DO RELÓGIO AQUI ---
+        var clockTimer = new System.Windows.Threading.DispatcherTimer();
+        clockTimer.Interval = TimeSpan.FromSeconds(1);
+        clockTimer.Tick += (s, e) =>
+        {
+            TxtTopClock.Text = DateTime.Now.ToString("HH:mm:ss");
+        };
+        clockTimer.Start();
+
+        // Atualiza logo no primeiro milissegundo para não mostrar "00:00"
+        TxtTopClock.Text = DateTime.Now.ToString("HH:mm:ss");
     }
 
     private void BtnImportBible_Click(object sender, RoutedEventArgs e)
@@ -156,6 +168,9 @@ public partial class MainWindow : Window
             var editor = new SongEditorWindow(selectedSong) { Owner = this };
             if (editor.ShowDialog() == true && editor.ResultSong != null)
             {
+                // A LINHA ABAIXO É A QUE ESTAVA A FALTAR PARA GRAVAR NA BASE DE DADOS!
+                _dbService.UpdateSong(editor.ResultSong);
+
                 _allSongs = _dbService.GetAllSongs();
                 UpdateSongFilter(TxtSearchSong.Text);
             }
@@ -730,7 +745,23 @@ public partial class MainWindow : Window
 
     private void LstSlides_SelectionChanged(object sender, SelectionChangedEventArgs e)
     {
-        if (LstSlides.SelectedItem is SlideItem slide) SendToProjection(slide.Content);
+        if (LstSlides.SelectedItem is SlideItem slide)
+        {
+            // 1. Descobre se o Slide tem um fundo próprio ou se usa o fundo global do Culto
+            string? activeBg = slide.HasCustomBackground ? slide.BackgroundPath : _currentBackgroundPath;
+
+            // 2. Atualiza a miniatura do ecrã "Em Direto" (na interface do operador)
+            SetPreviewMediaBackground(activeBg);
+
+            // 3. Atualiza o projetor real (se não estiver em modo Logo)
+            if (_projectionWindow != null && _currentMode != ProjectionMode.Logo)
+            {
+                _projectionWindow.SetMediaBackground(activeBg);
+            }
+
+            // 4. Manda o texto do slide
+            SendToProjection(slide.Content);
+        }
     }
 
     private void SendToProjection(string text)
@@ -928,6 +959,7 @@ public partial class MainWindow : Window
                 bitmap.DecodePixelWidth = 320;
                 bitmap.CacheOption = System.Windows.Media.Imaging.BitmapCacheOption.OnLoad;
                 bitmap.EndInit();
+                bitmap.Freeze();
                 PreviewBackgroundImage.Source = bitmap;
             }
             catch { PreviewBackgroundImage.Source = null; }

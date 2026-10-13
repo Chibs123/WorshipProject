@@ -7,7 +7,7 @@
         ResizeMode="NoResize"
         ShowInTaskbar="False"
         Topmost="True"
-        TextOptions.TextFormattingMode="Display"
+        TextOptions.TextFormattingMode="Ideal" 
         TextOptions.TextRenderingMode="ClearType"
         RenderOptions.BitmapScalingMode="HighQuality">
 
@@ -45,11 +45,12 @@
                            LineHeight="68"
                            Opacity="1">
                     <TextBlock.Effect>
-                        <DropShadowEffect Color="Black" BlurRadius="16" ShadowDepth="4" Direction="315" Opacity="0.95"/>
+                        <DropShadowEffect Color="Black" BlurRadius="16" ShadowDepth="4" Direction="315" Opacity="0.95" RenderingBias="Quality"/>
                     </TextBlock.Effect>
                 </TextBlock>
             </Grid>
         </Viewbox>
+
         <!-- Camada 5: Alertas e Cronómetros (Ecrã Inteiro) -->
         <Grid x:Name="FullScreenAlertOverlay" Background="#F5060A12" Opacity="0" Visibility="Collapsed">
             <Viewbox Stretch="Uniform" Margin="100">
@@ -63,7 +64,7 @@
                                TextAlignment="Center"
                                Margin="0,0,0,20">
                         <TextBlock.Effect>
-                            <DropShadowEffect Color="Black" BlurRadius="25" ShadowDepth="8" Opacity="0.95"/>
+                            <DropShadowEffect Color="Black" BlurRadius="25" ShadowDepth="8" Opacity="0.95" RenderingBias="Quality"/>
                         </TextBlock.Effect>
                     </TextBlock>
 
@@ -76,7 +77,7 @@
                                TextAlignment="Center"
                                MaxWidth="1600">
                         <TextBlock.Effect>
-                            <DropShadowEffect Color="Black" BlurRadius="16" ShadowDepth="6" Opacity="0.95"/>
+                            <DropShadowEffect Color="Black" BlurRadius="16" ShadowDepth="6" Opacity="0.95" RenderingBias="Quality"/>
                         </TextBlock.Effect>
                     </TextBlock>
                 </StackPanel>

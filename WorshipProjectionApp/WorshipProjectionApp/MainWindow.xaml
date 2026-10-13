@@ -444,8 +444,9 @@
 
         <!-- CABEÇALHO -->
         <Border Grid.Row="0" Background="#060A12" Padding="14,6,8,6" BorderBrush="{DynamicResource BorderDark}" BorderThickness="0,0,0,1">
-            <DockPanel LastChildFill="False">
-                <StackPanel Orientation="Horizontal" VerticalAlignment="Center" DockPanel.Dock="Left">
+            <Grid>
+                <!-- ESQUERDA: Botões de Estado -->
+                <StackPanel Orientation="Horizontal" VerticalAlignment="Center" HorizontalAlignment="Left">
                     <Button x:Name="BtnModeLive" Content="LIVE" Click="BtnModeLive_Click" Style="{DynamicResource NavyButton}" Margin="0,0,6,0" WindowChrome.IsHitTestVisibleInChrome="True" ToolTip="Transmitir (F5)"/>
                     <Button x:Name="BtnModeLogo" Content="LOGO" Click="BtnModeLogo_Click" Style="{DynamicResource NavyButton}" Margin="0,0,6,0" WindowChrome.IsHitTestVisibleInChrome="True" ToolTip="Clique com o Botão Direito para definir a imagem/vídeo (F6)!">
                         <Button.ContextMenu>
@@ -487,7 +488,14 @@
                     </Menu>
                 </StackPanel>
 
-                <StackPanel Orientation="Horizontal" DockPanel.Dock="Right" VerticalAlignment="Center" Margin="14,0,0,0">
+                <!-- CENTRO: Relógio -->
+                <StackPanel Orientation="Horizontal" VerticalAlignment="Center" HorizontalAlignment="Center" IsHitTestVisible="False">
+                    <!-- Texto do Relógio -->
+                    <TextBlock x:Name="TxtTopClock" Text="00:00" FontSize="16" FontWeight="SemiBold" Foreground="{DynamicResource TextPrimary}" VerticalAlignment="Center"/>
+                </StackPanel>
+
+                <!-- DIREITA: Controlos da Janela -->
+                <StackPanel Orientation="Horizontal" VerticalAlignment="Center" HorizontalAlignment="Right" Margin="14,0,0,0">
                     <Button Click="BtnMinimize_Click" Style="{DynamicResource WindowNavButton}" WindowChrome.IsHitTestVisibleInChrome="True">
                         <TextBlock FontFamily="Segoe Fluent Icons" Text="&#xE921;" FontSize="10" VerticalAlignment="Center"/>
                     </Button>
@@ -498,7 +506,7 @@
                         <TextBlock FontFamily="Segoe Fluent Icons" Text="&#xE8BB;" FontSize="10" VerticalAlignment="Center"/>
                     </Button>
                 </StackPanel>
-            </DockPanel>
+            </Grid>
         </Border>
 
         <!-- CORPO PRINCIPAL -->

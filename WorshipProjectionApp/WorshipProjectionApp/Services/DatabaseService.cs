@@ -45,6 +45,27 @@ public class DatabaseService
         connection.Execute(sql, new { Title = title, Artist = artist, RawLyrics = lyrics });
     }
 
+    public void UpdateSong(Song song)
+    {
+        // Assume que a tua string de conexão se chama _connectionString (ou semelhante)
+        // Se a tua variável tiver outro nome (ex: dbPath), ajusta a linha abaixo.
+        using var connection = new SqliteConnection(ConnectionString);
+        connection.Open();
+
+        string sql = @"
+        UPDATE Songs 
+        SET Title = @Title, Artist = @Artist, RawLyrics = @RawLyrics 
+        WHERE Id = @Id";
+
+        using var command = new SqliteCommand(sql, connection);
+        command.Parameters.AddWithValue("@Title", song.Title ?? "");
+        command.Parameters.AddWithValue("@Artist", song.Artist ?? "");
+        command.Parameters.AddWithValue("@RawLyrics", song.RawLyrics ?? "");
+        command.Parameters.AddWithValue("@Id", song.Id);
+
+        command.ExecuteNonQuery();
+    }
+
     public void InsertBatch(IEnumerable<Song> songs)
     {
         using var connection = new SqliteConnection(ConnectionString);
