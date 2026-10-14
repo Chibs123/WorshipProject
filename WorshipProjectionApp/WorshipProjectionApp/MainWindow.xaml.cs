@@ -15,11 +15,16 @@ using Point = System.Windows.Point;
 using MessageBox = System.Windows.MessageBox;
 using Color = System.Windows.Media.Color;
 using MouseEventArgs = System.Windows.Input.MouseEventArgs;
+using DragEventArgs = System.Windows.DragEventArgs;
+using ListBox = System.Windows.Controls.ListBox;
 
 namespace WorshipProjectionApp;
 
 public partial class MainWindow : Window
 {
+    private string? _lastLoadedPreviewPath;
+    private System.Windows.Threading.DispatcherTimer? _hoverPreviewTimer;
+    private string? _pendingHoverPath;
     public ObservableCollection<MediaBackground> FilteredBackgrounds { get; set; } = new();
     private DragAdorner? _dragAdorner;
     private AdornerLayer? _adornerLayer;
@@ -334,17 +339,39 @@ public partial class MainWindow : Window
 
     private void BackgroundItem_MouseEnter(object sender, MouseEventArgs e)
     {
-        // HOVER PREVIEW: Mostra no ecrã de preview interno (mas não no Live)
         if (sender is FrameworkElement el && el.DataContext is MediaBackground bg)
         {
-            SetPreviewMediaBackground(bg.FilePath);
+            _pendingHoverPath = bg.FilePath;
+
+            // Só carrega o vídeo/imagem se o rato parar em cima da miniatura durante 120ms!
+            if (_hoverPreviewTimer == null)
+            {
+                _hoverPreviewTimer = new System.Windows.Threading.DispatcherTimer
+                {
+                    Interval = TimeSpan.FromMilliseconds(120)
+                };
+                _hoverPreviewTimer.Tick += (s, args) =>
+                {
+                    _hoverPreviewTimer.Stop();
+                    SetPreviewMediaBackground(_pendingHoverPath);
+                };
+            }
+
+            _hoverPreviewTimer.Stop();
+            _hoverPreviewTimer.Start();
         }
     }
 
     private void BackgroundItem_MouseLeave(object sender, MouseEventArgs e)
     {
-        // Restaura a miniatura do fundo que está efetivamente selecionado
-        SetPreviewMediaBackground(_currentBackgroundPath);
+        _hoverPreviewTimer?.Stop();
+
+        string? bgToRestore = _currentBackgroundPath;
+        if (LstSlides.SelectedItem is SlideItem slide && slide.HasCustomBackground)
+        {
+            bgToRestore = slide.BackgroundPath;
+        }
+        SetPreviewMediaBackground(bgToRestore);
     }
 
     private void LstBackgrounds_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -359,6 +386,28 @@ public partial class MainWindow : Window
                 _projectionWindow.SetMediaBackground(_currentBackgroundPath);
             }
         }
+    }
+
+    private void BtnAddSeparator_Click(object sender, RoutedEventArgs e)
+    {
+        var newSeparator = new ScheduleItem
+        {
+            Title = "NOVO SEPARADOR",
+            ItemTypeIcon = "🏷️",
+            IsSeparator = true
+        };
+
+        // Assume que a tua lista se chama ScheduleItems
+        ScheduleItems.Add(newSeparator);
+
+        // Seleciona o novo item e força a abertura da janela de renomear
+        LstSchedule.SelectedItem = newSeparator;
+        LstSchedule.ScrollIntoView(newSeparator);
+
+        TxtRenameItem.Text = newSeparator.Title;
+        OverlayRename.Visibility = Visibility.Visible;
+        TxtRenameItem.Focus();
+        TxtRenameItem.SelectAll();
     }
 
     private void BtnClearBackground_Click(object sender, RoutedEventArgs e)
@@ -498,6 +547,59 @@ public partial class MainWindow : Window
             }
         }
     }
+
+    private void BtnAddFolder_Click(object sender, RoutedEventArgs e)
+    {
+        var novaPasta = new ScheduleItem
+        {
+            Title = "NOVA PASTA",
+            ItemTypeIcon = "📁", // Ou o ícone que preferires
+            IsFolder = true,
+            IsExpanded = true
+        };
+
+        ScheduleItems.Add(novaPasta);
+        LstSchedule.SelectedItem = novaPasta;
+        LstSchedule.ScrollIntoView(novaPasta);
+    }
+
+    private void InnerList_Drop(object sender, DragEventArgs e)
+{
+    // 1. Avisar o WPF que nós tratámos do assunto (evita que a lista principal tente engolir o item também)
+    e.Handled = true;
+
+    // 2. Descobrir qual é a pasta onde largámos o rato
+    if (sender is ListBox innerListBox && innerListBox.DataContext is ScheduleItem pastaDestino && pastaDestino.IsFolder)
+    {
+        // 3. RECUPERAR O ITEM ARRASTADO
+        // Atenção: Substitui 'ScheduleItem' pelo tipo exato que usas no teu DoDragDrop() atual!
+        if (e.Data.GetDataPresent(typeof(ScheduleItem)))
+        {
+            var itemArrastado = e.Data.GetData(typeof(ScheduleItem)) as ScheduleItem;
+            if (itemArrastado == null || itemArrastado == pastaDestino) return;
+
+            // Se o item estava na Lista Principal (arrastaste da raiz para dentro da pasta), remove-o da raiz
+            if (ScheduleItems.Contains(itemArrastado))
+            {
+                ScheduleItems.Remove(itemArrastado);
+            }
+            // Se tiveres lógica para arrastar entre duas pastas diferentes no futuro, farias aqui também
+
+            // 4. Adicionar à pasta!
+            if (!pastaDestino.SubItems.Contains(itemArrastado))
+            {
+                pastaDestino.SubItems.Add(itemArrastado);
+                
+                // Força a pasta a ficar expandida para vermos o item a cair lá dentro
+                pastaDestino.IsExpanded = true;
+            }
+        }
+        
+        // NOTA: Se arrastares diretamente da lista "Músicas" (e for um objeto 'Song' ou algo parecido), 
+        // fazes o mesmo If que tens no teu LstSchedule_Drop atual, transformas num ScheduleItem e fazes:
+        // pastaDestino.SubItems.Add(novoItemConvertido);
+    }
+}
 
     private void LstBibleResults_PreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
     {
@@ -909,6 +1011,10 @@ public partial class MainWindow : Window
         else if (e.Key == Key.Up || e.Key == Key.PageUp) { PrevSlide(); e.Handled = true; }
     }
 
+    private void BtnNextSlide_Click(object sender, RoutedEventArgs e) => NextSlide();
+
+    private void BtnPrevSlide_Click(object sender, RoutedEventArgs e) => PrevSlide();
+
     private void NextSlide()
     {
         if (LstSlides.Items.Count == 0) return;
@@ -925,6 +1031,12 @@ public partial class MainWindow : Window
 
     private void SetPreviewMediaBackground(string? filePath)
     {
+        // OTIMIZAÇÃO CRÍTICA: Se este fundo já está a dar no Preview, não faz absolutamente nada!
+        if (string.Equals(_lastLoadedPreviewPath, filePath, StringComparison.OrdinalIgnoreCase))
+            return;
+
+        _lastLoadedPreviewPath = filePath;
+
         if (string.IsNullOrEmpty(filePath) || !System.IO.File.Exists(filePath))
         {
             PreviewVideo.Stop();
@@ -933,7 +1045,7 @@ public partial class MainWindow : Window
             return;
         }
 
-        string ext = System.IO.Path.GetExtension(filePath).ToLower();
+        string ext = System.IO.Path.GetExtension(filePath).ToLowerInvariant();
         var videoExtensions = new[] { ".mp4", ".mov", ".wmv", ".avi", ".m4v" };
 
         if (videoExtensions.Contains(ext))
