@@ -74,29 +74,24 @@ namespace WorshipProjectionApp.Services
             }
         }
 
-        public List<BibleVerse> Search(string query, string version)
+        public List<BibleVerse> Search(string query, string version, bool searchByWords = false)
         {
             var finalResults = new List<BibleVerse>();
-            if (string.IsNullOrWhiteSpace(query) || string.IsNullOrWhiteSpace(version))
-                return finalResults;
+            if (string.IsNullOrWhiteSpace(query) || string.IsNullOrWhiteSpace(version)) return finalResults;
 
             query = query.Trim();
-
             string? dbPath = null;
             string[] extensions = { ".sqlite", ".db" };
+
             foreach (var ext in extensions)
             {
                 string testPath = Path.Combine(BiblesFolder, version + ext);
-                if (File.Exists(testPath))
-                {
-                    dbPath = testPath;
-                    break;
-                }
+                if (File.Exists(testPath)) { dbPath = testPath; break; }
             }
 
             if (dbPath == null)
             {
-                finalResults.Add(new BibleVerse { BookName = "Aviso", Text = $"Ficheiro da Bíblia '{version}' não encontrado.", Version = version });
+                finalResults.Add(new BibleVerse { BookName = "Aviso", Text = "Ficheiro não encontrado.", Version = version });
                 return finalResults;
             }
 
@@ -105,89 +100,60 @@ namespace WorshipProjectionApp.Services
                 using var connection = new SqliteConnection($"Data Source={dbPath}");
                 connection.Open();
 
-                // NOVA REGEX: Agora deteta se houver um hífen para criar um intervalo (ex: -18)
-                var match = Regex.Match(query, @"^(?<book>\d?\s*[a-zA-ZáéíóúÁÉÍÓÚãõÃÕâêîôûÂÊÎÔÛçÇ]+)\s+(?<chapter>\d+)[:\s]?(?<verse>\d+)?(?:\s*-\s*(?<verseEnd>\d+))?$");
-
-                if (match.Success)
+                if (searchByWords)
                 {
-                    string bookInput = match.Groups["book"].Value.Replace(" ", "").ToLower();
-                    int chapter = int.Parse(match.Groups["chapter"].Value);
-
-                    string verseStr = match.Groups["verse"].Value;
-                    string verseEndStr = match.Groups["verseEnd"].Value; // Lê o versículo final!
-
-                    int? verse = string.IsNullOrEmpty(verseStr) ? null : int.Parse(verseStr);
-                    int? verseEnd = string.IsNullOrEmpty(verseEndStr) ? null : int.Parse(verseEndStr);
-
-                    string targetBookName = BookAliases.TryGetValue(bookInput, out var alias) ? alias : bookInput;
-
-                    string sql = @"
-                        SELECT b.name, v.chapter, v.verse, v.text 
-                        FROM verse v 
-                        JOIN book b ON v.book_id = b.id 
-                        WHERE b.name LIKE @book AND v.chapter = @chapter";
-
-                    // NOVA LÓGICA SQL: Constrói a query consoante seja 1 versículo ou um intervalo
-                    if (verse.HasValue && verseEnd.HasValue)
-                    {
-                        sql += " AND v.verse >= @verse AND v.verse <= @verseEnd";
-                    }
-                    else if (verse.HasValue)
-                    {
-                        sql += " AND v.verse = @verse";
-                    }
-
-                    sql += " ORDER BY v.verse";
-
+                    // MODO 2: PROCURA POR PALAVRAS NOS VERSÍCULOS
+                    string sql = "SELECT b.name, v.chapter, v.verse, v.text FROM verse v JOIN book b ON v.book_id = b.id WHERE v.text LIKE @search LIMIT 40";
                     using var command = new SqliteCommand(sql, connection);
-                    command.Parameters.AddWithValue("@book", targetBookName + "%");
-                    command.Parameters.AddWithValue("@chapter", chapter);
-
-                    if (verse.HasValue) command.Parameters.AddWithValue("@verse", verse.Value);
-                    if (verseEnd.HasValue) command.Parameters.AddWithValue("@verseEnd", verseEnd.Value);
-
+                    command.Parameters.AddWithValue("@search", "%" + query + "%");
                     using var reader = command.ExecuteReader();
-                    while (reader.Read())
-                    {
-                        finalResults.Add(new BibleVerse
-                        {
-                            BookName = reader.GetString(0),
-                            Chapter = reader.GetInt32(1),
-                            Verse = reader.GetInt32(2),
-                            Text = reader.GetString(3),
-                            Version = version
-                        });
-                    }
+                    while (reader.Read()) finalResults.Add(new BibleVerse { BookName = reader.GetString(0), Chapter = reader.GetInt32(1), Verse = reader.GetInt32(2), Text = reader.GetString(3), Version = version });
                 }
                 else
                 {
-                    // Pesquisa livre (por palavra-chave)
-                    string sql = @"
-                        SELECT b.name, v.chapter, v.verse, v.text 
-                        FROM verse v 
-                        JOIN book b ON v.book_id = b.id 
-                        WHERE v.text LIKE @search LIMIT 40";
+                    // MODO 1: REFERÊNCIA EXATA OU NOME DO LIVRO (ex: "Salm" ou "Jo 3:16")
+                    // Regex atualizada: O Capítulo agora é opcional!
+                    var match = Regex.Match(query, @"^(?<book>\d?\s*[a-zA-ZáéíóúÁÉÍÓÚãõÃÕâêîôûÂÊÎÔÛçÇ]+)(?:\s+(?<chapter>\d+))?(?:[:\s]?(?<verse>\d+))?(?:\s*-\s*(?<verseEnd>\d+))?$");
 
-                    using var command = new SqliteCommand(sql, connection);
-                    command.Parameters.AddWithValue("@search", "%" + query + "%");
-
-                    using var reader = command.ExecuteReader();
-                    while (reader.Read())
+                    if (match.Success)
                     {
-                        finalResults.Add(new BibleVerse
+                        string bookInput = match.Groups["book"].Value.Replace(" ", "").ToLower();
+                        string targetBookName = BookAliases.TryGetValue(bookInput, out var alias) ? alias : bookInput;
+
+                        string sql = "SELECT b.name, v.chapter, v.verse, v.text FROM verse v JOIN book b ON v.book_id = b.id WHERE b.name LIKE @book";
+                        using var command = new SqliteCommand();
+                        command.Connection = connection;
+                        command.Parameters.AddWithValue("@book", targetBookName + "%");
+
+                        if (match.Groups["chapter"].Success)
                         {
-                            BookName = reader.GetString(0),
-                            Chapter = reader.GetInt32(1),
-                            Verse = reader.GetInt32(2),
-                            Text = reader.GetString(3),
-                            Version = version
-                        });
+                            sql += " AND v.chapter = @chapter";
+                            command.Parameters.AddWithValue("@chapter", int.Parse(match.Groups["chapter"].Value));
+
+                            if (match.Groups["verse"].Success && match.Groups["verseEnd"].Success)
+                            {
+                                sql += " AND v.verse >= @verse AND v.verse <= @verseEnd";
+                                command.Parameters.AddWithValue("@verse", int.Parse(match.Groups["verse"].Value));
+                                command.Parameters.AddWithValue("@verseEnd", int.Parse(match.Groups["verseEnd"].Value));
+                            }
+                            else if (match.Groups["verse"].Success)
+                            {
+                                sql += " AND v.verse = @verse";
+                                command.Parameters.AddWithValue("@verse", int.Parse(match.Groups["verse"].Value));
+                            }
+                        }
+
+                        sql += " ORDER BY v.chapter, v.verse LIMIT 40";
+                        command.CommandText = sql;
+
+                        using var reader = command.ExecuteReader();
+                        while (reader.Read()) finalResults.Add(new BibleVerse { BookName = reader.GetString(0), Chapter = reader.GetInt32(1), Verse = reader.GetInt32(2), Text = reader.GetString(3), Version = version });
                     }
                 }
             }
             catch (Exception ex)
             {
-                finalResults.Add(new BibleVerse { BookName = "Erro de Leitura", Text = $"A estrutura da base de dados ({version}) não é suportada. Detalhe: {ex.Message}", Version = version });
+                finalResults.Add(new BibleVerse { BookName = "Erro", Text = ex.Message, Version = version });
             }
 
             return finalResults;

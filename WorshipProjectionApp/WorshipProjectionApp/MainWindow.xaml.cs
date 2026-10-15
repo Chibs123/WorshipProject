@@ -17,6 +17,8 @@ using Color = System.Windows.Media.Color;
 using MouseEventArgs = System.Windows.Input.MouseEventArgs;
 using DragEventArgs = System.Windows.DragEventArgs;
 using ListBox = System.Windows.Controls.ListBox;
+using DragDropEffects = System.Windows.DragDropEffects;
+using Button = System.Windows.Controls.Button;
 
 namespace WorshipProjectionApp;
 
@@ -127,6 +129,99 @@ public partial class MainWindow : Window
         UpdateSongFilter(string.Empty);
     }
 
+    // NOVA FUNÇÃO para encontrar a ListBox, independentemente de onde os botões estejam
+    private ListBox? GetInnerListBox(DependencyObject child)
+    {
+        DependencyObject current = child;
+        Expander? expander = null;
+
+        // 1. Sobe na árvore até encontrar o Expander desta pasta específica
+        while (current != null)
+        {
+            if (current is Expander exp)
+            {
+                expander = exp;
+                break;
+            }
+            current = VisualTreeHelper.GetParent(current);
+        }
+
+        // 2. Se encontrou o Expander, desce na árvore para encontrar a ListBox com as músicas
+        if (expander != null)
+        {
+            return FindVisualChild<ListBox>(expander);
+        }
+
+        return null;
+    }
+
+    // Função auxiliar que pesquisa elementos visuais "para baixo"
+    private T? FindVisualChild<T>(DependencyObject parent) where T : DependencyObject
+    {
+        for (int i = 0; i < VisualTreeHelper.GetChildrenCount(parent); i++)
+        {
+            DependencyObject child = VisualTreeHelper.GetChild(parent, i);
+            if (child != null && child is T t)
+            {
+                return t;
+            }
+            else
+            {
+                T? childOfChild = FindVisualChild<T>(child);
+                if (childOfChild != null) return childOfChild;
+            }
+        }
+        return null;
+    }
+
+    private void BtnMoveSubItemUp_Click(object sender, RoutedEventArgs e)
+{
+    if (sender is Button btn && btn.DataContext is ScheduleItem folder)
+    {
+        var listBox = GetInnerListBox(btn);
+        
+        // Verifica se há alguma música selecionada nesta pasta
+        if (listBox?.SelectedItem is ScheduleItem selectedSubItem)
+        {
+            int index = folder.SubItems.IndexOf(selectedSubItem);
+            
+            // Só sobe se não for já o primeiro item (0)
+            if (index > 0)
+            {
+                folder.SubItems.RemoveAt(index);
+                folder.SubItems.Insert(index - 1, selectedSubItem);
+                
+                // Mantém a música selecionada para permitir clicar várias vezes rapidamente
+                listBox.SelectedItem = selectedSubItem;
+                SaveCurrentSession();
+            }
+        }
+    }
+}
+
+private void BtnMoveSubItemDown_Click(object sender, RoutedEventArgs e)
+{
+    if (sender is Button btn && btn.DataContext is ScheduleItem folder)
+    {
+        var listBox = GetInnerListBox(btn);
+        
+        if (listBox?.SelectedItem is ScheduleItem selectedSubItem)
+        {
+            int index = folder.SubItems.IndexOf(selectedSubItem);
+            
+            // Só desce se não for já o último item
+            if (index >= 0 && index < folder.SubItems.Count - 1)
+            {
+                folder.SubItems.RemoveAt(index);
+                folder.SubItems.Insert(index + 1, selectedSubItem);
+                
+                listBox.SelectedItem = selectedSubItem;
+                SaveCurrentSession();
+            }
+        }
+    }
+}
+
     private void LoadTeamData()
     {
         var catalog = WorshipTeamCatalog.LoadCatalog();
@@ -166,22 +261,6 @@ public partial class MainWindow : Window
         }
     }
 
-    private void BtnEditSong_Click(object sender, RoutedEventArgs e)
-    {
-        if (LstSongs.SelectedItem is Song selectedSong)
-        {
-            var editor = new SongEditorWindow(selectedSong) { Owner = this };
-            if (editor.ShowDialog() == true && editor.ResultSong != null)
-            {
-                // A LINHA ABAIXO É A QUE ESTAVA A FALTAR PARA GRAVAR NA BASE DE DADOS!
-                _dbService.UpdateSong(editor.ResultSong);
-
-                _allSongs = _dbService.GetAllSongs();
-                UpdateSongFilter(TxtSearchSong.Text);
-            }
-        }
-    }
-
     // ---------------------------------------------------------
     // DRAG & DROP DAS MÚSICAS PARA A PROGRAMAÇÃO
     // ---------------------------------------------------------
@@ -208,6 +287,21 @@ public partial class MainWindow : Window
         if (RbFilterVideos?.IsChecked == true) list = list.Where(b => b.IsVideo);
         else if (RbFilterImages?.IsChecked == true) list = list.Where(b => !b.IsVideo);
 
+        string query = TxtSearchBackground?.Text?.Trim() ?? "";
+        if (!string.IsNullOrEmpty(query))
+        {
+            if (RbSearchBgContains?.IsChecked == true)
+            {
+                // MODO 2: Nome contém a palavra algures no meio
+                list = list.Where(b => b.Name.Contains(query, StringComparison.OrdinalIgnoreCase));
+            }
+            else
+            {
+                // MODO 1: Nome começa exatamente por...
+                list = list.Where(b => b.Name.StartsWith(query, StringComparison.OrdinalIgnoreCase));
+            }
+        }
+
         foreach (var item in list) FilteredBackgrounds.Add(item);
     }
 
@@ -231,61 +325,67 @@ public partial class MainWindow : Window
     }
 
     private void LstSchedule_PreviewMouseMove(object sender, System.Windows.Input.MouseEventArgs e)
+{
+    if (e.LeftButton == MouseButtonState.Pressed && _isSchedulePotentialDrag)
     {
-        if (e.LeftButton == MouseButtonState.Pressed && _isSchedulePotentialDrag && LstSchedule.SelectedItem is ScheduleItem item)
-        {
-            Point mousePos = e.GetPosition(null);
-            Vector diff = _scheduleDragStartPoint - mousePos;
+        Point mousePos = e.GetPosition(null);
+        Vector diff = _scheduleDragStartPoint - mousePos;
 
-            // Só ativa o arrasto se o rato se mover uma distância real (evita falsos arrastos no clique)
-            if (Math.Abs(diff.X) > SystemParameters.MinimumHorizontalDragDistance ||
-                Math.Abs(diff.Y) > SystemParameters.MinimumVerticalDragDistance)
+        if (Math.Abs(diff.X) > SystemParameters.MinimumHorizontalDragDistance ||
+            Math.Abs(diff.Y) > SystemParameters.MinimumVerticalDragDistance)
+        {
+            _isSchedulePotentialDrag = false;
+
+            // EM VEZ DE USAR 'LstSchedule.SelectedItem', VAMOS BUSCAR EXATAMENTE O ELEMENTO DEBAIXO DO RATO
+            if (e.OriginalSource is FrameworkElement frameworkElement && 
+                frameworkElement.DataContext is ScheduleItem itemArrastado && 
+                sender is ListBox listBoxOrigem)
             {
-                _isSchedulePotentialDrag = false;
-                DragDrop.DoDragDrop(LstSchedule, item, System.Windows.DragDropEffects.Move);
+                DragDrop.DoDragDrop(listBoxOrigem, itemArrastado, DragDropEffects.Move);
             }
         }
     }
+}
+
+private void LstSchedule_Drop(object sender, System.Windows.DragEventArgs e)
+{
+    if (e.Data.GetData(typeof(ScheduleItem)) is ScheduleItem itemArrastado)
+    {
+        int dropIndex = -1;
+        if (e.OriginalSource is FrameworkElement fe && fe.DataContext is ScheduleItem targetItem)
+        {
+            dropIndex = ScheduleItems.IndexOf(targetItem);
+        }
+
+        // 1. REMOVE DA ORIGEM (Da raiz ou de dentro de uma pasta)
+        if (ScheduleItems.Contains(itemArrastado))
+        {
+            ScheduleItems.Remove(itemArrastado);
+        }
+        else
+        {
+            var parentFolder = ScheduleItems.FirstOrDefault(f => f.IsFolder && f.SubItems.Contains(itemArrastado));
+            if (parentFolder != null) parentFolder.SubItems.Remove(itemArrastado);
+        }
+
+        // 2. INSERE NO NOVO DESTINO (Na raiz do Alinhamento)
+        if (dropIndex != -1 && dropIndex <= ScheduleItems.Count)
+        {
+            ScheduleItems.Insert(dropIndex, itemArrastado);
+        }
+        else
+        {
+            ScheduleItems.Add(itemArrastado);
+        }
+
+        LstSchedule.SelectedItem = itemArrastado;
+        SaveCurrentSession();
+    }
+}
 
     private void LstSchedule_PreviewMouseLeftButtonUp(object sender, MouseButtonEventArgs e)
     {
         _isSchedulePotentialDrag = false;
-    }
-
-    private void LstSchedule_Drop(object sender, System.Windows.DragEventArgs e)
-    {
-        if (e.Data.GetData(typeof(ScheduleItem)) is ScheduleItem item)
-        {
-            int removeIndex = ScheduleItems.IndexOf(item);
-            int dropIndex = -1;
-
-            // Descobre em cima de que item o operador largou o cartão para inserir no local correto
-            if (e.OriginalSource is FrameworkElement fe && fe.DataContext is ScheduleItem targetItem)
-            {
-                dropIndex = ScheduleItems.IndexOf(targetItem);
-            }
-
-            if (removeIndex != -1) // Reordenação (vem da própria lista)
-            {
-                // O WPF tem um método perfeito para isto (Move), garante que não há duplicações!
-                if (dropIndex != -1 && dropIndex != removeIndex)
-                {
-                    ScheduleItems.Move(removeIndex, dropIndex);
-                }
-                else if (dropIndex == -1) // Se largou no fundo vazio da lista
-                {
-                    ScheduleItems.Move(removeIndex, ScheduleItems.Count - 1);
-                }
-            }
-            else // Novo Item (vem das Músicas ou Bíblia)
-            {
-                if (dropIndex != -1) ScheduleItems.Insert(dropIndex, item);
-                else ScheduleItems.Add(item);
-            }
-
-            LstSchedule.SelectedItem = item;
-            SaveCurrentSession();
-        }
     }
 
 
@@ -500,6 +600,31 @@ public partial class MainWindow : Window
         }
     }
 
+    private void MenuRemoveAnyItem_Click(object sender, RoutedEventArgs e)
+    {
+        if (sender is MenuItem menuItem && menuItem.DataContext is ScheduleItem itemToDelete)
+        {
+            // 1. Tenta remover da lista principal
+            if (ScheduleItems.Contains(itemToDelete))
+            {
+                ScheduleItems.Remove(itemToDelete);
+            }
+            else
+            {
+                // 2. Se não estiver na raiz, procura dentro das pastas e remove
+                foreach (var folder in ScheduleItems.Where(f => f.IsFolder))
+                {
+                    if (folder.SubItems.Contains(itemToDelete))
+                    {
+                        folder.SubItems.Remove(itemToDelete);
+                        break;
+                    }
+                }
+            }
+            SaveCurrentSession();
+        }
+    }
+
     private void SaveCurrentSession()
     {
         try { File.WriteAllText(AutoSavePath, JsonSerializer.Serialize(ScheduleItems, new JsonSerializerOptions { WriteIndented = true })); } catch { }
@@ -533,7 +658,10 @@ public partial class MainWindow : Window
             string version = CmbBibleVersion.SelectedItem?.ToString() ?? "";
             if (version == "Nenhuma Bíblia" || string.IsNullOrEmpty(version)) return;
 
-            var results = _bibleService.Search(TxtSearchBible.Text, version);
+            // Vê se a bolinha do "Modo 2 (Palavras)" está selecionada
+            bool searchByWords = RbSearchBibleText.IsChecked == true;
+
+            var results = _bibleService.Search(TxtSearchBible.Text, version, searchByWords);
             LstBibleResults.ItemsSource = results;
 
             if (results.Count > 0)
@@ -541,11 +669,15 @@ public partial class MainWindow : Window
                 if (TxtSearchBible.Text.Contains("-")) LstBibleResults.SelectAll();
                 else LstBibleResults.SelectedIndex = 0;
 
-                // Foco Automático para não precisares de clicar com o rato
                 Keyboard.ClearFocus();
                 LstBibleResults.Focus();
             }
         }
+    }
+
+    private void TxtSearchBackground_TextChanged(object sender, TextChangedEventArgs e)
+    {
+        ApplyBackgroundFilter();
     }
 
     private void BtnAddFolder_Click(object sender, RoutedEventArgs e)
@@ -563,30 +695,76 @@ public partial class MainWindow : Window
         LstSchedule.ScrollIntoView(novaPasta);
     }
 
+    private void MenuEditSong_Click(object sender, RoutedEventArgs e)
+    {
+        // Apanha a música exata onde o botão direito foi clicado
+        if (sender is MenuItem menuItem && menuItem.DataContext is Song songToEdit)
+        {
+            var editor = new SongEditorWindow(songToEdit) { Owner = this };
+            if (editor.ShowDialog() == true && editor.ResultSong != null)
+            {
+                _dbService.UpdateSong(editor.ResultSong);
+                _allSongs = _dbService.GetAllSongs();
+                UpdateSongFilter(TxtSearchSong.Text);
+            }
+        }
+    }
+
+    private void MenuDeleteSong_Click(object sender, RoutedEventArgs e)
+    {
+        // Apanha a música exata onde o botão direito foi clicado
+        if (sender is MenuItem menuItem && menuItem.DataContext is Song songToDelete)
+        {
+            var result = MessageBox.Show(
+                $"Tem a certeza que deseja apagar a música '{songToDelete.Title}'?\nEsta ação não pode ser revertida.",
+                "Apagar Música",
+                MessageBoxButton.YesNo,
+                MessageBoxImage.Warning);
+
+            if (result == MessageBoxResult.Yes)
+            {
+                _dbService.DeleteSong(songToDelete.Id);
+                _allSongs = _dbService.GetAllSongs();
+                UpdateSongFilter(TxtSearchSong.Text);
+
+                // Limpa o painel central se a música apagada estiver a ser projetada
+                if (TxtSelectedSongTitle.Text == songToDelete.Title)
+                {
+                    TxtSelectedSongTitle.Text = "Nenhum item selecionado";
+                    LstSlides.ItemsSource = null;
+                }
+            }
+        }
+    }
+
     private void InnerList_Drop(object sender, DragEventArgs e)
     {
-        e.Handled = true; // Avisa o WPF que já tratámos deste drop
+        e.Handled = true;
 
         if (sender is ListBox innerListBox && innerListBox.DataContext is ScheduleItem pastaDestino && pastaDestino.IsFolder)
         {
-            // Certifica-te que 'ScheduleItem' é o tipo exato que arrastas no teu DragDrop atual
             if (e.Data.GetDataPresent(typeof(ScheduleItem)))
             {
                 var itemArrastado = e.Data.GetData(typeof(ScheduleItem)) as ScheduleItem;
                 if (itemArrastado == null || itemArrastado == pastaDestino) return;
 
-                // 1. Remover o item da sua posição antiga (da raiz ou da pasta)
+                // 1. REMOVER DA ORIGEM UNIVERSAL (Raiz ou qualquer outra pasta)
                 if (ScheduleItems.Contains(itemArrastado))
                 {
                     ScheduleItems.Remove(itemArrastado);
                 }
-                else if (pastaDestino.SubItems.Contains(itemArrastado))
+                else
                 {
-                    pastaDestino.SubItems.Remove(itemArrastado);
+                    // Procura a pasta exata onde o item estava e remove-o de lá
+                    var pastaOrigem = ScheduleItems.FirstOrDefault(f => f.IsFolder && f.SubItems.Contains(itemArrastado));
+                    if (pastaOrigem != null)
+                    {
+                        pastaOrigem.SubItems.Remove(itemArrastado);
+                    }
                 }
 
-                // 2. Descobrir a que altura da pasta o rato largou o item
-                int dropIndex = pastaDestino.SubItems.Count; // Por defeito, atira para o fim da pasta
+                // 2. DESCOBRIR A POSIÇÃO DE DESTINO
+                int dropIndex = pastaDestino.SubItems.Count;
 
                 var elementUnderMouse = e.OriginalSource as FrameworkElement;
                 if (elementUnderMouse?.DataContext is ScheduleItem itemAlvo && itemAlvo != pastaDestino)
@@ -594,16 +772,17 @@ public partial class MainWindow : Window
                     int indexAlvo = pastaDestino.SubItems.IndexOf(itemAlvo);
                     if (indexAlvo >= 0)
                     {
-                        dropIndex = indexAlvo; // Se encontrou o alvo, assume a posição dele!
+                        dropIndex = indexAlvo;
                     }
                 }
 
-                // 3. Inserir o item na nova posição exata!
+                // 3. INSERIR NA NOVA PASTA
                 pastaDestino.SubItems.Insert(dropIndex, itemArrastado);
 
-                // 4. Manter a pasta aberta e o item selecionado
                 pastaDestino.IsExpanded = true;
                 innerListBox.SelectedItem = itemArrastado;
+
+                SaveCurrentSession();
             }
         }
     }
@@ -620,6 +799,7 @@ public partial class MainWindow : Window
         }
         else _isBiblePotentialDrag = false;
     }
+
 
     private void InnerList_SelectionChanged(object sender, SelectionChangedEventArgs e)
     {
@@ -866,7 +1046,28 @@ public partial class MainWindow : Window
     private void UpdateSongFilter(string query)
     {
         FilteredSongs.Clear();
-        var matches = string.IsNullOrWhiteSpace(query) ? _allSongs : _allSongs.Where(s => s.Title.Contains(query, StringComparison.OrdinalIgnoreCase));
+        IEnumerable<Song> matches;
+
+        if (string.IsNullOrWhiteSpace(query))
+        {
+            matches = _allSongs;
+        }
+        else
+        {
+            if (RbSearchSongLyrics?.IsChecked == true)
+            {
+                // MODO 2: Contém a palavra (Procura no Título E na Letra)
+                matches = _allSongs.Where(s =>
+                    (s.Title != null && s.Title.Contains(query, StringComparison.OrdinalIgnoreCase)) ||
+                    (s.RawLyrics != null && s.RawLyrics.Contains(query, StringComparison.OrdinalIgnoreCase)));
+            }
+            else
+            {
+                // MODO 1: Título exato a começar por... (Ex: "Grand" -> "Grandioso És Tu")
+                matches = _allSongs.Where(s => s.Title != null && s.Title.StartsWith(query, StringComparison.OrdinalIgnoreCase));
+            }
+        }
+
         foreach (var song in matches) FilteredSongs.Add(song);
     }
 
@@ -1068,7 +1269,7 @@ public partial class MainWindow : Window
 
     private void SetPreviewMediaBackground(string? filePath)
     {
-        // OTIMIZAÇÃO CRÍTICA: Se este fundo já está a dar no Preview, não faz absolutamente nada!
+        // OTIMIZAÇÃO: Se este fundo já está no Preview, não faz nada!
         if (string.Equals(_lastLoadedPreviewPath, filePath, StringComparison.OrdinalIgnoreCase))
             return;
 
@@ -1076,36 +1277,27 @@ public partial class MainWindow : Window
 
         if (string.IsNullOrEmpty(filePath) || !System.IO.File.Exists(filePath))
         {
-            PreviewVideo.Stop();
-            PreviewVideo.Source = null;
             PreviewBackgroundImage.Source = null;
             return;
         }
 
-        string ext = System.IO.Path.GetExtension(filePath).ToLowerInvariant();
-        var videoExtensions = new[] { ".mp4", ".mov", ".wmv", ".avi", ".m4v" };
+        // Tenta encontrar o ficheiro na nossa galeria já carregada em RAM
+        var knownBg = AvailableBackgrounds.FirstOrDefault(b => string.Equals(b.FilePath, filePath, StringComparison.OrdinalIgnoreCase));
 
-        if (videoExtensions.Contains(ext))
+        if (knownBg != null && knownBg.OptimizedThumbnail != null)
         {
-            PreviewBackgroundImage.Source = null;
-            try
-            {
-                PreviewVideo.Source = new Uri(filePath, UriKind.Absolute);
-                PreviewVideo.Position = TimeSpan.Zero;
-                PreviewVideo.Play();
-            }
-            catch { }
+            // Se encontrou (seja vídeo ou foto), usa a miniatura levezinha que já está em memória! (0 custo de CPU/RAM extra)
+            PreviewBackgroundImage.Source = knownBg.OptimizedThumbnail;
         }
         else
         {
-            PreviewVideo.Stop();
-            PreviewVideo.Source = null;
+            // Fallback: Se for um ficheiro de fora (ex: botão LOGO que não está na galeria)
             try
             {
                 var bitmap = new System.Windows.Media.Imaging.BitmapImage();
                 bitmap.BeginInit();
                 bitmap.UriSource = new Uri(filePath, UriKind.Absolute);
-                bitmap.DecodePixelWidth = 320;
+                bitmap.DecodePixelWidth = 320; // Carrega pequenino para poupar RAM
                 bitmap.CacheOption = System.Windows.Media.Imaging.BitmapCacheOption.OnLoad;
                 bitmap.EndInit();
                 bitmap.Freeze();
@@ -1115,7 +1307,6 @@ public partial class MainWindow : Window
         }
     }
 
-    private void PreviewVideo_MediaEnded(object sender, RoutedEventArgs e) { PreviewVideo.Position = TimeSpan.Zero; PreviewVideo.Play(); }
     private void BtnMinimize_Click(object sender, RoutedEventArgs e) { this.WindowState = WindowState.Minimized; }
     private void BtnMaximize_Click(object sender, RoutedEventArgs e) { this.WindowState = this.WindowState == WindowState.Maximized ? WindowState.Normal : WindowState.Maximized; }
     private void BtnClose_Click(object sender, RoutedEventArgs e) { this.Close(); }
@@ -1213,4 +1404,11 @@ public partial class MainWindow : Window
             catch { }
         }
     }
+
+    private void SongSearchMode_Changed(object sender, RoutedEventArgs e)
+    {
+        if (TxtSearchSong != null) UpdateSongFilter(TxtSearchSong.Text);
+    }
+
+
 }

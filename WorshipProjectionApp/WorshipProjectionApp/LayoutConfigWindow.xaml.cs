@@ -93,7 +93,6 @@ public partial class LayoutConfigWindow : Window
             {
                 var border = new Border
                 {
-                    BorderBrush = new SolidColorBrush(System.Windows.Media.Color.FromArgb(35, 255, 255, 255)),
                     BorderThickness = new Thickness(1),
                     Margin = new Thickness(1)
                 };
@@ -109,10 +108,13 @@ public partial class LayoutConfigWindow : Window
             var card = new Border
             {
                 Background = new SolidColorBrush(System.Windows.Media.Color.FromRgb(22, 32, 50)),
-                BorderBrush = new SolidColorBrush(System.Windows.Media.Color.FromRgb(212, 175, 55)),
+                BorderBrush = (System.Windows.Media.Brush)System.Windows.Application.Current.Resources["AccentColor"],
                 BorderThickness = new Thickness(2),
                 CornerRadius = new CornerRadius(6),
-                Margin = new Thickness(3)
+                Margin = new Thickness(3),
+
+                Padding = new Thickness(4),
+                ClipToBounds = true
             };
 
             var txt = new TextBlock
@@ -120,8 +122,12 @@ public partial class LayoutConfigWindow : Window
                 Text = p.Title,
                 Foreground = System.Windows.Media.Brushes.White,
                 FontWeight = FontWeights.Bold,
-                FontSize = 11,
+
+                FontSize = 10,
                 TextWrapping = TextWrapping.Wrap,
+
+                TextTrimming = TextTrimming.CharacterEllipsis,
+
                 TextAlignment = TextAlignment.Center,
                 HorizontalAlignment = System.Windows.HorizontalAlignment.Center,
                 VerticalAlignment = VerticalAlignment.Center

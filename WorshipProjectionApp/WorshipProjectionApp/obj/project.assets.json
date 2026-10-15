@@ -2069,23 +2069,23 @@
     ]
   },
   "packageFolders": {
-    "C:\\Users\\tiaho\\.nuget\\packages\\": {},
+    "C:\\Users\\Tiago.Rosario\\.nuget\\packages\\": {},
     "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages": {}
   },
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\Users\\tiaho\\Documents\\GitHub\\WorshipProject\\WorshipProjectionApp\\WorshipProjectionApp\\WorshipProjectionApp.csproj",
+      "projectUniqueName": "C:\\Users\\Tiago.Rosario\\Documents\\GitHub\\WorshipProject\\WorshipProjectionApp\\WorshipProjectionApp\\WorshipProjectionApp.csproj",
       "projectName": "WorshipProjectionApp",
-      "projectPath": "C:\\Users\\tiaho\\Documents\\GitHub\\WorshipProject\\WorshipProjectionApp\\WorshipProjectionApp\\WorshipProjectionApp.csproj",
-      "packagesPath": "C:\\Users\\tiaho\\.nuget\\packages\\",
-      "outputPath": "C:\\Users\\tiaho\\Documents\\GitHub\\WorshipProject\\WorshipProjectionApp\\WorshipProjectionApp\\obj\\",
+      "projectPath": "C:\\Users\\Tiago.Rosario\\Documents\\GitHub\\WorshipProject\\WorshipProjectionApp\\WorshipProjectionApp\\WorshipProjectionApp.csproj",
+      "packagesPath": "C:\\Users\\Tiago.Rosario\\.nuget\\packages\\",
+      "outputPath": "C:\\Users\\Tiago.Rosario\\Documents\\GitHub\\WorshipProject\\WorshipProjectionApp\\WorshipProjectionApp\\obj\\",
       "projectStyle": "PackageReference",
       "fallbackFolders": [
         "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
       ],
       "configFilePaths": [
-        "C:\\Users\\tiaho\\AppData\\Roaming\\NuGet\\NuGet.Config",
+        "C:\\Users\\Tiago.Rosario\\AppData\\Roaming\\NuGet\\NuGet.Config",
         "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
         "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
       ],

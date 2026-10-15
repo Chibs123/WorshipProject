@@ -72,44 +72,52 @@
                         </StackPanel>
 
                         <ListBox x:Name="LstSlidesEditor" SelectionChanged="LstSlidesEditor_SelectionChanged" Background="Transparent" BorderThickness="0" ScrollViewer.HorizontalScrollBarVisibility="Disabled">
+
+                            <!-- 1. Limpa o estilo do contentor (sem bordas duplas nem paddings fantasmas) -->
                             <ListBox.ItemContainerStyle>
                                 <Style TargetType="ListBoxItem">
                                     <Setter Property="Background" Value="Transparent"/>
-                                    <Setter Property="Padding" Value="4"/>
+                                    <Setter Property="Padding" Value="0"/>
                                     <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+                                    <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
                                     <Setter Property="Template">
                                         <Setter.Value>
                                             <ControlTemplate TargetType="ListBoxItem">
-                                                <Border x:Name="Bd" Background="{TemplateBinding Background}" CornerRadius="6" Padding="{TemplateBinding Padding}" Margin="0,0,0,6">
-                                                    <ContentPresenter/>
+                                                <Border Background="Transparent" Padding="{TemplateBinding Padding}">
+                                                    <ContentPresenter HorizontalAlignment="Stretch"/>
                                                 </Border>
-                                                <ControlTemplate.Triggers>
-                                                    <Trigger Property="IsSelected" Value="True">
-                                                        <Setter TargetName="Bd" Property="Background" Value="#24344D"/>
-                                                        <Setter TargetName="Bd" Property="BorderBrush" Value="{DynamicResource AccentColor}"/>
-                                                        <Setter TargetName="Bd" Property="BorderThickness" Value="1"/>
-                                                    </Trigger>
-                                                    <Trigger Property="IsMouseOver" Value="True">
-                                                        <Setter TargetName="Bd" Property="Background" Value="#1A2538"/>
-                                                    </Trigger>
-                                                </ControlTemplate.Triggers>
                                             </ControlTemplate>
                                         </Setter.Value>
                                     </Setter>
                                 </Style>
                             </ListBox.ItemContainerStyle>
+
+                            <!-- 2. O Cartão em si: Gere a cor, o hover e a seleção -->
                             <ListBox.ItemTemplate>
                                 <DataTemplate>
-                                    <Border Background="{DynamicResource CardBg}" BorderBrush="{DynamicResource BorderDark}" BorderThickness="1" CornerRadius="4" Padding="8">
+                                    <!-- Adicionado MinHeight="60" para manter a estrutura mesmo sem texto -->
+                                    <Border x:Name="SlideCard" Background="{DynamicResource CardBg}" BorderBrush="{DynamicResource BorderDark}" BorderThickness="1.5" CornerRadius="6" Padding="12" Margin="0,0,4,8" MinHeight="60">
                                         <Grid>
                                             <StackPanel>
-                                                <TextBlock Text="{Binding Header}" FontWeight="Bold" Foreground="{DynamicResource AccentColor}" FontSize="12" Margin="0,0,0,4"/>
+                                                <TextBlock Text="{Binding Header}" FontWeight="Bold" Foreground="{DynamicResource AccentColor}" FontSize="12" Margin="0,0,0,6"/>
                                                 <TextBlock Text="{Binding Content}" FontSize="11" Foreground="{DynamicResource TextMuted}" TextTrimming="CharacterEllipsis" MaxHeight="30" TextWrapping="Wrap"/>
                                             </StackPanel>
+
                                             <!-- MOSTRA O ICON SE TIVER FUNDO -->
                                             <TextBlock Text="🖼️" Visibility="{Binding HasCustomBackground, Converter={StaticResource BoolToVis}}" HorizontalAlignment="Right" VerticalAlignment="Top" FontSize="12"/>
                                         </Grid>
                                     </Border>
+
+                                    <DataTemplate.Triggers>
+                                        <DataTrigger Binding="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type ListBoxItem}}, Path=IsMouseOver}" Value="True">
+                                            <Setter TargetName="SlideCard" Property="Background" Value="#1A2538"/>
+                                            <Setter TargetName="SlideCard" Property="BorderBrush" Value="#3B4D71"/>
+                                        </DataTrigger>
+                                        <DataTrigger Binding="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type ListBoxItem}}, Path=IsSelected}" Value="True">
+                                            <Setter TargetName="SlideCard" Property="Background" Value="#24344D"/>
+                                            <Setter TargetName="SlideCard" Property="BorderBrush" Value="{DynamicResource AccentColor}"/>
+                                        </DataTrigger>
+                                    </DataTemplate.Triggers>
                                 </DataTemplate>
                             </ListBox.ItemTemplate>
                         </ListBox>

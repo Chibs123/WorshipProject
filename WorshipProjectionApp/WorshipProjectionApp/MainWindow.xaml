@@ -669,8 +669,10 @@
                 </Grid.ColumnDefinitions>
 
                 <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
-                    <Border Background="#0D131F" BorderBrush="{DynamicResource BorderDark}" BorderThickness="1" CornerRadius="8" Padding="3" Height="38" Margin="0,0,10,0" VerticalAlignment="Center">
+                    <!-- BORDER ÚNICO QUE ENGLOBARÁ TODOS OS BOTÕES DE CONTROLO E ÍCONES -->
+                    <Border Background="#0D131F" BorderBrush="{DynamicResource BorderDark}" BorderThickness="1" CornerRadius="8" Padding="3" Height="38" VerticalAlignment="Center">
                         <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                            <!-- 1. Botões de Estado do Projetor -->
                             <Button x:Name="BtnModeLive" Content="● LIVE" Click="BtnModeLive_Click" Style="{DynamicResource NavyButton}" Margin="0,0,3,0" Height="30" Padding="14,0" WindowChrome.IsHitTestVisibleInChrome="True" ToolTip="Transmitir para o Projetor (F5)"/>
                             <Button x:Name="BtnModeLogo" Content="LOGO" Click="BtnModeLogo_Click" Style="{DynamicResource NavyButton}" Margin="0,0,3,0" Height="30" Padding="14,0" WindowChrome.IsHitTestVisibleInChrome="True" ToolTip="Ativar Logo (F6) | Botão Direito para escolher ficheiro">
                                 <Button.ContextMenu>
@@ -683,42 +685,50 @@
                                     </ContextMenu>
                                 </Button.ContextMenu>
                             </Button>
-                            <Button x:Name="BtnModeClear" Content="CLEAR" Click="BtnModeClear_Click" Style="{DynamicResource NavyButton}" Height="30" Padding="14,0" WindowChrome.IsHitTestVisibleInChrome="True" ToolTip="Limpar Texto do Ecrã (Esc)"/>
+                            <Button x:Name="BtnModeClear" Content="CLEAR" Click="BtnModeClear_Click" Style="{DynamicResource NavyButton}" Margin="0,0,8,0" Height="30" Padding="14,0" WindowChrome.IsHitTestVisibleInChrome="True" ToolTip="Limpar Texto do Ecrã (Esc)"/>
+
+                            <!-- Uma linha divisória suave para separar as ações de projetor dos menus de app -->
+                            <Rectangle Width="1" Fill="{DynamicResource BorderDark}" Margin="0,4,8,4"/>
+
+                            <!-- 2. Botões de Ícones (Alertas e Menu de Settings) -->
+                            <Button Click="BtnOpenAlerts_Click" Style="{DynamicResource IconButton}" Width="30" Height="30" Margin="0,0,3,0" VerticalAlignment="Center" WindowChrome.IsHitTestVisibleInChrome="True" ToolTip="Informações, Alertas e Cronómetro">
+                                <TextBlock FontFamily="{StaticResource IconFont}" Text="&#xE783;" FontSize="14" Foreground="{DynamicResource AccentColor}"/>
+                            </Button>
+
+                            <Menu Height="30" VerticalAlignment="Center" WindowChrome.IsHitTestVisibleInChrome="True" Background="Transparent">
+                                <!-- Coloquei o Menu a emular o estilo NavyButton para ficar consistente -->
+                                <MenuItem Width="30" Height="30" Padding="0" Margin="0" VerticalAlignment="Center" ToolTip="Configurações e Importação">
+                                    <MenuItem.Header>
+                                        <Border Background="{StaticResource ButtonNeutral}" BorderBrush="#334155" BorderThickness="1" CornerRadius="6" Width="30" Height="30" HorizontalAlignment="Center">
+                                            <TextBlock FontFamily="{StaticResource IconFont}" Text="&#xE713;" FontSize="14" Foreground="{DynamicResource AccentColor}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                        </Border>
+                                    </MenuItem.Header>
+
+                                    <MenuItem Header="Personalizar Layout (Lego)" Click="BtnOpenLayoutConfig_Click">
+                                        <MenuItem.Icon>
+                                            <TextBlock FontFamily="{StaticResource IconFont}" Text="&#xE7C3;" Foreground="{DynamicResource AccentColor}"/>
+                                        </MenuItem.Icon>
+                                    </MenuItem>
+                                    <MenuItem Header="Definições de Projeção" Click="BtnOpenSettings_Click">
+                                        <MenuItem.Icon>
+                                            <TextBlock FontFamily="{StaticResource IconFont}" Text="&#xE713;" Foreground="{DynamicResource AccentColor}"/>
+                                        </MenuItem.Icon>
+                                    </MenuItem>
+                                    <Border Height="1" Background="#26334D" Margin="6,4"/>
+                                    <MenuItem Header="Importar EasyWorship (Songs.db)" Click="BtnImportEasyWorship_Click">
+                                        <MenuItem.Icon>
+                                            <TextBlock FontFamily="{StaticResource IconFont}" Text="&#xE896;" Foreground="{DynamicResource TextMuted}"/>
+                                        </MenuItem.Icon>
+                                    </MenuItem>
+                                    <MenuItem Header="Importar Bíblia (SQLite)" Click="BtnImportBible_Click">
+                                        <MenuItem.Icon>
+                                            <TextBlock FontFamily="{StaticResource IconFont}" Text="&#xE896;" Foreground="{DynamicResource TextMuted}"/>
+                                        </MenuItem.Icon>
+                                    </MenuItem>
+                                </MenuItem>
+                            </Menu>
                         </StackPanel>
                     </Border>
-
-                    <Button Click="BtnOpenAlerts_Click" Style="{DynamicResource IconButton}" Width="38" Height="38" Margin="0,0,6,0" VerticalAlignment="Center" WindowChrome.IsHitTestVisibleInChrome="True" ToolTip="Informações, Alertas e Cronómetro">
-                        <TextBlock FontFamily="{StaticResource IconFont}" Text="&#xE783;" FontSize="15" Foreground="{DynamicResource AccentColor}"/>
-                    </Button>
-
-                    <Menu Height="38" VerticalAlignment="Center" WindowChrome.IsHitTestVisibleInChrome="True">
-                        <MenuItem Width="38" Height="38" Padding="0" Margin="0" VerticalAlignment="Center" ToolTip="Configurações e Importação">
-                            <MenuItem.Header>
-                                <TextBlock FontFamily="{StaticResource IconFont}" Text="&#xE713;" FontSize="15" Foreground="{DynamicResource AccentColor}"/>
-                            </MenuItem.Header>
-                            <MenuItem Header="Personalizar Layout (Lego)" Click="BtnOpenLayoutConfig_Click">
-                                <MenuItem.Icon>
-                                    <TextBlock FontFamily="{StaticResource IconFont}" Text="&#xE7C3;" Foreground="{DynamicResource AccentColor}"/>
-                                </MenuItem.Icon>
-                            </MenuItem>
-                            <MenuItem Header="Definições de Projeção" Click="BtnOpenSettings_Click">
-                                <MenuItem.Icon>
-                                    <TextBlock FontFamily="{StaticResource IconFont}" Text="&#xE713;" Foreground="{DynamicResource AccentColor}"/>
-                                </MenuItem.Icon>
-                            </MenuItem>
-                            <Border Height="1" Background="#26334D" Margin="6,4"/>
-                            <MenuItem Header="Importar EasyWorship (Songs.db)" Click="BtnImportEasyWorship_Click">
-                                <MenuItem.Icon>
-                                    <TextBlock FontFamily="{StaticResource IconFont}" Text="&#xE896;" Foreground="{DynamicResource TextMuted}"/>
-                                </MenuItem.Icon>
-                            </MenuItem>
-                            <MenuItem Header="Importar Bíblia (SQLite)" Click="BtnImportBible_Click">
-                                <MenuItem.Icon>
-                                    <TextBlock FontFamily="{StaticResource IconFont}" Text="&#xE896;" Foreground="{DynamicResource TextMuted}"/>
-                                </MenuItem.Icon>
-                            </MenuItem>
-                        </MenuItem>
-                    </Menu>
                 </StackPanel>
 
                 <!-- CENTRO: Relógio Digital Estilo Régie -->
@@ -778,8 +788,10 @@
                                 <Grid.Clip>
                                     <RectangleGeometry Rect="0,0,317,177" RadiusX="6.5" RadiusY="6.5"/>
                                 </Grid.Clip>
-                                <MediaElement x:Name="PreviewVideo" LoadedBehavior="Manual" UnloadedBehavior="Manual" Stretch="UniformToFill" IsMuted="True" MediaEnded="PreviewVideo_MediaEnded"/>
+
+                                <!-- O MediaElement foi removido! Fica apenas a Imagem que vai receber a miniatura -->
                                 <Image x:Name="PreviewBackgroundImage" Stretch="UniformToFill" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+
                                 <Viewbox Margin="16" Stretch="Uniform">
                                     <TextBlock x:Name="TxtPreview" Foreground="White" FontWeight="Bold" TextWrapping="Wrap" MaxWidth="300" TextAlignment="Center">
                                         <TextBlock.Effect>
@@ -918,36 +930,73 @@
                                                 </ContextMenu>
                                             </Border.ContextMenu>
 
-                                            <Expander Style="{StaticResource FolderExpanderStyle}" IsExpanded="True">
+                                            <Expander Style="{StaticResource FolderExpanderStyle}" IsExpanded="{Binding IsExpanded, Mode=TwoWay}" HorizontalContentAlignment="Stretch">
                                                 <Expander.Header>
-                                                    <StackPanel Orientation="Horizontal">
-                                                        <TextBlock FontFamily="{StaticResource IconFont}" Text="&#xE8B7;" FontSize="15" Foreground="{DynamicResource AccentColor}" Margin="0,0,8,0" VerticalAlignment="Center"/>
-                                                        <TextBlock Text="{Binding Title}" FontWeight="Bold" FontSize="13" VerticalAlignment="Center"/>
-                                                        <Border Background="#1E293B" CornerRadius="4" Padding="5,1" Margin="10,0,0,0">
-                                                            <!-- Contador de Itens dentro da Pasta -->
-                                                            <TextBlock Text="{Binding SubItems.Count}" FontSize="10" Foreground="{DynamicResource TextMuted}" FontWeight="Bold"/>
-                                                        </Border>
-                                                    </StackPanel>
+                                                    <Grid HorizontalAlignment="Stretch" Margin="0,0,6,0">
+                                                        <Grid.ColumnDefinitions>
+                                                            <ColumnDefinition Width="*"/>
+                                                            <ColumnDefinition Width="Auto"/>
+                                                        </Grid.ColumnDefinitions>
+
+                                                        <!-- Lado Esquerdo: Ícone, Título e Contador -->
+                                                        <StackPanel Grid.Column="0" Orientation="Horizontal">
+                                                            <TextBlock FontFamily="{StaticResource IconFont}" Text="&#xE8B7;" FontSize="15" Foreground="{DynamicResource AccentColor}" Margin="0,0,8,0" VerticalAlignment="Center"/>
+                                                            <TextBlock Text="{Binding Title}" FontWeight="Bold" FontSize="13" VerticalAlignment="Center"/>
+                                                            <Border Background="#1E293B" CornerRadius="4" Padding="5,1" Margin="10,0,0,0">
+                                                                <!-- Contador de Itens dentro da Pasta -->
+                                                                <TextBlock Text="{Binding SubItems.Count}" FontSize="10" Foreground="{DynamicResource TextMuted}" FontWeight="Bold"/>
+                                                            </Border>
+                                                        </StackPanel>
+
+                                                        <!-- Lado Direito: Botões (Ficam ocultos se a pasta estiver fechada) -->
+                                                        <StackPanel Grid.Column="1" Orientation="Horizontal" Visibility="{Binding IsExpanded, Converter={StaticResource BoolToVis}}">
+                                                            <Button Click="BtnMoveSubItemUp_Click" Style="{StaticResource NavyButton}" Width="26" Height="24" Padding="0" Margin="0,0,4,0" ToolTip="Mover selecionado para Cima">
+                                                                <TextBlock FontFamily="{StaticResource IconFont}" Text="&#xE70E;" FontSize="10"/>
+                                                            </Button>
+                                                            <Button Click="BtnMoveSubItemDown_Click" Style="{StaticResource NavyButton}" Width="26" Height="24" Padding="0" ToolTip="Mover selecionado para Baixo">
+                                                                <TextBlock FontFamily="{StaticResource IconFont}" Text="&#xE70D;" FontSize="10"/>
+                                                            </Button>
+                                                        </StackPanel>
+                                                    </Grid>
                                                 </Expander.Header>
 
                                                 <!-- CONTEÚDO DA PASTA -->
                                                 <Border Background="#090D16" CornerRadius="0,0,8,8" Padding="6,8,6,2">
+
                                                     <ListBox ItemsSource="{Binding SubItems}" 
-                                                         ItemContainerStyle="{StaticResource AnimatedCardItemStyle}"
-                                                         SelectionChanged="InnerList_SelectionChanged" 
-                                                         PreviewMouseLeftButtonDown="LstSchedule_PreviewMouseLeftButtonDown"
-                                                         PreviewMouseMove="LstSchedule_PreviewMouseMove"
-                                                         AllowDrop="True"
-                                                         Drop="InnerList_Drop"
-                                                         DragOver="LstSchedule_DragOver"
-                                                         MinHeight="40"
-                                                         BorderThickness="0" Background="Transparent" 
-                                                         ScrollViewer.HorizontalScrollBarVisibility="Disabled">
+                                                    ItemContainerStyle="{StaticResource AnimatedCardItemStyle}"
+                                                    SelectionChanged="InnerList_SelectionChanged" 
+                                                    PreviewMouseLeftButtonDown="LstSchedule_PreviewMouseLeftButtonDown"
+                                                    PreviewMouseMove="LstSchedule_PreviewMouseMove"
+                                                    AllowDrop="True"
+                                                    Drop="InnerList_Drop"
+                                                    DragOver="LstSchedule_DragOver"
+                                                    MinHeight="40"
+                                                    BorderThickness="0" Background="Transparent" 
+                                                    ScrollViewer.HorizontalScrollBarVisibility="Disabled">
                                                         <ListBox.ItemTemplate>
                                                             <DataTemplate>
                                                                 <Border x:Name="SubItemBorder" Background="{DynamicResource CardBg}" BorderBrush="#26334D" BorderThickness="1" CornerRadius="6" Padding="8,6" Margin="0,0,0,4">
+
+                                                                    <!-- NOVO MENU DE CONTEXTO EXCLUSIVO DOS SUBITENS -->
+                                                                    <Border.ContextMenu>
+                                                                        <ContextMenu>
+                                                                            <MenuItem Header="Renomear Item..." Click="MenuRenameScheduleItem_Click">
+                                                                                <MenuItem.Icon>
+                                                                                    <TextBlock FontFamily="{StaticResource IconFont}" Text="&#xE70F;" Foreground="White"/>
+                                                                                </MenuItem.Icon>
+                                                                            </MenuItem>
+                                                                            <MenuItem Header="Remover da Pasta" Click="MenuRemoveAnyItem_Click">
+                                                                                <MenuItem.Icon>
+                                                                                    <TextBlock FontFamily="{StaticResource IconFont}" Text="&#xE74D;" Foreground="#EF4444"/>
+                                                                                </MenuItem.Icon>
+                                                                            </MenuItem>
+                                                                        </ContextMenu>
+                                                                    </Border.ContextMenu>
+
                                                                     <Grid>
                                                                         <Grid.ColumnDefinitions>
+                                                                            <!-- (Mantém o resto igual a partir daqui...) -->
                                                                             <ColumnDefinition Width="Auto"/>
                                                                             <ColumnDefinition Width="*"/>
                                                                             <ColumnDefinition Width="Auto"/>
@@ -1107,20 +1156,21 @@
                             </StackPanel>
                         </TabItem.Header>
                         <DockPanel Margin="0,12,0,0">
+                            <!-- TOGGLES DE PESQUISA DE MÚSICAS -->
+                            <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Margin="0,0,0,8">
+                                <RadioButton x:Name="RbSearchSongTitle" Content="Pelo Título" Style="{StaticResource PillRadioButton}" IsChecked="True" Checked="SongSearchMode_Changed"/>
+                                <RadioButton x:Name="RbSearchSongLyrics" Content="Pela Letra" Style="{StaticResource PillRadioButton}" Checked="SongSearchMode_Changed"/>
+                            </StackPanel>
+                            
                             <Grid DockPanel.Dock="Top" Margin="0,0,0,10">
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="*"/>
                                     <ColumnDefinition Width="Auto"/>
-                                    <ColumnDefinition Width="Auto"/>
                                 </Grid.ColumnDefinitions>
+
                                 <TextBox x:Name="TxtSearchSong" Grid.Column="0" Style="{StaticResource SearchTextBox}" TextChanged="TxtSearchSong_TextChanged" ToolTip="Pesquisar música por título..."/>
-                                <Button Grid.Column="1" Click="BtnEditSong_Click" Style="{StaticResource NavyButton}" Height="34" Padding="12,0" Margin="6,0,0,0" ToolTip="Editar Música Selecionada">
-                                    <StackPanel Orientation="Horizontal">
-                                        <TextBlock FontFamily="{StaticResource IconFont}" Text="&#xE70F;" Margin="0,0,6,0" VerticalAlignment="Center" FontSize="12"/>
-                                        <TextBlock Text="Editar" VerticalAlignment="Center"/>
-                                    </StackPanel>
-                                </Button>
-                                <Button Grid.Column="2" Click="BtnNewSong_Click" Style="{StaticResource GoldButton}" Height="34" Padding="12,0" Margin="6,0,0,0" ToolTip="Criar Nova Música">
+
+                                <Button Grid.Column="1" Click="BtnNewSong_Click" Style="{StaticResource GoldButton}" Height="34" Padding="12,0" Margin="6,0,0,0" ToolTip="Criar Nova Música">
                                     <StackPanel Orientation="Horizontal">
                                         <TextBlock FontFamily="{StaticResource IconFont}" Text="&#xE710;" Margin="0,0,6,0" VerticalAlignment="Center" FontSize="12"/>
                                         <TextBlock Text="Nova" VerticalAlignment="Center"/>
@@ -1140,7 +1190,23 @@
                                      BorderThickness="0" Background="Transparent" ScrollViewer.HorizontalScrollBarVisibility="Disabled">
                                 <ListBox.ItemTemplate>
                                     <DataTemplate>
-                                        <Grid>
+                                        <Grid Background="Transparent">
+                                            <!-- MENU DE CONTEXTO (RIGHT-CLICK) -->
+                                            <Grid.ContextMenu>
+                                                <ContextMenu>
+                                                    <MenuItem Header="Editar Música..." Click="MenuEditSong_Click">
+                                                        <MenuItem.Icon>
+                                                            <TextBlock FontFamily="{StaticResource IconFont}" Text="&#xE70F;" Foreground="White"/>
+                                                        </MenuItem.Icon>
+                                                    </MenuItem>
+                                                    <MenuItem Header="Apagar Música" Click="MenuDeleteSong_Click">
+                                                        <MenuItem.Icon>
+                                                            <TextBlock FontFamily="{StaticResource IconFont}" Text="&#xE74D;" Foreground="#EF4444"/>
+                                                        </MenuItem.Icon>
+                                                    </MenuItem>
+                                                </ContextMenu>
+                                            </Grid.ContextMenu>
+
                                             <Grid.ColumnDefinitions>
                                                 <ColumnDefinition Width="22"/>
                                                 <ColumnDefinition Width="*"/>
@@ -1175,7 +1241,11 @@
                             </StackPanel>
                         </TabItem.Header>
                         <DockPanel Margin="0,12,0,0">
-                            <TextBlock DockPanel.Dock="Top" Text="Pesquisa rápida (ex: jo 3:16, sl 23:1-6 ou termo) + Enter" Foreground="{DynamicResource TextMuted}" FontSize="11" TextWrapping="Wrap" Margin="2,0,0,6"/>
+                            <!-- TOGGLES DE PESQUISA DA BÍBLIA -->
+                            <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Margin="0,0,0,8">
+                                <RadioButton x:Name="RbSearchBibleRef" Content="Livro/Ref (Início)" Style="{StaticResource PillRadioButton}" IsChecked="True"/>
+                                <RadioButton x:Name="RbSearchBibleText" Content="Palavras (Contém)" Style="{StaticResource PillRadioButton}"/>
+                            </StackPanel>
                             <Grid DockPanel.Dock="Top" Margin="0,0,0,10">
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="*"/>
@@ -1236,10 +1306,19 @@
                                 </Button>
                             </Grid>
 
+                            <!-- NOVA TEXTBOX DE PESQUISA NOS FUNDOS -->
+                            <TextBox x:Name="TxtSearchBackground" DockPanel.Dock="Top" Style="{StaticResource SearchTextBox}" TextChanged="TxtSearchBackground_TextChanged" ToolTip="Pesquisar fundo por nome..." Margin="0,0,0,8"/>
+
+                            <!-- TOGGLES DE PESQUISA DE FUNDOS MISTURADOS COM OS FILTROS DE VÍDEO/FOTO -->
                             <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Margin="0,0,0,10">
                                 <RadioButton x:Name="RbFilterAll" Content="Todos" Style="{StaticResource PillRadioButton}" IsChecked="True" Checked="BgFilter_Changed"/>
                                 <RadioButton x:Name="RbFilterVideos" Content="🎬 Vídeos" Style="{StaticResource PillRadioButton}" Checked="BgFilter_Changed"/>
                                 <RadioButton x:Name="RbFilterImages" Content="📷 Fotos" Style="{StaticResource PillRadioButton}" Checked="BgFilter_Changed"/>
+
+                                <Rectangle Width="1" Fill="{StaticResource BorderDark}" Margin="4,2,10,2"/>
+
+                                <RadioButton x:Name="RbSearchBgStart" Content="Nome (Início)" Style="{StaticResource PillRadioButton}" IsChecked="True" Checked="BgFilter_Changed"/>
+                                <RadioButton x:Name="RbSearchBgContains" Content="Nome (Contém)" Style="{StaticResource PillRadioButton}" Checked="BgFilter_Changed"/>
                             </StackPanel>
 
                             <ListBox x:Name="LstBackgrounds" ItemContainerStyle="{StaticResource AnimatedCardItemStyle}" SelectionChanged="LstBackgrounds_SelectionChanged" AllowDrop="True" Drop="LstBackgrounds_Drop" BorderThickness="0" Background="Transparent" ScrollViewer.HorizontalScrollBarVisibility="Disabled">

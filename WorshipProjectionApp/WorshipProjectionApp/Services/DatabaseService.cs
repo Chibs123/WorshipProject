@@ -66,6 +66,19 @@ public class DatabaseService
         command.ExecuteNonQuery();
     }
 
+    public void DeleteSong(int id)
+    {
+        using var connection = new SqliteConnection(ConnectionString);
+        connection.Open();
+
+        const string sql = "DELETE FROM Songs WHERE Id = @Id";
+
+        using var command = new SqliteCommand(sql, connection);
+        command.Parameters.AddWithValue("@Id", id);
+
+        command.ExecuteNonQuery();
+    }
+
     public void InsertBatch(IEnumerable<Song> songs)
     {
         using var connection = new SqliteConnection(ConnectionString);
