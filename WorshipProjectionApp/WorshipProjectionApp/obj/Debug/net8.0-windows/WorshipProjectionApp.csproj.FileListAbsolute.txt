@@ -5260,3 +5260,7 @@ C:\Users\Tiago.Rosario\Documents\GitHub\WorshipProject\WorshipProjectionApp\Wors
 C:\Users\Tiago.Rosario\Documents\GitHub\WorshipProject\WorshipProjectionApp\WorshipProjectionApp\obj\Debug\net8.0-windows\App.baml
 C:\Users\Tiago.Rosario\Documents\GitHub\WorshipProject\WorshipProjectionApp\WorshipProjectionApp\obj\Debug\net8.0-windows\WorshipProjectionApp.Properties.Resources.resources
 C:\Users\Tiago.Rosario\Documents\GitHub\WorshipProject\WorshipProjectionApp\WorshipProjectionApp\obj\Debug\net8.0-windows\WorshipProjectionApp.csproj.GenerateResource.cache
+C:\Users\tiaho\Documents\GitHub\WorshipProject\WorshipProjectionApp\WorshipProjectionApp\bin\Debug\net8.0-windows\NReco.VideoConverter.dll
+C:\Users\tiaho\Documents\GitHub\WorshipProject\WorshipProjectionApp\WorshipProjectionApp\obj\Debug\net8.0-windows\App.baml
+C:\Users\tiaho\Documents\GitHub\WorshipProject\WorshipProjectionApp\WorshipProjectionApp\obj\Debug\net8.0-windows\WorshipProjectionApp.Properties.Resources.resources
+C:\Users\tiaho\Documents\GitHub\WorshipProject\WorshipProjectionApp\WorshipProjectionApp\obj\Debug\net8.0-windows\WorshipProjectionApp.csproj.GenerateResource.cache

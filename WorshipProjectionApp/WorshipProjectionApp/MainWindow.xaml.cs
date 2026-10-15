@@ -564,42 +564,49 @@ public partial class MainWindow : Window
     }
 
     private void InnerList_Drop(object sender, DragEventArgs e)
-{
-    // 1. Avisar o WPF que nós tratámos do assunto (evita que a lista principal tente engolir o item também)
-    e.Handled = true;
-
-    // 2. Descobrir qual é a pasta onde largámos o rato
-    if (sender is ListBox innerListBox && innerListBox.DataContext is ScheduleItem pastaDestino && pastaDestino.IsFolder)
     {
-        // 3. RECUPERAR O ITEM ARRASTADO
-        // Atenção: Substitui 'ScheduleItem' pelo tipo exato que usas no teu DoDragDrop() atual!
-        if (e.Data.GetDataPresent(typeof(ScheduleItem)))
+        e.Handled = true; // Avisa o WPF que já tratámos deste drop
+
+        if (sender is ListBox innerListBox && innerListBox.DataContext is ScheduleItem pastaDestino && pastaDestino.IsFolder)
         {
-            var itemArrastado = e.Data.GetData(typeof(ScheduleItem)) as ScheduleItem;
-            if (itemArrastado == null || itemArrastado == pastaDestino) return;
-
-            // Se o item estava na Lista Principal (arrastaste da raiz para dentro da pasta), remove-o da raiz
-            if (ScheduleItems.Contains(itemArrastado))
+            // Certifica-te que 'ScheduleItem' é o tipo exato que arrastas no teu DragDrop atual
+            if (e.Data.GetDataPresent(typeof(ScheduleItem)))
             {
-                ScheduleItems.Remove(itemArrastado);
-            }
-            // Se tiveres lógica para arrastar entre duas pastas diferentes no futuro, farias aqui também
+                var itemArrastado = e.Data.GetData(typeof(ScheduleItem)) as ScheduleItem;
+                if (itemArrastado == null || itemArrastado == pastaDestino) return;
 
-            // 4. Adicionar à pasta!
-            if (!pastaDestino.SubItems.Contains(itemArrastado))
-            {
-                pastaDestino.SubItems.Add(itemArrastado);
-                
-                // Força a pasta a ficar expandida para vermos o item a cair lá dentro
+                // 1. Remover o item da sua posição antiga (da raiz ou da pasta)
+                if (ScheduleItems.Contains(itemArrastado))
+                {
+                    ScheduleItems.Remove(itemArrastado);
+                }
+                else if (pastaDestino.SubItems.Contains(itemArrastado))
+                {
+                    pastaDestino.SubItems.Remove(itemArrastado);
+                }
+
+                // 2. Descobrir a que altura da pasta o rato largou o item
+                int dropIndex = pastaDestino.SubItems.Count; // Por defeito, atira para o fim da pasta
+
+                var elementUnderMouse = e.OriginalSource as FrameworkElement;
+                if (elementUnderMouse?.DataContext is ScheduleItem itemAlvo && itemAlvo != pastaDestino)
+                {
+                    int indexAlvo = pastaDestino.SubItems.IndexOf(itemAlvo);
+                    if (indexAlvo >= 0)
+                    {
+                        dropIndex = indexAlvo; // Se encontrou o alvo, assume a posição dele!
+                    }
+                }
+
+                // 3. Inserir o item na nova posição exata!
+                pastaDestino.SubItems.Insert(dropIndex, itemArrastado);
+
+                // 4. Manter a pasta aberta e o item selecionado
                 pastaDestino.IsExpanded = true;
+                innerListBox.SelectedItem = itemArrastado;
             }
         }
-        
-        // NOTA: Se arrastares diretamente da lista "Músicas" (e for um objeto 'Song' ou algo parecido), 
-        // fazes o mesmo If que tens no teu LstSchedule_Drop atual, transformas num ScheduleItem e fazes:
-        // pastaDestino.SubItems.Add(novoItemConvertido);
     }
-}
 
     private void LstBibleResults_PreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
     {
@@ -612,6 +619,36 @@ public partial class MainWindow : Window
             e.Handled = true;
         }
         else _isBiblePotentialDrag = false;
+    }
+
+    private void InnerList_SelectionChanged(object sender, SelectionChangedEventArgs e)
+    {
+        e.Handled = true; // Impede que o clique confunda a lista principal
+
+        if (sender is ListBox innerList && innerList.SelectedItem is ScheduleItem itemSelecionado)
+        {
+            // 1. Limpa a seleção da lista principal (para não teres dois itens azuis ao mesmo tempo)
+            if (LstSchedule.SelectedItem != null)
+            {
+                LstSchedule.SelectedIndex = -1;
+            }
+
+            // 2. AQUI ENVIAS PARA A PROJEÇÃO!
+            // (Deves usar o mesmo método que já usas no LstSchedule_SelectionChanged para carregar a música)
+            // Exemplo: 
+            // LoadItemToSlides(itemSelecionado);
+
+            // (Opcional) Atualiza o título do painel do meio
+            TxtSelectedSongTitle.Text = itemSelecionado.Title;
+
+            // 3. Atualiza o estado Ativo (Borda Verde/Dourada)
+            foreach (var folder in ScheduleItems)
+            {
+                folder.IsActive = false;
+                foreach (var sub in folder.SubItems) sub.IsActive = false;
+            }
+            itemSelecionado.IsActive = true;
+        }
     }
 
     private void LstBibleResults_PreviewMouseMove(object sender, System.Windows.Input.MouseEventArgs e)
