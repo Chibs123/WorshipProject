@@ -290,14 +290,13 @@ private void BtnMoveSubItemDown_Click(object sender, RoutedEventArgs e)
         string query = TxtSearchBackground?.Text?.Trim() ?? "";
         if (!string.IsNullOrEmpty(query))
         {
-            if (RbSearchBgContains?.IsChecked == true)
+            // Se o ComboBox Mode estiver no Index 1 ("Nome Contém")
+            if (CmbSearchBgMode != null && CmbSearchBgMode.SelectedIndex == 1)
             {
-                // MODO 2: Nome contém a palavra algures no meio
                 list = list.Where(b => b.Name.Contains(query, StringComparison.OrdinalIgnoreCase));
             }
             else
             {
-                // MODO 1: Nome começa exatamente por...
                 list = list.Where(b => b.Name.StartsWith(query, StringComparison.OrdinalIgnoreCase));
             }
         }
@@ -659,7 +658,7 @@ private void LstSchedule_Drop(object sender, System.Windows.DragEventArgs e)
             if (version == "Nenhuma Bíblia" || string.IsNullOrEmpty(version)) return;
 
             // Vê se a bolinha do "Modo 2 (Palavras)" está selecionada
-            bool searchByWords = RbSearchBibleText.IsChecked == true;
+            bool searchByWords = CmbSearchBibleMode != null && CmbSearchBibleMode.SelectedIndex == 1;
 
             var results = _bibleService.Search(TxtSearchBible.Text, version, searchByWords);
             LstBibleResults.ItemsSource = results;
@@ -1043,6 +1042,7 @@ private void LstSchedule_Drop(object sender, System.Windows.DragEventArgs e)
         }
     }
 
+    // Substitui a função UpdateSongFilter inteira
     private void UpdateSongFilter(string query)
     {
         FilteredSongs.Clear();
@@ -1054,21 +1054,26 @@ private void LstSchedule_Drop(object sender, System.Windows.DragEventArgs e)
         }
         else
         {
-            if (RbSearchSongLyrics?.IsChecked == true)
+            // Se CmbSearchSongMode existir e o Index for 1 ("Por Letra")
+            if (CmbSearchSongMode != null && CmbSearchSongMode.SelectedIndex == 1)
             {
-                // MODO 2: Contém a palavra (Procura no Título E na Letra)
                 matches = _allSongs.Where(s =>
                     (s.Title != null && s.Title.Contains(query, StringComparison.OrdinalIgnoreCase)) ||
                     (s.RawLyrics != null && s.RawLyrics.Contains(query, StringComparison.OrdinalIgnoreCase)));
             }
             else
             {
-                // MODO 1: Título exato a começar por... (Ex: "Grand" -> "Grandioso És Tu")
+                // Padrão (Index 0): Por Título
                 matches = _allSongs.Where(s => s.Title != null && s.Title.StartsWith(query, StringComparison.OrdinalIgnoreCase));
             }
         }
 
         foreach (var song in matches) FilteredSongs.Add(song);
+    }
+
+    private void SongSearchMode_Changed(object sender, SelectionChangedEventArgs e)
+    {
+        if (TxtSearchSong != null) UpdateSongFilter(TxtSearchSong.Text);
     }
 
     private void TxtSearchSong_TextChanged(object sender, TextChangedEventArgs e) => UpdateSongFilter(TxtSearchSong.Text);

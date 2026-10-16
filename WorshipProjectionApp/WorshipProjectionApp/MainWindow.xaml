@@ -1156,21 +1156,23 @@
                             </StackPanel>
                         </TabItem.Header>
                         <DockPanel Margin="0,12,0,0">
-                            <!-- TOGGLES DE PESQUISA DE MÚSICAS -->
-                            <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Margin="0,0,0,8">
-                                <RadioButton x:Name="RbSearchSongTitle" Content="Pelo Título" Style="{StaticResource PillRadioButton}" IsChecked="True" Checked="SongSearchMode_Changed"/>
-                                <RadioButton x:Name="RbSearchSongLyrics" Content="Pela Letra" Style="{StaticResource PillRadioButton}" Checked="SongSearchMode_Changed"/>
-                            </StackPanel>
-                            
                             <Grid DockPanel.Dock="Top" Margin="0,0,0,10">
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="*"/>
                                     <ColumnDefinition Width="Auto"/>
+                                    <!-- Nova coluna para o filtro -->
+                                    <ColumnDefinition Width="Auto"/>
                                 </Grid.ColumnDefinitions>
 
-                                <TextBox x:Name="TxtSearchSong" Grid.Column="0" Style="{StaticResource SearchTextBox}" TextChanged="TxtSearchSong_TextChanged" ToolTip="Pesquisar música por título..."/>
+                                <TextBox x:Name="TxtSearchSong" Grid.Column="0" Style="{StaticResource SearchTextBox}" TextChanged="TxtSearchSong_TextChanged" ToolTip="Pesquisar música..." Margin="0,0,6,0"/>
 
-                                <Button Grid.Column="1" Click="BtnNewSong_Click" Style="{StaticResource GoldButton}" Height="34" Padding="12,0" Margin="6,0,0,0" ToolTip="Criar Nova Música">
+                                <!-- NOVO COMBOBOX DE MODO (Título vs Letra) -->
+                                <ComboBox x:Name="CmbSearchSongMode" Grid.Column="1" Width="110" SelectionChanged="SongSearchMode_Changed" Margin="0,0,6,0" ToolTip="Modo de Pesquisa">
+                                    <ComboBoxItem Content="Por Título" IsSelected="True"/>
+                                    <ComboBoxItem Content="Por Letra"/>
+                                </ComboBox>
+
+                                <Button Grid.Column="2" Click="BtnNewSong_Click" Style="{StaticResource GoldButton}" Height="34" Padding="12,0" ToolTip="Criar Nova Música">
                                     <StackPanel Orientation="Horizontal">
                                         <TextBlock FontFamily="{StaticResource IconFont}" Text="&#xE710;" Margin="0,0,6,0" VerticalAlignment="Center" FontSize="12"/>
                                         <TextBlock Text="Nova" VerticalAlignment="Center"/>
@@ -1241,19 +1243,26 @@
                             </StackPanel>
                         </TabItem.Header>
                         <DockPanel Margin="0,12,0,0">
-                            <!-- TOGGLES DE PESQUISA DA BÍBLIA -->
-                            <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Margin="0,0,0,8">
-                                <RadioButton x:Name="RbSearchBibleRef" Content="Livro/Ref (Início)" Style="{StaticResource PillRadioButton}" IsChecked="True"/>
-                                <RadioButton x:Name="RbSearchBibleText" Content="Palavras (Contém)" Style="{StaticResource PillRadioButton}"/>
-                            </StackPanel>
                             <Grid DockPanel.Dock="Top" Margin="0,0,0,10">
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <!-- Para o Modo -->
                                     <ColumnDefinition Width="96"/>
+                                    <!-- Para a Versão -->
                                 </Grid.ColumnDefinitions>
+
                                 <TextBox x:Name="TxtSearchBible" Grid.Column="0" Style="{StaticResource SearchTextBox}" Margin="0,0,6,0" KeyDown="TxtSearchBible_KeyDown"/>
-                                <ComboBox x:Name="CmbBibleVersion" Grid.Column="1" SelectionChanged="CmbBibleVersion_SelectionChanged"/>
+
+                                <!-- NOVO COMBOBOX DE MODO (Livro vs Palavras) -->
+                                <ComboBox x:Name="CmbSearchBibleMode" Grid.Column="1" Width="115" Margin="0,0,6,0" ToolTip="Modo de Pesquisa">
+                                    <ComboBoxItem Content="Por Livro/Ref." IsSelected="True"/>
+                                    <ComboBoxItem Content="Por Palavras"/>
+                                </ComboBox>
+
+                                <ComboBox x:Name="CmbBibleVersion" Grid.Column="2" SelectionChanged="CmbBibleVersion_SelectionChanged"/>
                             </Grid>
+                            
                             <ListBox x:Name="LstBibleResults" 
                                      VirtualizingPanel.IsVirtualizing="True"
                                      VirtualizingPanel.VirtualizationMode="Recycling"
@@ -1287,6 +1296,7 @@
                             </StackPanel>
                         </TabItem.Header>
                         <DockPanel Margin="0,12,0,0">
+                            <!-- BARRA SUPERIOR: IMPORTAR E LIMPAR -->
                             <Grid DockPanel.Dock="Top" Margin="0,0,0,10">
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="*"/>
@@ -1306,19 +1316,25 @@
                                 </Button>
                             </Grid>
 
-                            <!-- NOVA TEXTBOX DE PESQUISA NOS FUNDOS -->
-                            <TextBox x:Name="TxtSearchBackground" DockPanel.Dock="Top" Style="{StaticResource SearchTextBox}" TextChanged="TxtSearchBackground_TextChanged" ToolTip="Pesquisar fundo por nome..." Margin="0,0,0,8"/>
+                            <!-- NOVA BARRA DE PESQUISA (TEXTO + MODO) -->
+                            <Grid DockPanel.Dock="Top" Margin="0,0,0,10">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBox x:Name="TxtSearchBackground" Grid.Column="0" Style="{StaticResource SearchTextBox}" TextChanged="TxtSearchBackground_TextChanged" ToolTip="Pesquisar fundo por nome..." Margin="0,0,6,0"/>
 
-                            <!-- TOGGLES DE PESQUISA DE FUNDOS MISTURADOS COM OS FILTROS DE VÍDEO/FOTO -->
+                                <ComboBox x:Name="CmbSearchBgMode" Grid.Column="1" Width="120" SelectionChanged="BgFilter_Changed">
+                                    <ComboBoxItem Content="Nome exato" IsSelected="True"/>
+                                    <ComboBoxItem Content="Nome contém"/>
+                                </ComboBox>
+                            </Grid>
+
+                            <!-- OS FILTROS ORIGINAIS DE VÍDEO/FOTO (MANTÉM AS BOLINHAS PARA ISTO) -->
                             <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Margin="0,0,0,10">
                                 <RadioButton x:Name="RbFilterAll" Content="Todos" Style="{StaticResource PillRadioButton}" IsChecked="True" Checked="BgFilter_Changed"/>
                                 <RadioButton x:Name="RbFilterVideos" Content="🎬 Vídeos" Style="{StaticResource PillRadioButton}" Checked="BgFilter_Changed"/>
                                 <RadioButton x:Name="RbFilterImages" Content="📷 Fotos" Style="{StaticResource PillRadioButton}" Checked="BgFilter_Changed"/>
-
-                                <Rectangle Width="1" Fill="{StaticResource BorderDark}" Margin="4,2,10,2"/>
-
-                                <RadioButton x:Name="RbSearchBgStart" Content="Nome (Início)" Style="{StaticResource PillRadioButton}" IsChecked="True" Checked="BgFilter_Changed"/>
-                                <RadioButton x:Name="RbSearchBgContains" Content="Nome (Contém)" Style="{StaticResource PillRadioButton}" Checked="BgFilter_Changed"/>
                             </StackPanel>
 
                             <ListBox x:Name="LstBackgrounds" ItemContainerStyle="{StaticResource AnimatedCardItemStyle}" SelectionChanged="LstBackgrounds_SelectionChanged" AllowDrop="True" Drop="LstBackgrounds_Drop" BorderThickness="0" Background="Transparent" ScrollViewer.HorizontalScrollBarVisibility="Disabled">
