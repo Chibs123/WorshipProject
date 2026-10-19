@@ -43,6 +43,8 @@ public partial class MainWindow : Window
     public enum ProjectionMode { Logo, Clear, Live }
     private ProjectionMode _currentMode = ProjectionMode.Clear;
     private string? _logoFilePath;
+    private readonly PowerPointService _powerPointService = new PowerPointService();
+
     private ProjectionWindow? _projectionWindow;
     private string? _currentBackgroundPath;
     private Point _bibleDragStartPoint;
@@ -105,6 +107,42 @@ public partial class MainWindow : Window
             }
             LoadBibleVersions();
             MessageBox.Show($"{successCount} Bíblias importadas com sucesso!", "Importação Concluída", MessageBoxButton.OK, MessageBoxImage.Information);
+        }
+    }
+
+    // Nota: Adicionei a palavra "async" aqui
+    private async void BtnImportPowerPoint_Click(object sender, RoutedEventArgs e)
+    {
+        var openFileDialog = new Microsoft.Win32.OpenFileDialog
+        {
+            Filter = "Apresentações PowerPoint (*.pptx;*.ppt)|*.pptx;*.ppt",
+            Title = "Selecione o ficheiro do PowerPoint"
+        };
+
+        if (openFileDialog.ShowDialog() == true)
+        {
+            // 1. Muda o cursor para "A carregar..." para o operador perceber que a app está a trabalhar
+            Mouse.OverrideCursor = System.Windows.Input.Cursors.Wait;
+
+            try
+            {
+                // 2. MAGIA AQUI: Executa a importação pesada noutra thread (núcleo) do processador!
+                // Isto impede que a aplicação congele enquanto o PowerPoint faz as imagens.
+                var pptFolder = await Task.Run(() => _powerPointService.ImportAsImages(openFileDialog.FileName));
+
+                if (pptFolder != null)
+                {
+                    // Adiciona a nova pasta de slides à aba de Programação
+                    // Assumindo que a tua lista se chama ScheduleItems
+                    ScheduleItems.Add(pptFolder);
+                    SaveCurrentSession();
+                }
+            }
+            finally
+            {
+                // 3. Restaura o cursor normal quer a importação corra bem ou dê erro
+                Mouse.OverrideCursor = null;
+            }
         }
     }
 
@@ -1407,6 +1445,22 @@ private void LstSchedule_Drop(object sender, System.Windows.DragEventArgs e)
                 }
             }
             catch { }
+        }
+    }
+
+    private void BtnOpenMedleyBuilder_Click(object sender, RoutedEventArgs e)
+    {
+        // _allSongs representa a lista atual de músicas carregadas da base de dados
+        var medleyWindow = new MedleyBuilderWindow(_allSongs)
+        {
+            Owner = this
+        };
+
+        if (medleyWindow.ShowDialog() == true && medleyWindow.ResultingMedley != null)
+        {
+            // Se o utilizador clicou em "Adicionar à Programação"
+            ScheduleItems.Add(medleyWindow.ResultingMedley);
+            SaveCurrentSession();
         }
     }
 

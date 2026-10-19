@@ -10,11 +10,11 @@ none
 false
 TRACE;DEBUG;NET;NET8_0;NETCOREAPP;WINDOWS;WINDOWS7_0;NET5_0_OR_GREATER;NET6_0_OR_GREATER;NET7_0_OR_GREATER;NET8_0_OR_GREATER;NETCOREAPP1_0_OR_GREATER;NETCOREAPP1_1_OR_GREATER;NETCOREAPP2_0_OR_GREATER;NETCOREAPP2_1_OR_GREATER;NETCOREAPP2_2_OR_GREATER;NETCOREAPP3_0_OR_GREATER;NETCOREAPP3_1_OR_GREATER;WINDOWS7_0_OR_GREATER
 C:\Users\Tiago.Rosario\Documents\GitHub\WorshipProject\WorshipProjectionApp\WorshipProjectionApp\App.xaml
-7-799975149
+8373275913
 1253-167780773
-26-1804535927
-2151059366100
-AlertWindow.xaml;EditTeamMemberWindow.xaml;LayoutConfigWindow.xaml;MainWindow.xaml;ProjectionWindow.xaml;SettingsWindow.xaml;SongEditorWindow.xaml;
+28502078667
+217-1973582104
+AlertWindow.xaml;EditTeamMemberWindow.xaml;LayoutConfigWindow.xaml;MainWindow.xaml;MedleyBuilderWindow.xaml;ProjectionWindow.xaml;SettingsWindow.xaml;SongEditorWindow.xaml;
 
 False
 

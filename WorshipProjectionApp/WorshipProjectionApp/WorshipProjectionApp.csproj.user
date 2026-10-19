@@ -11,6 +11,9 @@
     <Compile Update="LayoutConfigWindow.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Update="MedleyBuilderWindow.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Update="ProjectionWindow.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
