@@ -281,11 +281,31 @@ private void BtnMoveSubItemDown_Click(object sender, RoutedEventArgs e)
         }
     }
 
-    private void LoadBackgroundGallery()
+    private async void LoadBackgroundGallery()
     {
-        AvailableBackgrounds.Clear();
-        foreach (var bg in _bgGalleryService.GetBackgrounds()) AvailableBackgrounds.Add(bg);
-        ApplyBackgroundFilter();
+        try
+        {
+            // 1. Vai à pasta e gera as miniaturas numa thread paralela (não bloqueia a UI!)
+            var bgs = await Task.Run(() => _bgGalleryService.GetBackgrounds());
+
+            // 2. Volta à Thread Principal para atualizar os ecrãs em segurança
+            Dispatcher.Invoke(() =>
+            {
+                AvailableBackgrounds.Clear();
+
+                foreach (var bg in bgs)
+                {
+                    AvailableBackgrounds.Add(bg);
+                }
+
+                ApplyBackgroundFilter();
+            });
+        }
+        catch (Exception ex)
+        {
+            // Impede que a aplicação crashe caso haja um vídeo corrompido
+            System.Windows.MessageBox.Show($"Erro ao carregar galeria: {ex.Message}");
+        }
     }
 
     private void BtnNewSong_Click(object sender, RoutedEventArgs e)
@@ -319,6 +339,13 @@ private void BtnMoveSubItemDown_Click(object sender, RoutedEventArgs e)
 
     private void ApplyBackgroundFilter()
     {
+        // Se vier de uma thread paralela, força a execução na thread principal da UI
+        if (!Dispatcher.CheckAccess())
+        {
+            Dispatcher.Invoke(ApplyBackgroundFilter);
+            return;
+        }
+
         FilteredBackgrounds.Clear();
         var list = AvailableBackgrounds.AsEnumerable();
 
@@ -328,15 +355,10 @@ private void BtnMoveSubItemDown_Click(object sender, RoutedEventArgs e)
         string query = TxtSearchBackground?.Text?.Trim() ?? "";
         if (!string.IsNullOrEmpty(query))
         {
-            // Se o ComboBox Mode estiver no Index 1 ("Nome Contém")
             if (CmbSearchBgMode != null && CmbSearchBgMode.SelectedIndex == 1)
-            {
                 list = list.Where(b => b.Name.Contains(query, StringComparison.OrdinalIgnoreCase));
-            }
             else
-            {
                 list = list.Where(b => b.Name.StartsWith(query, StringComparison.OrdinalIgnoreCase));
-            }
         }
 
         foreach (var item in list) FilteredBackgrounds.Add(item);
