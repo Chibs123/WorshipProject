@@ -39,7 +39,7 @@ namespace WorshipProjectionApp.Services
 
         public BibleService()
         {
-            BiblesFolder = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Bibles");
+            BiblesFolder = WorshipProjectionApp.AppPaths.Folder("Bibles");
             if (!Directory.Exists(BiblesFolder))
             {
                 Directory.CreateDirectory(BiblesFolder);

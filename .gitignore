@@ -1,0 +1,13 @@
+# Build / IDE
+[Bb]in/
+[Oo]bj/
+.vs/
+*.user
+*.suo
+
+# Backup local
+_backup_antes_correcoes/
+_backup_antes_temas/
+_backup_antes_perf/
+_backup_antes_monitor/
+_backup_antes_projecao/

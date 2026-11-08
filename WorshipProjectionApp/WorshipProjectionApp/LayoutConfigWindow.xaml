@@ -19,7 +19,7 @@
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
-        <Border Grid.Row="0" Background="#060A12" Padding="14,6,6,6" BorderBrush="{DynamicResource BorderDark}" BorderThickness="0,0,0,1" WindowChrome.IsHitTestVisibleInChrome="True">
+        <Border Grid.Row="0" Background="{DynamicResource N_090B0E}" Padding="14,6,6,6" BorderBrush="{DynamicResource BorderDark}" BorderThickness="0,0,0,1" WindowChrome.IsHitTestVisibleInChrome="True">
             <DockPanel>
                 <TextBlock Text="🧩 Construtor Lego: Matriz 4x4" Foreground="{DynamicResource AccentColor}" FontWeight="Bold" FontSize="14" VerticalAlignment="Center"/>
                 <Button Click="BtnClose_Click" Style="{DynamicResource WindowCloseButton}" HorizontalAlignment="Right" DockPanel.Dock="Right">
@@ -47,10 +47,10 @@
                     <ScrollViewer VerticalScrollBarVisibility="Auto">
                         <StackPanel>
                             <TextBlock Text="1. Seleciona a Peça:" FontWeight="Bold" Margin="0,0,0,6"/>
-                            <ListBox x:Name="LstPieces" Height="110" Background="#0B0F19" BorderBrush="{DynamicResource BorderDark}" SelectionChanged="LstPieces_SelectionChanged">
+                            <ListBox x:Name="LstPieces" Height="110" Background="{DynamicResource N_0F1216}" BorderBrush="{DynamicResource BorderDark}" SelectionChanged="LstPieces_SelectionChanged">
                                 <ListBox.ItemTemplate>
                                     <DataTemplate>
-                                        <TextBlock Text="{Binding Title}" Foreground="White" Padding="4,2"/>
+                                        <TextBlock Text="{Binding Title}" Foreground="{DynamicResource TextPrimary}" Padding="4,2"/>
                                     </DataTemplate>
                                 </ListBox.ItemTemplate>
                             </ListBox>
@@ -101,7 +101,7 @@
                 <Border Grid.Column="1" Background="{DynamicResource PanelBg}" BorderBrush="{DynamicResource BorderDark}" BorderThickness="1" CornerRadius="8" Padding="12">
                     <DockPanel>
                         <TextBlock DockPanel.Dock="Top" Text="Pré-visualização do Ecrã (4 Linhas x 4 Colunas):" FontWeight="Bold" Margin="0,0,0,8"/>
-                        <Grid x:Name="GridPreview" Background="#060A12">
+                        <Grid x:Name="GridPreview" Background="{DynamicResource N_090B0E}">
                             <Grid.RowDefinitions>
                                 <RowDefinition Height="*"/>
                                 <RowDefinition Height="*"/>

@@ -27,7 +27,7 @@ public class LayoutSettings
 {
     public List<PanelConfig> Panels { get; set; } = new();
 
-    private static readonly string FilePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "layout_settings.json");
+    private static readonly string FilePath = WorshipProjectionApp.AppPaths.File("layout_settings.json");
 
     public static LayoutSettings LoadDefault()
     {

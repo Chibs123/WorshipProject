@@ -38,7 +38,7 @@
                       UseAeroCaptionButtons="False"/>
     </WindowChrome.WindowChrome>
 
-    <Grid Background="{StaticResource BgCanvas}">
+    <Grid Background="{DynamicResource BgCanvas}">
         <Grid.RowDefinitions>
             <RowDefinition Height="50"/>
             <RowDefinition Height="*"/>
@@ -77,7 +77,7 @@
 
                 <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
                     <!-- BORDER ÚNICO QUE ENGLOBARÁ TODOS OS BOTÕES DE CONTROLO E ÍCONES -->
-                    <Border Background="#0D131F" BorderBrush="{DynamicResource BorderDark}" BorderThickness="1" CornerRadius="8" Padding="3" Height="38" VerticalAlignment="Center">
+                    <Border Background="{DynamicResource N_12161B}" BorderBrush="{DynamicResource BorderDark}" BorderThickness="1" CornerRadius="8" Padding="3" Height="38" VerticalAlignment="Center">
                         <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                             <!-- 1. Botões de Estado do Projetor -->
                             <Button x:Name="BtnModeLive" Content="● LIVE" Click="BtnModeLive_Click" Style="{DynamicResource NavyButton}" Margin="0,0,3,0" Height="30" Padding="14,0" WindowChrome.IsHitTestVisibleInChrome="True" ToolTip="Transmitir para o Projetor (F5)"/>
@@ -106,7 +106,7 @@
                                 <!-- Coloquei o Menu a emular o estilo NavyButton para ficar consistente -->
                                 <MenuItem Width="30" Height="30" Padding="0" Margin="0" VerticalAlignment="Center" ToolTip="Configurações e Importação">
                                     <MenuItem.Header>
-                                        <Border Background="{StaticResource ButtonNeutral}" BorderBrush="#334155" BorderThickness="1" CornerRadius="6" Width="30" Height="30" HorizontalAlignment="Center">
+                                        <Border Background="{DynamicResource ButtonNeutral}" BorderBrush="{DynamicResource N_323A45}" BorderThickness="1" CornerRadius="6" Width="30" Height="30" HorizontalAlignment="Center">
                                             <TextBlock FontFamily="{StaticResource IconFont}" Text="&#xE713;" FontSize="14" Foreground="{DynamicResource AccentColor}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                                         </Border>
                                     </MenuItem.Header>
@@ -121,7 +121,8 @@
                                             <TextBlock FontFamily="{StaticResource IconFont}" Text="&#xE713;" Foreground="{DynamicResource AccentColor}"/>
                                         </MenuItem.Icon>
                                     </MenuItem>
-                                    <Border Height="1" Background="#26334D" Margin="6,4"/>
+                                    <MenuItem Header="Controlo remoto (telemóvel)" Click="BtnRemoteInfo_Click"/>
+                                    <Border Height="1" Background="{DynamicResource N_2C333D}" Margin="6,4"/>
                                     <MenuItem Header="Importar EasyWorship (Songs.db)" Click="BtnImportEasyWorship_Click">
                                         <MenuItem.Icon>
                                             <TextBlock FontFamily="{StaticResource IconFont}" Text="&#xE896;" Foreground="{DynamicResource TextMuted}"/>
@@ -139,7 +140,7 @@
                 </StackPanel>
 
                 <!-- CENTRO: Relógio Digital Estilo Régie -->
-                <Border Grid.Column="1" Background="#0D131F" BorderBrush="#1E293B" BorderThickness="1" CornerRadius="16" Padding="14,5" HorizontalAlignment="Center" VerticalAlignment="Center" IsHitTestVisible="False">
+                <Border Grid.Column="1" Background="{DynamicResource N_12161B}" BorderBrush="{DynamicResource N_20262E}" BorderThickness="1" CornerRadius="16" Padding="14,5" HorizontalAlignment="Center" VerticalAlignment="Center" IsHitTestVisible="False">
                     <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                         <TextBlock FontFamily="{StaticResource IconFont}" Text="&#xE121;" FontSize="13" Foreground="{DynamicResource AccentColor}" VerticalAlignment="Center" Margin="0,0,8,0"/>
                         <TextBlock x:Name="TxtTopClock" Text="00:00:00" FontSize="14" FontWeight="Bold" Foreground="{DynamicResource TextPrimary}" VerticalAlignment="Center" FontFamily="Consolas, Segoe UI"/>
@@ -182,7 +183,7 @@
             <Border x:Name="PanelLive" Grid.Column="0" Grid.Row="0" Background="{DynamicResource PanelBg}" BorderBrush="{DynamicResource BorderDark}" BorderThickness="1" CornerRadius="10" Padding="12" Margin="4">
                 <StackPanel>
                     <DockPanel Margin="0,0,0,10">
-                        <TextBlock DockPanel.Dock="Right" Text="16:9 HD" FontSize="10" FontWeight="SemiBold" Foreground="#64748B" VerticalAlignment="Center"/>
+                        <TextBlock DockPanel.Dock="Right" Text="16:9 HD" FontSize="10" FontWeight="SemiBold" Foreground="{DynamicResource N_6B7683}" VerticalAlignment="Center"/>
                         <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                             <TextBlock FontFamily="{StaticResource IconFont}" Text="&#xE7F4;" Foreground="{DynamicResource AccentColor}" FontSize="13" Margin="0,0,8,0" VerticalAlignment="Center"/>
                             <TextBlock Text="MONITOR DE SAÍDA" FontWeight="Bold" FontSize="11" Foreground="{DynamicResource TextMuted}" VerticalAlignment="Center"/>
@@ -190,7 +191,7 @@
                     </DockPanel>
 
                     <Viewbox Stretch="Uniform" HorizontalAlignment="Stretch" VerticalAlignment="Center">
-                        <Border Width="320" Height="180" Background="#030508" CornerRadius="8" BorderBrush="#334155" BorderThickness="1.5">
+                        <Border Width="320" Height="180" Background="#030508" CornerRadius="8" BorderBrush="{DynamicResource N_323A45}" BorderThickness="1.5">
                             <Grid>
                                 <Grid.Clip>
                                     <RectangleGeometry Rect="0,0,317,177" RadiusX="6.5" RadiusY="6.5"/>
@@ -206,7 +207,14 @@
                                         </TextBlock.Effect>
                                     </TextBlock>
                                 </Viewbox>
-                                <Border x:Name="BadgeLiveBorder" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="8" Background="#D9060A12" BorderBrush="#44EF4444" BorderThickness="1" CornerRadius="6" Padding="8,4">
+                                <!-- Aviso / cronómetro ativo no projetor (espelhado aqui) -->
+                                <Border x:Name="PreviewAlertOverlay" Visibility="Collapsed" Background="#E6060A12">
+                                    <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
+                                        <TextBlock x:Name="TxtPreviewAlertClock" Foreground="White" FontSize="24" FontWeight="Bold" HorizontalAlignment="Center" Visibility="Collapsed"/>
+                                        <TextBlock x:Name="TxtPreviewAlert" Foreground="White" FontSize="14" FontWeight="Bold" TextWrapping="Wrap" TextAlignment="Center" Margin="14,2,14,0"/>
+                                    </StackPanel>
+                                </Border>
+                                <Border x:Name="BadgeLiveBorder" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="8" Background="#D9090B0E" BorderBrush="#44EF4444" BorderThickness="1" CornerRadius="6" Padding="8,4">
                                     <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                                         <Ellipse x:Name="BadgeLiveDot" Width="7" Height="7" Fill="#EF4444" Margin="0,0,6,0"/>
                                         <TextBlock x:Name="BadgeLiveText" Text="EM DIRETO" Foreground="#EF4444" FontWeight="Bold" FontSize="9" VerticalAlignment="Center"/>
@@ -248,7 +256,7 @@
                     </Border>
 
                     <Grid>
-                        <Border BorderBrush="#1E293B" BorderThickness="1" CornerRadius="8" Background="#0B0F19" Margin="2" IsHitTestVisible="False">
+                        <Border BorderBrush="{DynamicResource N_20262E}" BorderThickness="1" CornerRadius="8" Background="{DynamicResource N_0F1216}" Margin="2" IsHitTestVisible="False">
                             <Border.Style>
                                 <Style TargetType="Border">
                                     <Setter Property="Visibility" Value="Collapsed"/>
@@ -260,7 +268,7 @@
                                 </Style>
                             </Border.Style>
                             <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center" Margin="16">
-                                <Border Width="44" Height="44" CornerRadius="22" Background="#141C2B" HorizontalAlignment="Center" Margin="0,0,0,10">
+                                <Border Width="44" Height="44" CornerRadius="22" Background="{DynamicResource N_1A1F26}" HorizontalAlignment="Center" Margin="0,0,0,10">
                                     <TextBlock FontFamily="{StaticResource IconFont}" Text="&#xE8FD;" FontSize="20" Foreground="{DynamicResource AccentColor}" HorizontalAlignment="Center" VerticalAlignment="Center" Opacity="0.7"/>
                                 </Border>
                                 <TextBlock Text="Programação Vazia" Foreground="{DynamicResource TextPrimary}" FontWeight="SemiBold" FontSize="12" HorizontalAlignment="Center"/>
@@ -292,7 +300,7 @@
                                                 <ContextMenu>
                                                     <MenuItem Header="Renomear Item..." Click="MenuRenameScheduleItem_Click">
                                                         <MenuItem.Icon>
-                                                            <TextBlock FontFamily="{StaticResource IconFont}" Text="&#xE70F;" Foreground="White"/>
+                                                            <TextBlock FontFamily="{StaticResource IconFont}" Text="&#xE70F;" Foreground="{DynamicResource TextPrimary}"/>
                                                         </MenuItem.Icon>
                                                     </MenuItem>
                                                     <MenuItem Header="Remover da Lista" Click="BtnScheduleRemove_Click">
@@ -308,7 +316,7 @@
                                                     <ColumnDefinition Width="*"/>
                                                     <ColumnDefinition Width="Auto"/>
                                                 </Grid.ColumnDefinitions>
-                                                <Border Grid.Column="0" Width="34" Height="34" CornerRadius="6" Background="#111827" BorderBrush="#26334D" BorderThickness="1" Margin="0,0,10,0" VerticalAlignment="Center">
+                                                <Border Grid.Column="0" Width="34" Height="34" CornerRadius="6" Background="{DynamicResource N_15191F}" BorderBrush="{DynamicResource N_2C333D}" BorderThickness="1" Margin="0,0,10,0" VerticalAlignment="Center">
                                                     <TextBlock Text="{Binding ItemTypeIcon}" FontSize="14" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                                                 </Border>
                                                 <StackPanel Grid.Column="1" VerticalAlignment="Center">
@@ -320,12 +328,12 @@
                                         </Border>
 
                                         <!-- LAYOUT 2: PASTA (EXPANDER) -->
-                                        <Border x:Name="FolderBorder" Visibility="Collapsed" Background="#141C2B" BorderBrush="{DynamicResource BorderDark}" BorderThickness="1" CornerRadius="8" Margin="0,4,4,8">
+                                        <Border x:Name="FolderBorder" Visibility="Collapsed" Background="{DynamicResource N_1A1F26}" BorderBrush="{DynamicResource BorderDark}" BorderThickness="1" CornerRadius="8" Margin="0,4,4,8">
                                             <Border.ContextMenu>
                                                 <ContextMenu>
                                                     <MenuItem Header="Renomear Pasta..." Click="MenuRenameScheduleItem_Click">
                                                         <MenuItem.Icon>
-                                                            <TextBlock FontFamily="{StaticResource IconFont}" Text="&#xE70F;" Foreground="White"/>
+                                                            <TextBlock FontFamily="{StaticResource IconFont}" Text="&#xE70F;" Foreground="{DynamicResource TextPrimary}"/>
                                                         </MenuItem.Icon>
                                                     </MenuItem>
                                                     <MenuItem Header="Remover Pasta" Click="BtnScheduleRemove_Click">
@@ -348,7 +356,7 @@
                                                         <StackPanel Grid.Column="0" Orientation="Horizontal">
                                                             <TextBlock FontFamily="{StaticResource IconFont}" Text="&#xE8B7;" FontSize="15" Foreground="{DynamicResource AccentColor}" Margin="0,0,8,0" VerticalAlignment="Center"/>
                                                             <TextBlock Text="{Binding Title}" FontWeight="Bold" FontSize="13" VerticalAlignment="Center"/>
-                                                            <Border Background="#1E293B" CornerRadius="4" Padding="5,1" Margin="10,0,0,0">
+                                                            <Border Background="{DynamicResource N_20262E}" CornerRadius="4" Padding="5,1" Margin="10,0,0,0">
                                                                 <!-- Contador de Itens dentro da Pasta -->
                                                                 <TextBlock Text="{Binding SubItems.Count}" FontSize="10" Foreground="{DynamicResource TextMuted}" FontWeight="Bold"/>
                                                             </Border>
@@ -367,7 +375,7 @@
                                                 </Expander.Header>
 
                                                 <!-- CONTEÚDO DA PASTA -->
-                                                <Border Background="#090D16" CornerRadius="0,0,8,8" Padding="6,8,6,2">
+                                                <Border Background="{DynamicResource N_0E1115}" CornerRadius="0,0,8,8" Padding="6,8,6,2">
 
                                                     <ListBox ItemsSource="{Binding SubItems}" 
                                                     ItemContainerStyle="{StaticResource AnimatedCardItemStyle}"
@@ -382,14 +390,14 @@
                                                     ScrollViewer.HorizontalScrollBarVisibility="Disabled">
                                                         <ListBox.ItemTemplate>
                                                             <DataTemplate>
-                                                                <Border x:Name="SubItemBorder" Background="{DynamicResource CardBg}" BorderBrush="#26334D" BorderThickness="1" CornerRadius="6" Padding="8,6" Margin="0,0,0,4">
+                                                                <Border x:Name="SubItemBorder" Background="{DynamicResource CardBg}" BorderBrush="{DynamicResource N_2C333D}" BorderThickness="1" CornerRadius="6" Padding="8,6" Margin="0,0,0,4">
 
                                                                     <!-- NOVO MENU DE CONTEXTO EXCLUSIVO DOS SUBITENS -->
                                                                     <Border.ContextMenu>
                                                                         <ContextMenu>
                                                                             <MenuItem Header="Renomear Item..." Click="MenuRenameScheduleItem_Click">
                                                                                 <MenuItem.Icon>
-                                                                                    <TextBlock FontFamily="{StaticResource IconFont}" Text="&#xE70F;" Foreground="White"/>
+                                                                                    <TextBlock FontFamily="{StaticResource IconFont}" Text="&#xE70F;" Foreground="{DynamicResource TextPrimary}"/>
                                                                                 </MenuItem.Icon>
                                                                             </MenuItem>
                                                                             <MenuItem Header="Remover da Pasta" Click="MenuRemoveAnyItem_Click">
@@ -407,7 +415,7 @@
                                                                             <ColumnDefinition Width="*"/>
                                                                             <ColumnDefinition Width="Auto"/>
                                                                         </Grid.ColumnDefinitions>
-                                                                        <Border Grid.Column="0" Width="28" Height="28" CornerRadius="4" Background="#111827" BorderBrush="#26334D" BorderThickness="1" Margin="0,0,8,0">
+                                                                        <Border Grid.Column="0" Width="28" Height="28" CornerRadius="4" Background="{DynamicResource N_15191F}" BorderBrush="{DynamicResource N_2C333D}" BorderThickness="1" Margin="0,0,8,0">
                                                                             <TextBlock Text="{Binding ItemTypeIcon}" FontSize="12" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                                                                         </Border>
                                                                         <StackPanel Grid.Column="1" VerticalAlignment="Center">
@@ -418,16 +426,16 @@
                                                                 </Border>
                                                                 <DataTemplate.Triggers>
                                                                     <DataTrigger Binding="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type ListBoxItem}}, Path=IsMouseOver}" Value="True">
-                                                                        <Setter TargetName="SubItemBorder" Property="Background" Value="#222D42"/>
-                                                                        <Setter TargetName="SubItemBorder" Property="BorderBrush" Value="#3B4D71"/>
+                                                                        <Setter TargetName="SubItemBorder" Property="Background" Value="{DynamicResource N_2A323C}"/>
+                                                                        <Setter TargetName="SubItemBorder" Property="BorderBrush" Value="{DynamicResource N_3F4A58}"/>
                                                                     </DataTrigger>
                                                                     <DataTrigger Binding="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type ListBoxItem}}, Path=IsSelected}" Value="True">
                                                                         <Setter TargetName="SubItemBorder" Property="BorderBrush" Value="{DynamicResource AccentColor}"/>
-                                                                        <Setter TargetName="SubItemBorder" Property="Background" Value="#1C283D"/>
+                                                                        <Setter TargetName="SubItemBorder" Property="Background" Value="{DynamicResource N_222931}"/>
                                                                     </DataTrigger>
                                                                     <DataTrigger Binding="{Binding IsActive}" Value="True">
                                                                         <Setter TargetName="SubItemBorder" Property="BorderBrush" Value="{DynamicResource AccentColor}"/>
-                                                                        <Setter TargetName="SubItemBorder" Property="Background" Value="#1C283D"/>
+                                                                        <Setter TargetName="SubItemBorder" Property="Background" Value="{DynamicResource N_222931}"/>
                                                                         <Setter TargetName="SubTitleTxt" Property="Foreground" Value="{DynamicResource AccentColor}"/>
                                                                         <Setter TargetName="SubActiveDot" Property="Visibility" Value="Visible"/>
                                                                     </DataTrigger>
@@ -451,8 +459,8 @@
                                                 <Condition Binding="{Binding IsFolder}" Value="False"/>
                                                 <Condition Binding="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type ListBoxItem}}, Path=IsMouseOver}" Value="True"/>
                                             </MultiDataTrigger.Conditions>
-                                            <Setter TargetName="ItemBorder" Property="Background" Value="#222D42"/>
-                                            <Setter TargetName="ItemBorder" Property="BorderBrush" Value="#3B4D71"/>
+                                            <Setter TargetName="ItemBorder" Property="Background" Value="{DynamicResource N_2A323C}"/>
+                                            <Setter TargetName="ItemBorder" Property="BorderBrush" Value="{DynamicResource N_3F4A58}"/>
                                         </MultiDataTrigger>
 
                                         <MultiDataTrigger>
@@ -460,8 +468,8 @@
                                                 <Condition Binding="{Binding IsFolder}" Value="False"/>
                                                 <Condition Binding="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type ListBoxItem}}, Path=IsSelected}" Value="True"/>
                                             </MultiDataTrigger.Conditions>
-                                            <Setter TargetName="ItemBorder" Property="BorderBrush" Value="#475D85"/>
-                                            <Setter TargetName="ItemBorder" Property="Background" Value="#202B42"/>
+                                            <Setter TargetName="ItemBorder" Property="BorderBrush" Value="{DynamicResource N_566273}"/>
+                                            <Setter TargetName="ItemBorder" Property="Background" Value="{DynamicResource N_252C35}"/>
                                         </MultiDataTrigger>
 
                                         <MultiDataTrigger>
@@ -470,7 +478,7 @@
                                                 <Condition Binding="{Binding IsActive}" Value="True"/>
                                             </MultiDataTrigger.Conditions>
                                             <Setter TargetName="ItemBorder" Property="BorderBrush" Value="{DynamicResource AccentColor}"/>
-                                            <Setter TargetName="ItemBorder" Property="Background" Value="#202B42"/>
+                                            <Setter TargetName="ItemBorder" Property="Background" Value="{DynamicResource N_252C35}"/>
                                             <Setter TargetName="TitleTxt" Property="Foreground" Value="{DynamicResource AccentColor}"/>
                                             <Setter TargetName="ActiveDot" Property="Visibility" Value="Visible"/>
                                         </MultiDataTrigger>
@@ -522,12 +530,12 @@
                                 <Border x:Name="CardBorder" BorderBrush="{DynamicResource BorderDark}" BorderThickness="1.5" CornerRadius="8" Padding="14,12" Margin="0,3,6,6" Background="{DynamicResource CardBg}">
                                     <StackPanel>
                                         <DockPanel Margin="0,0,0,8" LastChildFill="False">
-                                            <Border DockPanel.Dock="Left" Background="#111827" BorderBrush="#26334D" BorderThickness="1" CornerRadius="4" Padding="7,2">
+                                            <Border DockPanel.Dock="Left" Background="{DynamicResource N_15191F}" BorderBrush="{DynamicResource N_2C333D}" BorderThickness="1" CornerRadius="4" Padding="7,2">
                                                 <TextBlock Text="{Binding Header}" FontWeight="Bold" Foreground="{DynamicResource AccentColor}" FontSize="11"/>
                                             </Border>
-                                            <Border DockPanel.Dock="Right" Background="#CC1E3A8A" BorderBrush="#3B82F6" BorderThickness="1" CornerRadius="4" Padding="6,2"
+                                            <Border DockPanel.Dock="Right" Background="{DynamicResource AccentSoft}" BorderBrush="{DynamicResource AccentColor}" BorderThickness="1" CornerRadius="4" Padding="6,2"
                                                     Visibility="{Binding HasCustomBackground, Converter={StaticResource BoolToVis}}">
-                                                <TextBlock Text="🖼️ FUNDO" FontSize="9" Foreground="White" FontWeight="Bold"/>
+                                                <TextBlock Text="FUNDO" FontSize="9" Foreground="White" FontWeight="Bold"/>
                                             </Border>
                                         </DockPanel>
                                         <TextBlock Text="{Binding Content}" FontSize="14" Foreground="{DynamicResource TextPrimary}" TextWrapping="Wrap" LineHeight="21"/>
@@ -535,12 +543,12 @@
                                 </Border>
                                 <DataTemplate.Triggers>
                                     <DataTrigger Binding="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type ListBoxItem}}, Path=IsMouseOver}" Value="True">
-                                        <Setter TargetName="CardBorder" Property="Background" Value="#222D42"/>
-                                        <Setter TargetName="CardBorder" Property="BorderBrush" Value="#3B4D71"/>
+                                        <Setter TargetName="CardBorder" Property="Background" Value="{DynamicResource N_2A323C}"/>
+                                        <Setter TargetName="CardBorder" Property="BorderBrush" Value="{DynamicResource N_3F4A58}"/>
                                     </DataTrigger>
                                     <DataTrigger Binding="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type ListBoxItem}}, Path=IsSelected}" Value="True">
                                         <Setter TargetName="CardBorder" Property="BorderBrush" Value="{DynamicResource AccentColor}"/>
-                                        <Setter TargetName="CardBorder" Property="Background" Value="#202B42"/>
+                                        <Setter TargetName="CardBorder" Property="Background" Value="{DynamicResource N_252C35}"/>
                                     </DataTrigger>
                                 </DataTemplate.Triggers>
                             </DataTemplate>
@@ -563,6 +571,10 @@
                         </TabItem.Header>
                         <DockPanel Margin="0,12,0,0">
                             <Grid DockPanel.Dock="Top" Margin="0,0,0,10">
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                </Grid.RowDefinitions>
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="*"/>
                                     <ColumnDefinition Width="Auto"/>
@@ -573,22 +585,22 @@
                                     <!-- Botão Nova Música -->
                                 </Grid.ColumnDefinitions>
 
-                                <TextBox x:Name="TxtSearchSong" Grid.Column="0" Style="{StaticResource SearchTextBox}" TextChanged="TxtSearchSong_TextChanged" ToolTip="Pesquisar música..." Margin="0,0,6,0"/>
+                                <TextBox x:Name="TxtSearchSong" Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="4" Style="{StaticResource SearchTextBox}" TextChanged="TxtSearchSong_TextChanged" ToolTip="Pesquisar música..." Margin="0,0,0,8"/>
 
-                                <ComboBox x:Name="CmbSearchSongMode" Grid.Column="1" Width="110" SelectionChanged="SongSearchMode_Changed" Margin="0,0,6,0" ToolTip="Modo de Pesquisa">
+                                <ComboBox x:Name="CmbSearchSongMode" Grid.Row="1" Grid.Column="0" HorizontalAlignment="Left" Width="110" SelectionChanged="SongSearchMode_Changed" Margin="0,0,6,0" ToolTip="Modo de Pesquisa">
                                     <ComboBoxItem Content="Por Título" IsSelected="True"/>
                                     <ComboBoxItem Content="Por Letra"/>
                                 </ComboBox>
 
                                 <!-- NOVO BOTÃO DE MEDLEY -->
-                                <Button Grid.Column="2" Click="BtnOpenMedleyBuilder_Click" Style="{StaticResource NavyButton}" Height="34" Padding="10,0" Margin="0,0,6,0" ToolTip="Criar Medley (Ligar 2 Músicas)">
+                                <Button Grid.Row="1" Grid.Column="2" Click="BtnOpenMedleyBuilder_Click" Style="{StaticResource NavyButton}" Height="34" Padding="10,0" Margin="0,0,6,0" ToolTip="Criar Medley (Ligar 2 Músicas)">
                                     <StackPanel Orientation="Horizontal">
                                         <TextBlock FontFamily="{StaticResource IconFont}" Text="&#xE71B;" Margin="0,0,6,0" VerticalAlignment="Center" FontSize="12" Foreground="{DynamicResource AccentColor}"/>
                                         <TextBlock Text="Medley" VerticalAlignment="Center"/>
                                     </StackPanel>
                                 </Button>
 
-                                <Button Grid.Column="3" Click="BtnNewSong_Click" Style="{StaticResource GoldButton}" Height="34" Padding="12,0" ToolTip="Criar Nova Música">
+                                <Button Grid.Row="1" Grid.Column="3" Click="BtnNewSong_Click" Style="{StaticResource GoldButton}" Height="34" Padding="12,0" ToolTip="Criar Nova Música">
                                     <StackPanel Orientation="Horizontal">
                                         <TextBlock FontFamily="{StaticResource IconFont}" Text="&#xE710;" Margin="0,0,6,0" VerticalAlignment="Center" FontSize="12"/>
                                         <TextBlock Text="Nova" VerticalAlignment="Center"/>
@@ -614,7 +626,7 @@
                                                 <ContextMenu>
                                                     <MenuItem Header="Editar Música..." Click="MenuEditSong_Click">
                                                         <MenuItem.Icon>
-                                                            <TextBlock FontFamily="{StaticResource IconFont}" Text="&#xE70F;" Foreground="White"/>
+                                                            <TextBlock FontFamily="{StaticResource IconFont}" Text="&#xE70F;" Foreground="{DynamicResource TextPrimary}"/>
                                                         </MenuItem.Icon>
                                                     </MenuItem>
                                                     <MenuItem Header="Apagar Música" Click="MenuDeleteSong_Click">
@@ -749,8 +761,8 @@
                             <!-- OS FILTROS ORIGINAIS DE VÍDEO/FOTO (MANTÉM AS BOLINHAS PARA ISTO) -->
                             <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Margin="0,0,0,10">
                                 <RadioButton x:Name="RbFilterAll" Content="Todos" Style="{StaticResource PillRadioButton}" IsChecked="True" Checked="BgFilter_Changed"/>
-                                <RadioButton x:Name="RbFilterVideos" Content="🎬 Vídeos" Style="{StaticResource PillRadioButton}" Checked="BgFilter_Changed"/>
-                                <RadioButton x:Name="RbFilterImages" Content="📷 Fotos" Style="{StaticResource PillRadioButton}" Checked="BgFilter_Changed"/>
+                                <RadioButton x:Name="RbFilterVideos" Content="Vídeos" Style="{StaticResource PillRadioButton}" Checked="BgFilter_Changed"/>
+                                <RadioButton x:Name="RbFilterImages" Content="Fotos" Style="{StaticResource PillRadioButton}" Checked="BgFilter_Changed"/>
                             </StackPanel>
 
                             <ListBox x:Name="LstBackgrounds" ItemContainerStyle="{StaticResource AnimatedCardItemStyle}" SelectionChanged="LstBackgrounds_SelectionChanged" AllowDrop="True" Drop="LstBackgrounds_Drop" BorderThickness="0" Background="Transparent" ScrollViewer.HorizontalScrollBarVisibility="Disabled">
@@ -770,7 +782,7 @@
                                                 <Border HorizontalAlignment="Right" VerticalAlignment="Top" Padding="6,3" CornerRadius="0,0,0,6">
                                                     <Border.Style>
                                                         <Style TargetType="Border">
-                                                            <Setter Property="Background" Value="#CC1E3A8A"/>
+                                                            <Setter Property="Background" Value="{DynamicResource AccentSoft}"/>
                                                             <Style.Triggers>
                                                                 <DataTrigger Binding="{Binding IsVideo}" Value="True">
                                                                     <Setter Property="Background" Value="#CC991B1B"/>
@@ -781,24 +793,24 @@
                                                     <TextBlock Foreground="White" FontSize="8" FontWeight="Bold">
                                                         <TextBlock.Style>
                                                             <Style TargetType="TextBlock">
-                                                                <Setter Property="Text" Value="📷 FOTO"/>
+                                                                <Setter Property="Text" Value="FOTO"/>
                                                                 <Style.Triggers>
                                                                     <DataTrigger Binding="{Binding IsVideo}" Value="True">
-                                                                        <Setter Property="Text" Value="🎬 VÍDEO"/>
+                                                                        <Setter Property="Text" Value="VÍDEO"/>
                                                                     </DataTrigger>
                                                                 </Style.Triggers>
                                                             </Style>
                                                         </TextBlock.Style>
                                                     </TextBlock>
                                                 </Border>
-                                                <Border Background="#E6060A12" VerticalAlignment="Bottom" Padding="6,4">
+                                                <Border Background="#E6090B0E" VerticalAlignment="Bottom" Padding="6,4">
                                                     <TextBlock Text="{Binding Name}" Foreground="White" FontSize="10" TextTrimming="CharacterEllipsis" TextAlignment="Center" ToolTip="{Binding Name}"/>
                                                 </Border>
                                             </Grid>
                                         </Border>
                                         <DataTemplate.Triggers>
                                             <DataTrigger Binding="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type ListBoxItem}}, Path=IsMouseOver}" Value="True">
-                                                <Setter TargetName="BgCard" Property="BorderBrush" Value="#3B4D71"/>
+                                                <Setter TargetName="BgCard" Property="BorderBrush" Value="{DynamicResource N_3F4A58}"/>
                                             </DataTrigger>
                                             <DataTrigger Binding="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type ListBoxItem}}, Path=IsSelected}" Value="True">
                                                 <Setter TargetName="BgCard" Property="BorderBrush" Value="{DynamicResource AccentColor}"/>
@@ -856,8 +868,8 @@
                                         </Button>
 
                                         <StackPanel Orientation="Horizontal" DockPanel.Dock="Right" VerticalAlignment="Center" Margin="6,0,2,0">
-                                            <Border Background="#1E3A8A" BorderBrush="#2563EB" BorderThickness="1" CornerRadius="4" Padding="6,2" Margin="0,0,4,0" ToolTip="Canal do Microfone">
-                                                <TextBlock Text="{Binding Microphone}" Foreground="#93C5FD" FontSize="10" FontWeight="Bold"/>
+                                            <Border Background="{DynamicResource AccentSoft}" BorderBrush="{DynamicResource AccentDim}" BorderThickness="1" CornerRadius="4" Padding="6,2" Margin="0,0,4,0" ToolTip="Canal do Microfone">
+                                                <TextBlock Text="{Binding Microphone}" Foreground="{DynamicResource AccentLight}" FontSize="10" FontWeight="Bold"/>
                                             </Border>
                                             <Border Background="#064E3B" BorderBrush="#059669" BorderThickness="1" CornerRadius="4" Padding="6,2" ToolTip="Canal de Retorno (In-Ear)">
                                                 <TextBlock Text="{Binding InEarReturn}" Foreground="#6EE7B7" FontSize="10" FontWeight="Bold"/>
@@ -872,8 +884,8 @@
                                 </Border>
                                 <DataTemplate.Triggers>
                                     <DataTrigger Binding="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type ListBoxItem}}, Path=IsMouseOver}" Value="True">
-                                        <Setter TargetName="CardBorder" Property="Background" Value="#222D42"/>
-                                        <Setter TargetName="CardBorder" Property="BorderBrush" Value="#3B4D71"/>
+                                        <Setter TargetName="CardBorder" Property="Background" Value="{DynamicResource N_2A323C}"/>
+                                        <Setter TargetName="CardBorder" Property="BorderBrush" Value="{DynamicResource N_3F4A58}"/>
                                     </DataTrigger>
                                 </DataTemplate.Triggers>
                             </DataTemplate>

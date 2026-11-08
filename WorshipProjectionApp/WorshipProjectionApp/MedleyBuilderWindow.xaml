@@ -18,7 +18,7 @@
         </Grid.RowDefinitions>
 
         <!-- CABEÇALHO -->
-        <Border Grid.Row="0" Background="#060A12" Padding="14,6,6,6" BorderBrush="{DynamicResource BorderDark}" BorderThickness="0,0,0,1" WindowChrome.IsHitTestVisibleInChrome="True">
+        <Border Grid.Row="0" Background="{DynamicResource N_090B0E}" Padding="14,6,6,6" BorderBrush="{DynamicResource BorderDark}" BorderThickness="0,0,0,1" WindowChrome.IsHitTestVisibleInChrome="True">
             <DockPanel>
                 <TextBlock Text="🔗 Construtor de Medley (Transição de Músicas)" Foreground="{DynamicResource AccentColor}" FontWeight="Bold" FontSize="14" VerticalAlignment="Center"/>
                 <Button Click="BtnClose_Click" Style="{DynamicResource WindowCloseButton}" HorizontalAlignment="Right" DockPanel.Dock="Right">
@@ -48,7 +48,7 @@
                              ItemContainerStyle="{StaticResource AnimatedCardItemStyle}" BorderThickness="0" Background="Transparent" ScrollViewer.HorizontalScrollBarVisibility="Disabled">
                         <ListBox.ItemTemplate>
                             <DataTemplate>
-                                <Border Background="#1A2234" BorderBrush="#26334D" BorderThickness="1" CornerRadius="6" Padding="10" Margin="0,0,0,4">
+                                <Border Background="{DynamicResource N_1C2128}" BorderBrush="{DynamicResource N_2C333D}" BorderThickness="1" CornerRadius="6" Padding="10" Margin="0,0,0,4">
                                     <TextBlock Text="{Binding Content}" FontSize="12" TextWrapping="Wrap" Foreground="{DynamicResource TextPrimary}"/>
                                 </Border>
                             </DataTemplate>
@@ -59,7 +59,7 @@
             </Border>
 
             <!-- COLUNA CENTRAL: O MEDLEY -->
-            <Border Grid.Column="1" Background="#0D131F" BorderBrush="{DynamicResource AccentColor}" BorderThickness="1" CornerRadius="8" Padding="10" Margin="6,0,6,0">
+            <Border Grid.Column="1" Background="{DynamicResource N_12161B}" BorderBrush="{DynamicResource AccentColor}" BorderThickness="1" CornerRadius="8" Padding="10" Margin="6,0,6,0">
                 <DockPanel>
                     <TextBlock DockPanel.Dock="Top" Text="Estrutura do Medley (Duplo clique nas laterais para adicionar)" FontWeight="Bold" FontSize="12" Margin="0,0,0,8" Foreground="{DynamicResource AccentColor}" HorizontalAlignment="Center"/>
 
@@ -79,9 +79,9 @@
                                 ItemContainerStyle="{StaticResource AnimatedCardItemStyle}" BorderThickness="0" Background="Transparent" ScrollViewer.HorizontalScrollBarVisibility="Disabled">
                         <ListBox.ItemTemplate>
                             <DataTemplate>
-                                <Border Background="#1E293B" BorderBrush="{DynamicResource BorderDark}" BorderThickness="1.5" CornerRadius="6" Padding="12" Margin="0,0,0,6">
+                                <Border Background="{DynamicResource N_20262E}" BorderBrush="{DynamicResource BorderDark}" BorderThickness="1.5" CornerRadius="6" Padding="12" Margin="0,0,0,6">
                                     <Grid>
-                                        <TextBlock Text="{Binding Content}" FontSize="13" TextWrapping="Wrap" Foreground="White" FontWeight="SemiBold"/>
+                                        <TextBlock Text="{Binding Content}" FontSize="13" TextWrapping="Wrap" Foreground="{DynamicResource TextPrimary}" FontWeight="SemiBold"/>
                                         <!-- CORRIGIDO: Transformado num Botão interativo para remover ao clicar -->
                                         <Button Content="❌ Remover" Click="BtnRemoveMedleyItem_Click" HorizontalAlignment="Right" VerticalAlignment="Top" Background="Transparent" BorderThickness="0" Cursor="Hand" FontSize="9" Foreground="#EF4444"/>
                                     </Grid>
@@ -107,7 +107,7 @@
          ItemContainerStyle="{StaticResource AnimatedCardItemStyle}" BorderThickness="0" Background="Transparent" ScrollViewer.HorizontalScrollBarVisibility="Disabled">
                         <ListBox.ItemTemplate>
                             <DataTemplate>
-                                <Border Background="#1A2234" BorderBrush="#26334D" BorderThickness="1" CornerRadius="0" Padding="10" Margin="0,0,0,4">
+                                <Border Background="{DynamicResource N_1C2128}" BorderBrush="{DynamicResource N_2C333D}" BorderThickness="1" CornerRadius="0" Padding="10" Margin="0,0,0,4">
                                     <TextBlock Text="{Binding Content}" FontSize="12" TextWrapping="Wrap" Foreground="{DynamicResource TextPrimary}"/>
                                 </Border>
                             </DataTemplate>
@@ -118,7 +118,7 @@
         </Grid>
 
         <!-- BARRA DE ACÕES INFERIOR -->
-        <Border Grid.Row="2" Background="#060A12" Padding="12" BorderBrush="{DynamicResource BorderDark}" BorderThickness="0,1,0,0">
+        <Border Grid.Row="2" Background="{DynamicResource N_090B0E}" Padding="12" BorderBrush="{DynamicResource BorderDark}" BorderThickness="0,1,0,0">
             <DockPanel>
                 <Button Content="Cancelar" Click="BtnClose_Click" Style="{DynamicResource NavyButton}" DockPanel.Dock="Left" Width="100"/>
                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" DockPanel.Dock="Right">

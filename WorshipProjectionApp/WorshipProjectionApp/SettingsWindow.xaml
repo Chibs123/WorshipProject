@@ -5,8 +5,8 @@
         Height="680" Width="480"
         WindowStartupLocation="CenterOwner"
         ResizeMode="NoResize"
-        Background="{StaticResource BgCanvas}"
-        Foreground="{StaticResource TextPrimary}"
+        Background="{DynamicResource BgCanvas}"
+        Foreground="{DynamicResource TextPrimary}"
         FontFamily="Segoe UI">
 
     <WindowChrome.WindowChrome>
@@ -21,7 +21,7 @@
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
-        <Border Grid.Row="0" Background="#060A12" Padding="14,6,6,6" BorderBrush="{StaticResource BorderDark}" BorderThickness="0,0,0,1" WindowChrome.IsHitTestVisibleInChrome="True">
+        <Border Grid.Row="0" Background="{DynamicResource N_090B0E}" Padding="14,6,6,6" BorderBrush="{DynamicResource BorderDark}" BorderThickness="0,0,0,1" WindowChrome.IsHitTestVisibleInChrome="True">
             <DockPanel>
                 <!-- A magia do DynamicResource: Quando a cor muda, este título atualiza sozinho! -->
                 <TextBlock Text="⚙️ Definições Gerais e Projeção" Foreground="{DynamicResource AccentColor}" FontWeight="Bold" FontSize="14" VerticalAlignment="Center"/>
@@ -37,58 +37,22 @@
                 <RowDefinition Height="Auto"/>
             </Grid.RowDefinitions>
 
-            <Border Grid.Row="0" Background="{StaticResource PanelBg}" BorderBrush="{StaticResource BorderDark}" BorderThickness="1" CornerRadius="8" Padding="14">
+            <Border Grid.Row="0" Background="{DynamicResource PanelBg}" BorderBrush="{DynamicResource BorderDark}" BorderThickness="1" CornerRadius="8" Padding="14">
                 <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="0,0,8,0">
                     <StackPanel>
 
-                        <!-- NOVO: SELETOR DE TEMA -->
-                        <TextBlock Text="Tema da Aplicação (Cor de Destaque):" FontWeight="SemiBold" Margin="0,0,0,8"/>
-                        <StackPanel Orientation="Horizontal" Margin="0,0,0,16">
-                            <!-- Botões de Cor (O C# trata de extrair o Background de cada um quando clicas) -->
-                            <Button Background="#D4AF37" Width="30" Height="30" Margin="0,0,8,0" Click="BtnTheme_Click" Cursor="Hand" ToolTip="Dourado Clássico">
-                                <Button.Template>
-                                    <ControlTemplate TargetType="Button">
-                                        <Border Background="{TemplateBinding Background}" CornerRadius="15"/>
-                                    </ControlTemplate>
-                                </Button.Template>
-                            </Button>
-                            <Button Background="#3B82F6" Width="30" Height="30" Margin="0,0,8,0" Click="BtnTheme_Click" Cursor="Hand" ToolTip="Azul Royal">
-                                <Button.Template>
-                                    <ControlTemplate TargetType="Button">
-                                        <Border Background="{TemplateBinding Background}" CornerRadius="15"/>
-                                    </ControlTemplate>
-                                </Button.Template>
-                            </Button>
-                            <Button Background="#10B981" Width="30" Height="30" Margin="0,0,8,0" Click="BtnTheme_Click" Cursor="Hand" ToolTip="Verde Esmeralda">
-                                <Button.Template>
-                                    <ControlTemplate TargetType="Button">
-                                        <Border Background="{TemplateBinding Background}" CornerRadius="15"/>
-                                    </ControlTemplate>
-                                </Button.Template>
-                            </Button>
-                            <Button Background="#8B5CF6" Width="30" Height="30" Margin="0,0,8,0" Click="BtnTheme_Click" Cursor="Hand" ToolTip="Roxo Imperial">
-                                <Button.Template>
-                                    <ControlTemplate TargetType="Button">
-                                        <Border Background="{TemplateBinding Background}" CornerRadius="15"/>
-                                    </ControlTemplate>
-                                </Button.Template>
-                            </Button>
-                            <Button Background="#F43F5E" Width="30" Height="30" Margin="0,0,8,0" Click="BtnTheme_Click" Cursor="Hand" ToolTip="Vermelho Rosa">
-                                <Button.Template>
-                                    <ControlTemplate TargetType="Button">
-                                        <Border Background="{TemplateBinding Background}" CornerRadius="15"/>
-                                    </ControlTemplate>
-                                </Button.Template>
-                            </Button>
-                        </StackPanel>
+                        <!-- SELETOR DE TEMAS (os cartões são criados em SettingsWindow.xaml.cs) -->
+                        <TextBlock Text="Tema da Aplicação:" FontWeight="SemiBold" Margin="0,0,0,2"/>
+                        <TextBlock Text="Passa o rato por cima de um tema para o pré-visualizar em toda a aplicação. Clica para o escolher e grava em Guardar e Aplicar." Foreground="{DynamicResource TextMuted}" FontSize="11" TextWrapping="Wrap" Margin="0,0,0,10"/>
+                        <WrapPanel x:Name="ThemePanel" Margin="0,0,0,16"/>
 
-                        <Rectangle Height="1" Fill="{StaticResource BorderDark}" Margin="0,0,0,16"/>
+                        <Rectangle Height="1" Fill="{DynamicResource BorderDark}" Margin="0,0,0,16"/>
 
                         <!-- DEFINIÇÕES EXISTENTES -->
                         <TextBlock Text="Ecrã de Destino (Projetor Principal):" FontWeight="SemiBold" Margin="0,0,0,4"/>
                         <ComboBox x:Name="CmbScreens" Margin="0,0,0,16" Height="28"/>
 
-                        <Rectangle Height="1" Fill="{StaticResource BorderDark}" Margin="0,0,0,16"/>
+                        <Rectangle Height="1" Fill="{DynamicResource BorderDark}" Margin="0,0,0,16"/>
 
                         <TextBlock Text="Tipo de Letra (Fonte):" FontWeight="SemiBold" Margin="0,0,0,4"/>
                         <ComboBox x:Name="CmbFontFamily" Margin="0,0,0,12" Height="28"/>
@@ -98,9 +62,9 @@
                                 <ColumnDefinition Width="*"/>
                                 <ColumnDefinition Width="*"/>
                             </Grid.ColumnDefinitions>
-                            <CheckBox x:Name="ChkBold" Content="Negrito (Bold)" VerticalAlignment="Center" Foreground="#F8FAFC" Grid.Column="0"/>
+                            <CheckBox x:Name="ChkBold" Content="Negrito (Bold)" VerticalAlignment="Center" Foreground="{DynamicResource TextPrimary}" Grid.Column="0"/>
                             <StackPanel Grid.Column="1">
-                                <TextBlock Text="Alinhamento:" FontSize="11" Foreground="#94A3B8" Margin="0,0,0,2"/>
+                                <TextBlock Text="Alinhamento:" FontSize="11" Foreground="{DynamicResource TextMuted}" Margin="0,0,0,2"/>
                                 <ComboBox x:Name="CmbAlignment" Height="26">
                                     <ComboBoxItem Content="Centro" IsSelected="True"/>
                                     <ComboBoxItem Content="Esquerda"/>
@@ -135,6 +99,51 @@
                             <ComboBoxItem Content="Amarelo / Dourado Claro (#FFF2A3)"/>
                             <ComboBoxItem Content="Ciano Suave (#E0F2FE)"/>
                         </ComboBox>
+
+                        <TextBlock Text="TEXTO NA PROJEÇÃO" Foreground="{DynamicResource AccentColor}" FontWeight="Bold" FontSize="12" Margin="0,18,0,8"/>
+                        <DockPanel Margin="0,0,0,4">
+                            <TextBlock Text="Tamanho da letra (referência em ecrã 1080p):" FontWeight="SemiBold" DockPanel.Dock="Left"/>
+                            <TextBlock x:Name="TxtFontSizeVal" Text="84" Foreground="{DynamicResource AccentColor}" FontWeight="Bold" HorizontalAlignment="Right"/>
+                        </DockPanel>
+                        <Slider x:Name="SldFontSize" Minimum="40" Maximum="160" Value="84" TickFrequency="2" IsSnapToTickEnabled="True" ValueChanged="SldGeneric_ValueChanged" Margin="0,0,0,12"/>
+                        <DockPanel Margin="0,0,0,4">
+                            <TextBlock Text="Espaçamento entre linhas:" FontWeight="SemiBold" DockPanel.Dock="Left"/>
+                            <TextBlock x:Name="TxtLineSpacingVal" Text="1.20" Foreground="{DynamicResource AccentColor}" FontWeight="Bold" HorizontalAlignment="Right"/>
+                        </DockPanel>
+                        <Slider x:Name="SldLineSpacing" Minimum="1.0" Maximum="1.8" Value="1.2" TickFrequency="0.05" IsSnapToTickEnabled="True" ValueChanged="SldGeneric_ValueChanged" Margin="0,0,0,12"/>
+                        <CheckBox x:Name="ChkUppercase" Content="Escrever tudo em MAIÚSCULAS" Foreground="{DynamicResource TextPrimary}" Margin="0,0,0,10"/>
+                        <CheckBox x:Name="ChkOutline" Content="Contorno preto nas letras" Foreground="{DynamicResource TextPrimary}" Margin="0,0,0,10"/>
+                        <DockPanel Margin="0,0,0,4">
+                            <TextBlock Text="Espessura do contorno:" FontWeight="SemiBold" DockPanel.Dock="Left"/>
+                            <TextBlock x:Name="TxtOutlineVal" Text="4" Foreground="{DynamicResource AccentColor}" FontWeight="Bold" HorizontalAlignment="Right"/>
+                        </DockPanel>
+                        <Slider x:Name="SldOutline" Minimum="1" Maximum="10" Value="4" TickFrequency="1" IsSnapToTickEnabled="True" ValueChanged="SldGeneric_ValueChanged" Margin="0,0,0,12"/>
+                        <CheckBox x:Name="ChkBackBox" Content="Caixa semitransparente atrás do texto" Foreground="{DynamicResource TextPrimary}" Margin="0,0,0,10"/>
+                        <DockPanel Margin="0,0,0,4">
+                            <TextBlock Text="Opacidade da caixa:" FontWeight="SemiBold" DockPanel.Dock="Left"/>
+                            <TextBlock x:Name="TxtBackBoxVal" Text="55%" Foreground="{DynamicResource AccentColor}" FontWeight="Bold" HorizontalAlignment="Right"/>
+                        </DockPanel>
+                        <Slider x:Name="SldBackBox" Minimum="10" Maximum="90" Value="55" TickFrequency="5" IsSnapToTickEnabled="True" ValueChanged="SldGeneric_ValueChanged" Margin="0,0,0,12"/>
+                        <DockPanel Margin="0,0,0,4">
+                            <TextBlock Text="Escurecimento do fundo:" FontWeight="SemiBold" DockPanel.Dock="Left"/>
+                            <TextBlock x:Name="TxtDimmerVal" Text="15%" Foreground="{DynamicResource AccentColor}" FontWeight="Bold" HorizontalAlignment="Right"/>
+                        </DockPanel>
+                        <Slider x:Name="SldDimmer" Minimum="0" Maximum="80" Value="15" TickFrequency="5" IsSnapToTickEnabled="True" ValueChanged="SldGeneric_ValueChanged" Margin="0,0,0,12"/>
+                        <CheckBox x:Name="ChkBibleRefBottom" Content="Mostrar a referência bíblica pequena no fundo do ecrã" Foreground="{DynamicResource TextPrimary}" Margin="0,0,0,10"/>
+                        <DockPanel Margin="0,0,0,4">
+                            <TextBlock Text="Dividir slides com mais de N linhas (0 = não dividir):" FontWeight="SemiBold" DockPanel.Dock="Left"/>
+                            <TextBlock x:Name="TxtMaxLinesVal" Text="Desligado" Foreground="{DynamicResource AccentColor}" FontWeight="Bold" HorizontalAlignment="Right"/>
+                        </DockPanel>
+                        <Slider x:Name="SldMaxLines" Minimum="0" Maximum="8" Value="0" TickFrequency="1" IsSnapToTickEnabled="True" ValueChanged="SldGeneric_ValueChanged" Margin="0,0,0,12"/>
+
+                        <TextBlock Text="ECRÃ DO GRUPO DE LOUVOR" Foreground="{DynamicResource AccentColor}" FontWeight="Bold" FontSize="12" Margin="0,18,0,8"/>
+                        <TextBlock Text="Ecrã do louvor (mostra só a letra atual, em grande):" FontWeight="SemiBold" Margin="0,0,0,4"/>
+                        <ComboBox x:Name="CmbStageScreen" Margin="0,0,0,12" Height="28"/>
+                        <DockPanel Margin="0,0,0,4">
+                            <TextBlock Text="Tamanho da letra no ecrã do louvor:" FontWeight="SemiBold" DockPanel.Dock="Left"/>
+                            <TextBlock x:Name="TxtStageFontVal" Text="96" Foreground="{DynamicResource AccentColor}" FontWeight="Bold" HorizontalAlignment="Right"/>
+                        </DockPanel>
+                        <Slider x:Name="SldStageFont" Minimum="50" Maximum="200" Value="96" TickFrequency="2" IsSnapToTickEnabled="True" ValueChanged="SldGeneric_ValueChanged" Margin="0,0,0,12"/>
                     </StackPanel>
                 </ScrollViewer>
             </Border>

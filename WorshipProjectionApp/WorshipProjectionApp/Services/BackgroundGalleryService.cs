@@ -15,7 +15,7 @@ namespace WorshipProjectionApp.Services
         public BackgroundGalleryService()
         {
             // Define as pastas base
-            BackgroundsFolder = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Backgrounds");
+            BackgroundsFolder = WorshipProjectionApp.AppPaths.Folder("Backgrounds");
             ThumbnailsFolder = Path.Combine(BackgroundsFolder, "Thumbnails");
 
             // Cria as pastas se não existirem
@@ -47,7 +47,7 @@ namespace WorshipProjectionApp.Services
                     {
                         Name = Path.GetFileNameWithoutExtension(file),
                         FilePath = file,
-                        ThumbnailPath = GetOrGenerateThumbnail(file), // Extrai o frame do vídeo
+                        ThumbnailPath = ThumbnailFor(file), // Caminho esperado; os que faltam são gerados em paralelo abaixo
                         IsVideo = true
                     });
                 }
@@ -63,8 +63,20 @@ namespace WorshipProjectionApp.Services
                 }
             }
 
+            // Gera em paralelo as miniaturas que ainda não existem (só acontece na primeira vez)
+            var missing = list.Where(b => b.IsVideo && !File.Exists(b.ThumbnailPath)).ToList();
+            if (missing.Count > 0)
+            {
+                Parallel.ForEach(missing,
+                    new ParallelOptions { MaxDegreeOfParallelism = Math.Max(1, Environment.ProcessorCount / 2) },
+                    b => b.ThumbnailPath = GetOrGenerateThumbnail(b.FilePath));
+            }
+
             return list;
         }
+
+        private string ThumbnailFor(string videoFilePath) =>
+            Path.Combine(ThumbnailsFolder, Path.GetFileNameWithoutExtension(videoFilePath) + ".jpg");
 
         // Copia um ficheiro do Windows para a pasta interna e gera a miniatura
         public MediaBackground? ImportFile(string sourceFilePath)

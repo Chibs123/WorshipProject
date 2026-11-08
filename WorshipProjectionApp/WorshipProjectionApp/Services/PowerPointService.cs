@@ -14,7 +14,7 @@ namespace WorshipProjectionApp.Services
 
         public PowerPointService()
         {
-            _pptExportFolder = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "ImportedPPTs");
+            _pptExportFolder = WorshipProjectionApp.AppPaths.Folder("ImportedPPTs");
             if (!Directory.Exists(_pptExportFolder))
                 Directory.CreateDirectory(_pptExportFolder);
         }
@@ -50,12 +50,16 @@ namespace WorshipProjectionApp.Services
                 presentation = presentations.Open(pptxFilePath, -1, 0, 0);
 
                 // 2. Extrair cada slide e adicionar à lista de Slides deste item
-                for (int i = 1; i <= presentation.Slides.Count; i++)
+                dynamic slides = presentation.Slides;
+                int slideCount = slides.Count;
+                for (int i = 1; i <= slideCount; i++)
                 {
                     string imagePath = Path.Combine(slideFolder, $"Slide_{i}.jpg");
 
                     // Exportar em Full HD (1920x1080)
-                    presentation.Slides[i].Export(imagePath, "jpg", 1920, 1080);
+                    dynamic slide = slides[i];
+                    slide.Export(imagePath, "jpg", 1920, 1080);
+                    Marshal.ReleaseComObject(slide);
 
                     // Criar o slide perfeitamente alinhado com a tua classe SlideItem
                     pptItem.Slides.Add(new SlideItem
@@ -66,23 +70,13 @@ namespace WorshipProjectionApp.Services
                     });
                 }
             }
-            catch (Exception ex)
-            {
-                System.Windows.MessageBox.Show($"Erro ao importar PPT: {ex.Message}");
-                return null;
-            }
             finally
             {
-                if (presentation != null)
-                {
-                    presentation.Close();
-                    Marshal.ReleaseComObject(presentation);
-                }
-                if (pptApp != null)
-                {
-                    pptApp.Quit();
-                    Marshal.ReleaseComObject(pptApp);
-                }
+                // Não mostra MessageBox aqui (corre numa thread de fundo): a exceção sobe para o chamador.
+                try { presentation?.Close(); } catch { }
+                if (presentation != null) Marshal.ReleaseComObject(presentation);
+                try { pptApp?.Quit(); } catch { }
+                if (pptApp != null) Marshal.ReleaseComObject(pptApp);
             }
 
             return pptItem;

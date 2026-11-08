@@ -20,7 +20,7 @@
         </Grid.RowDefinitions>
 
         <!-- Barra de Título Customizada -->
-        <Border Grid.Row="0" Background="#060A12" Padding="14,6,6,6" BorderBrush="{DynamicResource BorderDark}" BorderThickness="0,0,0,1" WindowChrome.IsHitTestVisibleInChrome="True">
+        <Border Grid.Row="0" Background="{DynamicResource N_090B0E}" Padding="14,6,6,6" BorderBrush="{DynamicResource BorderDark}" BorderThickness="0,0,0,1" WindowChrome.IsHitTestVisibleInChrome="True">
             <DockPanel>
                 <TextBlock Text="📢 Avisos &amp; Controlo de Tempo" Foreground="{DynamicResource AccentColor}" FontWeight="Bold" FontSize="14" VerticalAlignment="Center"/>
                 <Button Click="BtnClose_Click" Style="{DynamicResource WindowCloseButton}" HorizontalAlignment="Right" DockPanel.Dock="Right">

@@ -1,9 +1,7 @@
 ﻿using System.Windows;
-using System.Windows.Media;
 using WorshipProjectionApp.Models;
+using WorshipProjectionApp.Services;
 using Application = System.Windows.Application;
-using Color = System.Windows.Media.Color;
-using ColorConverter = System.Windows.Media.ColorConverter;
 
 namespace WorshipProjectionApp
 {
@@ -11,18 +9,11 @@ namespace WorshipProjectionApp
     {
         protected override void OnStartup(StartupEventArgs e)
         {
-            base.OnStartup(e);
-
-            // Carrega as definições guardadas
+            // O tema tem de estar aplicado ANTES de a janela principal ser criada
             var settings = ProjectionSettings.Load();
+            ThemeService.Apply(ThemeService.Get(settings.ThemeId));
 
-            // Pinta a cor de destaque (AccentColor) na App Inteira em tempo real!
-            try
-            {
-                var color = (Color)ColorConverter.ConvertFromString(settings.AppThemeColorHex);
-                Application.Current.Resources["AccentColor"] = new SolidColorBrush(color);
-            }
-            catch { } // Proteção caso a cor seja inválida
+            base.OnStartup(e);
         }
     }
 }

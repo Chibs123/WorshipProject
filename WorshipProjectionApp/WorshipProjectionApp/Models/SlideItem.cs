@@ -8,6 +8,9 @@ namespace WorshipProjectionApp.Models
         public string Header { get; set; } = string.Empty;
         public string Content { get; set; } = string.Empty;
 
+        // Referência bíblica (mostrada pequena no fundo do ecrã); vazio nos slides normais
+        public string? Reference { get; set; }
+
         private string? _backgroundPath;
         public string? BackgroundPath
         {

@@ -7,7 +7,7 @@ namespace WorshipProjectionApp.Services;
 
 public class DatabaseService
 {
-    private static readonly string DbPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "worship.db");
+    private static readonly string DbPath = AppPaths.File("worship.db");
     private static readonly string ConnectionString = $"Data Source={DbPath}";
 
     public DatabaseService()

@@ -30,7 +30,7 @@ public partial class MainWindow : Window
     public ObservableCollection<MediaBackground> FilteredBackgrounds { get; set; } = new();
     private DragAdorner? _dragAdorner;
     private AdornerLayer? _adornerLayer;
-    private static readonly string AutoSavePath = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "autosave_schedule.json");
+    private static readonly string AutoSavePath = AppPaths.File("autosave_schedule.json");
     private ProjectionSettings _projectionSettings = ProjectionSettings.Load();
     private LayoutSettings _layoutSettings = LayoutSettings.Load();
     private Point _scheduleDragStartPoint;
@@ -47,6 +47,10 @@ public partial class MainWindow : Window
 
     private ProjectionWindow? _projectionWindow;
     private string? _currentBackgroundPath;
+    private string? _projectorBgPath;      // último fundo enviado ao projetor
+    private string _currentSlideText = string.Empty; // texto do slide selecionado (só vai para o ecrã em modo LIVE)
+    private string _currentReference = string.Empty; // referência bíblica do slide (se houver)
+    private StageWindow? _stageWindow;               // ecrã do grupo de louvor
     private Point _bibleDragStartPoint;
     private bool _isBiblePotentialDrag;
     private readonly DatabaseService _dbService = new();
@@ -55,6 +59,9 @@ public partial class MainWindow : Window
     private List<Song> _allSongs = new();
 
     private ScheduleItem? _itemToRename; // Guarda o item que está a ser renomeado
+    private Point _songDragStartPoint;
+    private System.Windows.Threading.DispatcherTimer? _saveTimer;
+    private System.Windows.Threading.DispatcherTimer? _songSearchTimer;
 
     public MainWindow()
     {
@@ -68,6 +75,7 @@ public partial class MainWindow : Window
         LstSchedule.ItemsSource = ScheduleItems;
         LstActiveTeam.ItemsSource = ActiveTeam;
         LstBackgrounds.ItemsSource = FilteredBackgrounds;
+        LstSongs.PreviewMouseLeftButtonDown += (s, e) => _songDragStartPoint = e.GetPosition(null);
 
         CmbPresetMembers.ItemsSource = TeamCatalog;
         if (TeamCatalog.Count > 0) CmbPresetMembers.SelectedIndex = 0;
@@ -75,6 +83,8 @@ public partial class MainWindow : Window
         ApplyLayout(_layoutSettings);
         LoadBibleVersions();
         this.KeyDown += MainWindow_KeyDown;
+        this.PreviewKeyDown += MainWindow_PreviewKeyDown;
+        StartRemote();
 
         // --- CÓDIGO NOVO DO RELÓGIO AQUI ---
         var clockTimer = new System.Windows.Threading.DispatcherTimer();
@@ -82,11 +92,13 @@ public partial class MainWindow : Window
         clockTimer.Tick += (s, e) =>
         {
             TxtTopClock.Text = DateTime.Now.ToString("HH:mm:ss");
+            SyncAlertPreview();
         };
         clockTimer.Start();
 
         // Atualiza logo no primeiro milissegundo para não mostrar "00:00"
         TxtTopClock.Text = DateTime.Now.ToString("HH:mm:ss");
+        ApplyBadge(_currentMode);
     }
 
     private void BtnImportBible_Click(object sender, RoutedEventArgs e)
@@ -137,6 +149,11 @@ public partial class MainWindow : Window
                     ScheduleItems.Add(pptFolder);
                     SaveCurrentSession();
                 }
+            }
+            catch (Exception ex)
+            {
+                AppPaths.Log("Importar PowerPoint", ex);
+                MessageBox.Show($"Erro ao importar PowerPoint: {ex.Message}", "Importar PowerPoint", MessageBoxButton.OK, MessageBoxImage.Error);
             }
             finally
             {
@@ -277,7 +294,12 @@ private void BtnMoveSubItemDown_Click(object sender, RoutedEventArgs e)
         if (dlg.ShowDialog() == true)
         {
             if (dlg.ShouldHide) _projectionWindow?.HideAlert();
-            else _projectionWindow?.ShowAlert(dlg.MessageText, dlg.ShowClock, dlg.CountdownMinutes);
+            else
+            {
+                OpenProjectionWindow();
+                _projectionWindow?.ShowAlert(dlg.MessageText, dlg.ShowClock, dlg.CountdownMinutes);
+            }
+            SyncAlertPreview();
         }
     }
 
@@ -286,7 +308,13 @@ private void BtnMoveSubItemDown_Click(object sender, RoutedEventArgs e)
         try
         {
             // 1. Vai à pasta e gera as miniaturas numa thread paralela (não bloqueia a UI!)
-            var bgs = await Task.Run(() => _bgGalleryService.GetBackgrounds());
+            var bgs = await Task.Run(() =>
+            {
+                var list = _bgGalleryService.GetBackgrounds();
+                // Decodifica as miniaturas (150px, congeladas) já aqui, para a lista não "engasgar" ao aparecer
+                foreach (var b in list) _ = b.OptimizedThumbnail;
+                return list;
+            });
 
             // 2. Volta à Thread Principal para atualizar os ecrãs em segurança
             Dispatcher.Invoke(() =>
@@ -324,17 +352,24 @@ private void BtnMoveSubItemDown_Click(object sender, RoutedEventArgs e)
     // ---------------------------------------------------------
     private void LstSongs_PreviewMouseMove(object sender, System.Windows.Input.MouseEventArgs e)
     {
-        if (e.LeftButton == MouseButtonState.Pressed && LstSongs.SelectedItem is Song selectedSong)
+        if (e.LeftButton == MouseButtonState.Pressed && LstSongs.SelectedItem is Song selectedSong && ExceededSongDragThreshold(e))
         {
             var item = new ScheduleItem
             {
                 Title = selectedSong.Title,
                 Subtitle = string.IsNullOrWhiteSpace(selectedSong.Artist) ? "Música" : selectedSong.Artist,
                 ItemTypeIcon = "🎵",
-                Slides = selectedSong.ParseSlides()
+                Slides = selectedSong.ParseSlides(_projectionSettings.MaxLinesPerSlide)
             };
             StartDrag(LstSongs, item);
         }
+    }
+
+    private bool ExceededSongDragThreshold(System.Windows.Input.MouseEventArgs e)
+    {
+        Vector diff = _songDragStartPoint - e.GetPosition(null);
+        return Math.Abs(diff.X) > SystemParameters.MinimumHorizontalDragDistance ||
+               Math.Abs(diff.Y) > SystemParameters.MinimumVerticalDragDistance;
     }
 
     private void ApplyBackgroundFilter()
@@ -346,7 +381,6 @@ private void BtnMoveSubItemDown_Click(object sender, RoutedEventArgs e)
             return;
         }
 
-        FilteredBackgrounds.Clear();
         var list = AvailableBackgrounds.AsEnumerable();
 
         if (RbFilterVideos?.IsChecked == true) list = list.Where(b => b.IsVideo);
@@ -361,7 +395,8 @@ private void BtnMoveSubItemDown_Click(object sender, RoutedEventArgs e)
                 list = list.Where(b => b.Name.StartsWith(query, StringComparison.OrdinalIgnoreCase));
         }
 
-        foreach (var item in list) FilteredBackgrounds.Add(item);
+        FilteredBackgrounds = new ObservableCollection<MediaBackground>(list);
+        if (LstBackgrounds != null) LstBackgrounds.ItemsSource = FilteredBackgrounds;
     }
 
     private void BgFilter_Changed(object sender, RoutedEventArgs e) => ApplyBackgroundFilter();
@@ -513,6 +548,7 @@ private void LstSchedule_Drop(object sender, System.Windows.DragEventArgs e)
                 {
                     _hoverPreviewTimer.Stop();
                     SetPreviewMediaBackground(_pendingHoverPath);
+                    ShowHoverBadge();
                 };
             }
 
@@ -524,13 +560,8 @@ private void LstSchedule_Drop(object sender, System.Windows.DragEventArgs e)
     private void BackgroundItem_MouseLeave(object sender, MouseEventArgs e)
     {
         _hoverPreviewTimer?.Stop();
-
-        string? bgToRestore = _currentBackgroundPath;
-        if (LstSlides.SelectedItem is SlideItem slide && slide.HasCustomBackground)
-        {
-            bgToRestore = slide.BackgroundPath;
-        }
-        SetPreviewMediaBackground(bgToRestore);
+        RefreshMonitor();
+        ApplyBadge(_currentMode);
     }
 
     private void LstBackgrounds_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -538,12 +569,8 @@ private void LstSchedule_Drop(object sender, System.Windows.DragEventArgs e)
         if (LstBackgrounds.SelectedItem is MediaBackground bg)
         {
             _currentBackgroundPath = bg.FilePath;
-            SetPreviewMediaBackground(_currentBackgroundPath);
-
-            if (_projectionWindow != null && _currentMode != ProjectionMode.Logo)
-            {
-                _projectionWindow.SetMediaBackground(_currentBackgroundPath);
-            }
+            PushBackgroundToProjector();
+            RefreshMonitor();
         }
     }
 
@@ -573,8 +600,8 @@ private void LstSchedule_Drop(object sender, System.Windows.DragEventArgs e)
     {
         _currentBackgroundPath = null;
         LstBackgrounds.SelectedItem = null;
-        SetPreviewMediaBackground(null);
-        _projectionWindow?.SetMediaBackground(null);
+        PushBackgroundToProjector();
+        RefreshMonitor();
     }
 
     // ---------------------------------------------------------
@@ -655,7 +682,9 @@ private void LstSchedule_Drop(object sender, System.Windows.DragEventArgs e)
         {
             _projectionSettings = settingsWindow.Settings;
             _projectionWindow?.ApplySettings(_projectionSettings);
-            OpenProjectionWindow();
+            // Só reposiciona (ex.: mudança de ecrã) se a janela de projeção já estiver aberta;
+            // guardar definições não deve abrir a projeção.
+            if (_projectionWindow != null) OpenProjectionWindow();
         }
     }
 
@@ -684,9 +713,32 @@ private void LstSchedule_Drop(object sender, System.Windows.DragEventArgs e)
         }
     }
 
+    // Agrupa várias alterações seguidas numa só gravação (400 ms depois da última)
     private void SaveCurrentSession()
     {
-        try { File.WriteAllText(AutoSavePath, JsonSerializer.Serialize(ScheduleItems, new JsonSerializerOptions { WriteIndented = true })); } catch { }
+        if (_saveTimer == null)
+        {
+            _saveTimer = new System.Windows.Threading.DispatcherTimer { Interval = TimeSpan.FromMilliseconds(400) };
+            _saveTimer.Tick += (s, e) =>
+            {
+                _saveTimer!.Stop();
+                SaveSessionNow();
+            };
+        }
+        _saveTimer.Stop();
+        _saveTimer.Start();
+    }
+
+    private void SaveSessionNow()
+    {
+        try
+        {
+            // Grava num ficheiro temporário e só depois substitui, para nunca deixar o autosave a meio
+            string tmp = AutoSavePath + ".tmp";
+            File.WriteAllText(tmp, JsonSerializer.Serialize(ScheduleItems, new JsonSerializerOptions { WriteIndented = true }));
+            File.Move(tmp, AutoSavePath, true);
+        }
+        catch (Exception ex) { AppPaths.Log("Gravar autosave", ex); }
     }
 
     private void RestoreLastSession()
@@ -704,7 +756,12 @@ private void LstSchedule_Drop(object sender, System.Windows.DragEventArgs e)
                 }
             }
         }
-        catch { }
+        catch (Exception ex)
+        {
+            AppPaths.Log("Restaurar sessão", ex);
+            // Guarda uma cópia do ficheiro estragado para não ser sobrescrito
+            try { File.Copy(AutoSavePath, AutoSavePath + ".corrompido", true); } catch { }
+        }
     }
 
     // ---------------------------------------------------------
@@ -872,13 +929,10 @@ private void LstSchedule_Drop(object sender, System.Windows.DragEventArgs e)
                 LstSchedule.SelectedIndex = -1;
             }
 
-            // 2. AQUI ENVIAS PARA A PROJEÇÃO!
-            // (Deves usar o mesmo método que já usas no LstSchedule_SelectionChanged para carregar a música)
-            // Exemplo: 
-            // LoadItemToSlides(itemSelecionado);
-
-            // (Opcional) Atualiza o título do painel do meio
+            // 2. Carrega os slides do item (igual ao que LstSchedule_SelectionChanged faz)
             TxtSelectedSongTitle.Text = itemSelecionado.Title;
+            LstSlides.ItemsSource = itemSelecionado.Slides;
+            if (itemSelecionado.Slides.Count > 0) LstSlides.SelectedIndex = 0;
 
             // 3. Atualiza o estado Ativo (Borda Verde/Dourada)
             foreach (var folder in ScheduleItems)
@@ -966,7 +1020,7 @@ private void LstSchedule_Drop(object sender, System.Windows.DragEventArgs e)
             var slide = verse.ToSlideItem();
             LstSlides.ItemsSource = new List<SlideItem> { slide };
             LstSlides.SelectedIndex = 0;
-            SendToProjection(slide.Content);
+            SendToProjection(slide.Content, slide.Reference);
         }
     }
 
@@ -982,7 +1036,11 @@ private void LstSchedule_Drop(object sender, System.Windows.DragEventArgs e)
             if (item.Slides.Count > 0) LstSlides.SelectedIndex = 0;
 
             // Borda Ativa Dinâmica
-            foreach (var sch in ScheduleItems) sch.IsActive = (sch == item);
+            foreach (var sch in ScheduleItems)
+            {
+                sch.IsActive = (sch == item);
+                foreach (var sub in sch.SubItems) sub.IsActive = false;
+            }
         }
     }
 
@@ -1049,7 +1107,12 @@ private void LstSchedule_Drop(object sender, System.Windows.DragEventArgs e)
         var dialog = new Microsoft.Win32.SaveFileDialog { Title = "Gravar Culto", Filter = "Playlist (*.json)|*.json", FileName = "Culto_Domingo.json" };
         if (dialog.ShowDialog() == true)
         {
-            try { File.WriteAllText(dialog.FileName, JsonSerializer.Serialize(ScheduleItems, new JsonSerializerOptions { WriteIndented = true })); } catch { }
+            try { File.WriteAllText(dialog.FileName, JsonSerializer.Serialize(ScheduleItems, new JsonSerializerOptions { WriteIndented = true })); }
+            catch (Exception ex)
+            {
+                AppPaths.Log("Gravar culto", ex);
+                MessageBox.Show($"Não foi possível gravar o culto: {ex.Message}", "Gravar Culto", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
         }
     }
 
@@ -1065,9 +1128,15 @@ private void LstSchedule_Drop(object sender, System.Windows.DragEventArgs e)
                 {
                     ScheduleItems.Clear();
                     foreach (var item in items) ScheduleItems.Add(item);
+                    if (ScheduleItems.Count > 0) LstSchedule.SelectedIndex = 0;
+                    SaveCurrentSession();
                 }
             }
-            catch { MessageBox.Show("Erro ao carregar o culto."); }
+            catch (Exception ex)
+            {
+                AppPaths.Log("Carregar culto", ex);
+                MessageBox.Show($"Erro ao carregar o culto: {ex.Message}", "Abrir Culto", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
         }
     }
 
@@ -1105,7 +1174,6 @@ private void LstSchedule_Drop(object sender, System.Windows.DragEventArgs e)
     // Substitui a função UpdateSongFilter inteira
     private void UpdateSongFilter(string query)
     {
-        FilteredSongs.Clear();
         IEnumerable<Song> matches;
 
         if (string.IsNullOrWhiteSpace(query))
@@ -1128,7 +1196,8 @@ private void LstSchedule_Drop(object sender, System.Windows.DragEventArgs e)
             }
         }
 
-        foreach (var song in matches) FilteredSongs.Add(song);
+        FilteredSongs = new ObservableCollection<Song>(matches);
+        if (LstSongs != null) LstSongs.ItemsSource = FilteredSongs;
     }
 
     private void SongSearchMode_Changed(object sender, SelectionChangedEventArgs e)
@@ -1136,14 +1205,28 @@ private void LstSchedule_Drop(object sender, System.Windows.DragEventArgs e)
         if (TxtSearchSong != null) UpdateSongFilter(TxtSearchSong.Text);
     }
 
-    private void TxtSearchSong_TextChanged(object sender, TextChangedEventArgs e) => UpdateSongFilter(TxtSearchSong.Text);
+    private void TxtSearchSong_TextChanged(object sender, TextChangedEventArgs e)
+    {
+        // Espera 200 ms depois da última letra, para não refiltrar a cada tecla
+        if (_songSearchTimer == null)
+        {
+            _songSearchTimer = new System.Windows.Threading.DispatcherTimer { Interval = TimeSpan.FromMilliseconds(200) };
+            _songSearchTimer.Tick += (s, args) =>
+            {
+                _songSearchTimer!.Stop();
+                UpdateSongFilter(TxtSearchSong.Text);
+            };
+        }
+        _songSearchTimer.Stop();
+        _songSearchTimer.Start();
+    }
 
     private void LstSongs_SelectionChanged(object sender, SelectionChangedEventArgs e)
     {
         if (LstSongs.SelectedItem is Song selectedSong)
         {
             TxtSelectedSongTitle.Text = selectedSong.Title;
-            LstSlides.ItemsSource = selectedSong.ParseSlides();
+            LstSlides.ItemsSource = selectedSong.ParseSlides(_projectionSettings.MaxLinesPerSlide);
             if (LstSlides.Items.Count > 0) LstSlides.SelectedIndex = 0;
         }
     }
@@ -1152,27 +1235,98 @@ private void LstSchedule_Drop(object sender, System.Windows.DragEventArgs e)
     {
         if (LstSlides.SelectedItem is SlideItem slide)
         {
-            // 1. Descobre se o Slide tem um fundo próprio ou se usa o fundo global do Culto
-            string? activeBg = slide.HasCustomBackground ? slide.BackgroundPath : _currentBackgroundPath;
+            // 1. Fundo próprio do slide (ex.: PowerPoint) ou fundo geral; só muda o projetor se for diferente
+            PushBackgroundToProjector();
 
-            // 2. Atualiza a miniatura do ecrã "Em Direto" (na interface do operador)
-            SetPreviewMediaBackground(activeBg);
-
-            // 3. Atualiza o projetor real (se não estiver em modo Logo)
-            if (_projectionWindow != null && _currentMode != ProjectionMode.Logo)
-            {
-                _projectionWindow.SetMediaBackground(activeBg);
-            }
-
-            // 4. Manda o texto do slide
-            SendToProjection(slide.Content);
+            // 2. Texto do slide (o monitor é atualizado dentro de SendToProjection)
+            SendToProjection(slide.Content, slide.Reference);
         }
     }
 
-    private void SendToProjection(string text)
+    private void SendToProjection(string text, string? reference = null)
     {
-        TxtPreview.Text = text;
-        if (_projectionWindow != null && _currentMode == ProjectionMode.Live) _projectionWindow.UpdateText(text);
+        _currentSlideText = text;
+        _currentReference = reference ?? string.Empty;
+        if (_projectionWindow != null && _currentMode == ProjectionMode.Live) _projectionWindow.UpdateText(text, reference);
+        RefreshMonitor();
+    }
+
+    // ---------------------------------------------------------
+    // MONITOR DE SAÍDA = espelho do que está realmente no projetor
+    // ---------------------------------------------------------
+    // Fundo que o projetor deve mostrar agora: logo (modo LOGO), fundo do slide, ou fundo geral
+    private string? GetEffectiveBackground()
+    {
+        if (_currentMode == ProjectionMode.Logo) return _logoFilePath;
+        if (LstSlides.SelectedItem is SlideItem slide && slide.HasCustomBackground) return slide.BackgroundPath;
+        return _currentBackgroundPath;
+    }
+
+    // Só envia ao projetor se o fundo mudou (assim um vídeo em loop não reinicia a cada slide)
+    private void PushBackgroundToProjector()
+    {
+        string? eff = GetEffectiveBackground();
+        if (string.Equals(_projectorBgPath, eff, StringComparison.OrdinalIgnoreCase)) return;
+        _projectorBgPath = eff;
+        _projectionWindow?.SetMediaBackground(eff);
+    }
+
+    private void RefreshMonitor()
+    {
+        SetPreviewMediaBackground(GetEffectiveBackground());
+
+        // Só há texto no ecrã em modo LIVE; em CLEAR e LOGO o monitor fica sem texto, tal como o projetor
+        string raw = string.Empty;
+        if (_currentMode == ProjectionMode.Live)
+        {
+            raw = _currentSlideText;
+            if (!string.IsNullOrWhiteSpace(_currentReference)) raw += "\n\n— " + _currentReference;
+        }
+        _stageWindow?.SetText(raw);
+        string text = _projectionSettings.Uppercase ? raw.ToUpperInvariant() : raw;
+        if (TxtPreview.Text != text)
+        {
+            TxtPreview.Text = text;
+            TxtPreview.BeginAnimation(UIElement.OpacityProperty,
+                new System.Windows.Media.Animation.DoubleAnimation(0, 1, TimeSpan.FromMilliseconds(220)));
+        }
+    }
+
+    private void ApplyBadge(ProjectionMode mode)
+    {
+        var c = mode == ProjectionMode.Live ? Color.FromRgb(16, 185, 129) : Color.FromRgb(239, 68, 68);
+        BadgeLiveDot.Fill = new SolidColorBrush(c);
+        BadgeLiveText.Foreground = new SolidColorBrush(c);
+        BadgeLiveBorder.BorderBrush = new SolidColorBrush(Color.FromArgb(51, c.R, c.G, c.B));
+        BadgeLiveText.Text = mode switch
+        {
+            ProjectionMode.Live => "EM DIRETO",
+            ProjectionMode.Clear => "SÓ FUNDO (CLEAR)",
+            _ => "LOGO ATIVO"
+        };
+    }
+
+    // Ao passar o rato sobre um fundo da galeria o monitor mostra-o, mas avisa que não está no ecrã
+    private void ShowHoverBadge()
+    {
+        var amber = Color.FromRgb(245, 158, 11);
+        BadgeLiveDot.Fill = new SolidColorBrush(amber);
+        BadgeLiveText.Foreground = new SolidColorBrush(amber);
+        BadgeLiveBorder.BorderBrush = new SolidColorBrush(Color.FromArgb(51, amber.R, amber.G, amber.B));
+        BadgeLiveText.Text = "PRÉ-VISUALIZAÇÃO";
+    }
+
+    // Mostra no monitor o aviso/cronómetro que estiver ativo no projetor
+    private void SyncAlertPreview()
+    {
+        bool active = _projectionWindow?.IsAlertActive == true;
+        PreviewAlertOverlay.Visibility = active ? Visibility.Visible : Visibility.Collapsed;
+        if (!active) return;
+
+        TxtPreviewAlert.Text = _projectionWindow!.AlertMessageText;
+        string clock = _projectionWindow.AlertClockText;
+        TxtPreviewAlertClock.Text = clock;
+        TxtPreviewAlertClock.Visibility = string.IsNullOrEmpty(clock) ? Visibility.Collapsed : Visibility.Visible;
     }
 
     // ---------------------------------------------------------
@@ -1195,42 +1349,21 @@ private void LstSchedule_Drop(object sender, System.Windows.DragEventArgs e)
     private void SetProjectionMode(ProjectionMode mode)
     {
         OpenProjectionWindow();
+        _isBlack = false;
         _currentMode = mode;
 
         BtnModeLogo.Style = (Style)FindResource(mode == ProjectionMode.Logo ? "GoldButton" : "NavyButton");
         BtnModeClear.Style = (Style)FindResource(mode == ProjectionMode.Clear ? "GoldButton" : "NavyButton");
         BtnModeLive.Style = (Style)FindResource(mode == ProjectionMode.Live ? "GoldButton" : "NavyButton");
 
-        if (mode == ProjectionMode.Live)
-        {
-            BadgeLiveDot.Fill = new SolidColorBrush(Color.FromRgb(16, 185, 129));
-            BadgeLiveText.Foreground = new SolidColorBrush(Color.FromRgb(16, 185, 129));
-            BadgeLiveBorder.BorderBrush = new SolidColorBrush(Color.FromArgb(51, 16, 185, 129));
-            BadgeLiveText.Text = "EM DIRETO";
-            _projectionWindow?.SetBlackout(false);
-            _projectionWindow?.SetMediaBackground(_currentBackgroundPath);
-            _projectionWindow?.UpdateText(TxtPreview.Text);
-        }
-        else if (mode == ProjectionMode.Clear)
-        {
-            BadgeLiveDot.Fill = new SolidColorBrush(Color.FromRgb(239, 68, 68));
-            BadgeLiveText.Foreground = new SolidColorBrush(Color.FromRgb(239, 68, 68));
-            BadgeLiveBorder.BorderBrush = new SolidColorBrush(Color.FromArgb(51, 239, 68, 68));
-            BadgeLiveText.Text = "SÓ FUNDO (CLEAR)";
-            _projectionWindow?.SetBlackout(false);
-            _projectionWindow?.SetMediaBackground(_currentBackgroundPath);
-            _projectionWindow?.ClearScreen();
-        }
-        else if (mode == ProjectionMode.Logo)
-        {
-            BadgeLiveDot.Fill = new SolidColorBrush(Color.FromRgb(239, 68, 68));
-            BadgeLiveText.Foreground = new SolidColorBrush(Color.FromRgb(239, 68, 68));
-            BadgeLiveBorder.BorderBrush = new SolidColorBrush(Color.FromArgb(51, 239, 68, 68));
-            BadgeLiveText.Text = "LOGO ATIVO";
-            _projectionWindow?.SetBlackout(false);
-            _projectionWindow?.SetMediaBackground(_logoFilePath);
-            _projectionWindow?.ClearScreen();
-        }
+        ApplyBadge(mode);
+        _projectionWindow?.SetBlackout(false);
+        PushBackgroundToProjector();
+
+        if (mode == ProjectionMode.Live) _projectionWindow?.UpdateText(_currentSlideText, _currentReference);
+        else _projectionWindow?.ClearScreen();
+
+        RefreshMonitor();
     }
 
     private void OpenProjectionWindow()
@@ -1253,7 +1386,18 @@ private void LstSchedule_Drop(object sender, System.Windows.DragEventArgs e)
 
         if (isNewWindow)
         {
-            _projectionWindow = new ProjectionWindow();
+            var newWindow = new ProjectionWindow();
+            newWindow.PreviewKeyDown += ForwardPresenterKey;
+            newWindow.Closed += (s, e) =>
+            {
+                if (ReferenceEquals(_projectionWindow, newWindow))
+                {
+                    _projectionWindow = null;
+                    _stageWindow?.Close();
+                }
+                SyncAlertPreview();
+            };
+            _projectionWindow = newWindow;
             _projectionWindow.WindowStartupLocation = WindowStartupLocation.Manual;
             _projectionWindow.Left = bounds.Left;
             _projectionWindow.Top = bounds.Top;
@@ -1282,36 +1426,116 @@ private void LstSchedule_Drop(object sender, System.Windows.DragEventArgs e)
 
         if (isNewWindow)
         {
-            if (_currentMode == ProjectionMode.Live)
-            {
-                _projectionWindow.SetBlackout(false);
-                _projectionWindow.SetMediaBackground(_currentBackgroundPath);
-                _projectionWindow.UpdateText(TxtPreview.Text);
-            }
-            else if (_currentMode == ProjectionMode.Clear)
-            {
-                _projectionWindow.SetBlackout(false);
-                _projectionWindow.SetMediaBackground(_currentBackgroundPath);
-                _projectionWindow.ClearScreen();
-            }
-            else if (_currentMode == ProjectionMode.Logo)
-            {
-                _projectionWindow.SetBlackout(false);
-                _projectionWindow.SetMediaBackground(_logoFilePath);
-                _projectionWindow.ClearScreen();
-            }
+            _projectorBgPath = GetEffectiveBackground();
+            _projectionWindow.SetBlackout(false);
+            _projectionWindow.SetMediaBackground(_projectorBgPath);
+            if (_currentMode == ProjectionMode.Live) _projectionWindow.UpdateText(_currentSlideText, _currentReference);
+            else _projectionWindow.ClearScreen();
         }
+
+        EnsureStageWindow();
+    }
+
+    // ---------------------------------------------------------
+    // ECRÃ DO GRUPO DE LOUVOR
+    // ---------------------------------------------------------
+    // Abre/move/fecha o ecrã do louvor conforme as definições (só com a projeção ativa e num ecrã diferente)
+    private void EnsureStageWindow()
+    {
+        var screens = System.Windows.Forms.Screen.AllScreens;
+        int idx = _projectionSettings.StageScreenIndex;
+        bool wanted = _projectionWindow != null && screens.Length > 1
+                      && idx >= 0 && idx < screens.Length && idx != _projectionSettings.ScreenIndex;
+
+        if (!wanted)
+        {
+            _stageWindow?.Close();
+            _stageWindow = null;
+            return;
+        }
+
+        var bounds = screens[idx].Bounds;
+
+        if (_stageWindow != null && (Math.Abs(_stageWindow.Left - bounds.Left) > 50 || Math.Abs(_stageWindow.Top - bounds.Top) > 50))
+        {
+            _stageWindow.Close();
+            _stageWindow = null;
+        }
+
+        if (_stageWindow == null)
+        {
+            var stage = new StageWindow
+            {
+                WindowStartupLocation = WindowStartupLocation.Manual,
+                Left = bounds.Left,
+                Top = bounds.Top,
+                Width = bounds.Width,
+                Height = bounds.Height
+            };
+            stage.PreviewKeyDown += ForwardPresenterKey;
+            stage.Closed += (s, e) => { if (ReferenceEquals(_stageWindow, stage)) _stageWindow = null; };
+            _stageWindow = stage;
+            stage.Show();
+            stage.WindowState = WindowState.Maximized;
+        }
+
+        _stageWindow.ApplySettings(_projectionSettings);
+        RefreshMonitor(); // envia o texto atual ao ecrã do louvor
+    }
+
+    // Teclas da caneta (Logitech R400 e semelhantes): Page Up/Down, setas, "." ou B (ecrã preto), F5/Esc
+    private bool _isBlack;
+    private ProjectionMode _modeBeforeBlack = ProjectionMode.Live;
+
+    private static bool IsPresenterPriorityKey(Key k) =>
+        k == Key.PageDown || k == Key.PageUp || k == Key.Right || k == Key.Left || k == Key.B || k == Key.OemPeriod;
+
+    private void ToggleBlack()
+    {
+        if (_isBlack)
+        {
+            SetProjectionMode(_modeBeforeBlack);
+            return;
+        }
+        _modeBeforeBlack = _currentMode == ProjectionMode.Clear ? ProjectionMode.Live : _currentMode;
+        SetProjectionMode(ProjectionMode.Clear);
+        _projectionWindow?.SetBlackout(true);
+        _isBlack = true;
+    }
+
+    private bool HandlePresenterKey(Key key)
+    {
+        if (Keyboard.Modifiers != ModifierKeys.None) return false;
+        switch (key)
+        {
+            case Key.Escape: SetProjectionMode(ProjectionMode.Clear); return true;
+            case Key.F6: SetProjectionMode(ProjectionMode.Logo); return true;
+            case Key.F5: SetProjectionMode(ProjectionMode.Live); return true;
+            case Key.B:
+            case Key.OemPeriod: ToggleBlack(); return true;
+            case Key.Down: case Key.Space: case Key.PageDown: case Key.Right: NextSlide(); return true;
+            case Key.Up: case Key.PageUp: case Key.Left: PrevSlide(); return true;
+        }
+        return false;
+    }
+
+    // Antes de a lista/tabs "engolirem" a tecla
+    private void MainWindow_PreviewKeyDown(object sender, System.Windows.Input.KeyEventArgs e)
+    {
+        if (e.OriginalSource is System.Windows.Controls.TextBox) return;
+        if (IsPresenterPriorityKey(e.Key) && HandlePresenterKey(e.Key)) e.Handled = true;
     }
 
     private void MainWindow_KeyDown(object sender, System.Windows.Input.KeyEventArgs e)
     {
         if (e.OriginalSource is System.Windows.Controls.TextBox) return;
+        if (HandlePresenterKey(e.Key)) e.Handled = true;
+    }
 
-        if (e.Key == Key.Escape) { SetProjectionMode(ProjectionMode.Clear); e.Handled = true; }
-        else if (e.Key == Key.F6) { SetProjectionMode(ProjectionMode.Logo); e.Handled = true; }
-        else if (e.Key == System.Windows.Input.Key.F5) { SetProjectionMode(ProjectionMode.Live); e.Handled = true; }
-        else if (e.Key == Key.Down || e.Key == Key.Space || e.Key == Key.PageDown) { NextSlide(); e.Handled = true; }
-        else if (e.Key == Key.Up || e.Key == Key.PageUp) { PrevSlide(); e.Handled = true; }
+    // Janelas de projeção/louvor reencaminham as teclas para a janela principal
+    private void ForwardPresenterKey(object sender, System.Windows.Input.KeyEventArgs e)
+    {
+        if (HandlePresenterKey(e.Key)) e.Handled = true;
     }
 
     private void BtnNextSlide_Click(object sender, RoutedEventArgs e) => NextSlide();
@@ -1375,7 +1599,7 @@ private void LstSchedule_Drop(object sender, System.Windows.DragEventArgs e)
     private void BtnMinimize_Click(object sender, RoutedEventArgs e) { this.WindowState = WindowState.Minimized; }
     private void BtnMaximize_Click(object sender, RoutedEventArgs e) { this.WindowState = this.WindowState == WindowState.Maximized ? WindowState.Normal : WindowState.Maximized; }
     private void BtnClose_Click(object sender, RoutedEventArgs e) { this.Close(); }
-    protected override void OnClosed(EventArgs e) { SaveCurrentSession(); _projectionWindow?.Close(); base.OnClosed(e); }
+    protected override void OnClosed(EventArgs e) { _saveTimer?.Stop(); SaveSessionNow(); _remote?.Stop(); _stageWindow?.Close(); _projectionWindow?.Close(); base.OnClosed(e); }
 
     // ---------------------------------------------------------
     // DRAG ADORNER (EFEITO VISUAL AO ARRASTAR DE FORA DA PROGRAMAÇÃO)
@@ -1435,8 +1659,8 @@ private void LstSchedule_Drop(object sender, System.Windows.DragEventArgs e)
     {
         var border = new Border
         {
-            Background = new SolidColorBrush(Color.FromArgb(220, 22, 32, 50)),
-            BorderBrush = new SolidColorBrush(Color.FromRgb(212, 175, 55)),
+            Background = new SolidColorBrush(Color.FromArgb(230, 21, 25, 31)),
+            BorderBrush = new SolidColorBrush(Color.FromRgb(34, 211, 238)),
             BorderThickness = new Thickness(1),
             CornerRadius = new CornerRadius(6),
             Padding = new Thickness(10, 6, 10, 6),
@@ -1457,16 +1681,32 @@ private void LstSchedule_Drop(object sender, System.Windows.DragEventArgs e)
         {
             try
             {
+                Mouse.OverrideCursor = System.Windows.Input.Cursors.Wait;
                 var imported = EasyWorshipImporter.ImportFromEasyWorshipSqlite(dialog.FileName);
-                if (imported.Count > 0)
+
+                // Ignora músicas que já existem (mesmo título e mesma letra), para não duplicar ao importar duas vezes
+                static string Key(Song s) => (s.Title ?? "").Trim().ToLowerInvariant() + "|" + (s.RawLyrics ?? "").Trim();
+                var existing = new HashSet<string>(_allSongs.Select(Key));
+                var novas = imported.Where(s => existing.Add(Key(s))).ToList();
+
+                if (novas.Count > 0)
                 {
-                    _dbService.InsertBatch(imported);
+                    _dbService.InsertBatch(novas);
                     _allSongs = _dbService.GetAllSongs();
                     UpdateSongFilter(string.Empty);
-                    MessageBox.Show($"{imported.Count} músicas importadas!");
                 }
+                Mouse.OverrideCursor = null;
+
+                MessageBox.Show(
+                    $"{novas.Count} músicas importadas." + (imported.Count - novas.Count > 0 ? $"\n{imported.Count - novas.Count} já existiam e foram ignoradas." : ""),
+                    "Importar EasyWorship", MessageBoxButton.OK, MessageBoxImage.Information);
             }
-            catch { }
+            catch (Exception ex)
+            {
+                Mouse.OverrideCursor = null;
+                AppPaths.Log("Importar EasyWorship", ex);
+                MessageBox.Show($"Erro ao importar do EasyWorship:\n{ex.Message}", "Importar EasyWorship", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
         }
     }
 
@@ -1486,10 +1726,6 @@ private void LstSchedule_Drop(object sender, System.Windows.DragEventArgs e)
         }
     }
 
-    private void SongSearchMode_Changed(object sender, RoutedEventArgs e)
-    {
-        if (TxtSearchSong != null) UpdateSongFilter(TxtSearchSong.Text);
-    }
 
 
 }

@@ -31,6 +31,10 @@
   </ItemGroup>
 
   <ItemGroup>
+    <FrameworkReference Include="Microsoft.AspNetCore.App" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="Dapper" Version="2.1.89" />
     <PackageReference Include="LibVLCSharp" Version="3.10.1" />
     <PackageReference Include="LibVLCSharp.WPF" Version="3.10.1" />

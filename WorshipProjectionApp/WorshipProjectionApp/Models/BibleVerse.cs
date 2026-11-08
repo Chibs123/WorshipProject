@@ -15,7 +15,8 @@ public class BibleVerse
         return new SlideItem
         {
             Header = Reference,
-            Content = $"\"{Text.Trim()}\"\n\n— {Reference}"
+            Content = $"\"{Text.Trim()}\"",
+            Reference = Reference
         };
     }
 }

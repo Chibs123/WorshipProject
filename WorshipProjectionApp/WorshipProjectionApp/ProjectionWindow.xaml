@@ -1,6 +1,7 @@
 ﻿<Window x:Class="WorshipProjectionApp.ProjectionWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:local="clr-namespace:WorshipProjectionApp"
         Title="IEBCR II Setúbal - Saída de Projeção"
         Background="Black"
         WindowStyle="None"
@@ -18,6 +19,7 @@
                       UnloadedBehavior="Manual"
                       Stretch="UniformToFill"
                       IsMuted="True"
+                      RenderOptions.BitmapScalingMode="LowQuality"
                       MediaEnded="MediaBgVideo_MediaEnded"
                       Opacity="0"/>
 
@@ -31,25 +33,45 @@
         <!-- Camada 3: Filtro Escuro Suave para Contraste -->
         <Rectangle x:Name="OverlayDimmer" Fill="#000000" Opacity="0.15"/>
 
-        <!-- Camada 4: Área das Letras e Versículos -->
-        <Viewbox x:Name="ViewboxContent" Stretch="Uniform" Margin="70">
-            <Grid MinWidth="800">
-                <TextBlock x:Name="TxtProjection"
-                           Foreground="White"
-                           FontFamily="Segoe UI"
-                           FontWeight="Bold"
-                           FontSize="54"
-                           TextWrapping="Wrap"
-                           TextAlignment="Center"
-                           MaxWidth="1100"
-                           LineHeight="68"
-                           Opacity="1">
-                    <TextBlock.Effect>
-                        <DropShadowEffect Color="Black" BlurRadius="16" ShadowDepth="4" Direction="315" Opacity="0.95" RenderingBias="Quality"/>
-                    </TextBlock.Effect>
-                </TextBlock>
-            </Grid>
-        </Viewbox>
+        <!-- Camada 4: Área das Letras e Versículos (tamanho fixo; só reduz se o texto não couber) -->
+        <Grid x:Name="TextLayer" Opacity="1">
+            <Viewbox x:Name="ViewboxContent" Stretch="Uniform" StretchDirection="DownOnly" Margin="70">
+                <Border x:Name="TextHost" Visibility="Collapsed">
+                    <local:OutlinedTextBlock x:Name="TxtProjection"
+                                             Foreground="White"
+                                             FontFamily="Segoe UI"
+                                             FontWeight="Bold"
+                                             FontSize="84"
+                                             TextAlignment="Center"
+                                             LineHeight="100"
+                                             Stroke="Black"
+                                             StrokeThickness="0"
+                                             MaxWidth="1700">
+                        <local:OutlinedTextBlock.Effect>
+                            <DropShadowEffect Color="Black" BlurRadius="16" ShadowDepth="4" Direction="315" Opacity="0.95" RenderingBias="Quality"/>
+                        </local:OutlinedTextBlock.Effect>
+                    </local:OutlinedTextBlock>
+                </Border>
+            </Viewbox>
+
+            <!-- Referência bíblica pequena no fundo do ecrã -->
+            <TextBlock x:Name="TxtReference"
+                       Visibility="Collapsed"
+                       HorizontalAlignment="Center"
+                       VerticalAlignment="Bottom"
+                       Margin="0,0,0,40"
+                       Foreground="White"
+                       FontFamily="Segoe UI"
+                       FontWeight="SemiBold"
+                       FontSize="36"
+                       TextWrapping="Wrap"
+                       TextAlignment="Center"
+                       MaxWidth="1600">
+                <TextBlock.Effect>
+                    <DropShadowEffect Color="Black" BlurRadius="10" ShadowDepth="3" Direction="315" Opacity="0.95" RenderingBias="Quality"/>
+                </TextBlock.Effect>
+            </TextBlock>
+        </Grid>
 
         <!-- Camada 5: Alertas e Cronómetros (Ecrã Inteiro) -->
         <Grid x:Name="FullScreenAlertOverlay" Background="#F5060A12" Opacity="0" Visibility="Collapsed">

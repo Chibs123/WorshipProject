@@ -13,7 +13,7 @@ public class WorshipTeamMember
 
 public static class WorshipTeamCatalog
 {
-    private static readonly string CatalogPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "worship_team_catalog.json");
+    private static readonly string CatalogPath = WorshipProjectionApp.AppPaths.File("worship_team_catalog.json");
 
     public static List<WorshipTeamMember> LoadCatalog()
     {

@@ -15,13 +15,24 @@ public partial class ProjectionWindow : Window
     private readonly Duration _fadeDuration = new(TimeSpan.FromMilliseconds(220));
     private bool _isBlackout;
 
+    // Estado do aviso (lido pelo monitor da janela principal)
+    public bool IsAlertActive { get; private set; }
+    public string AlertMessageText => TxtProjectionAlert.Text;
+    public string AlertClockText => TxtProjectionClock.Visibility == Visibility.Visible ? TxtProjectionClock.Text : string.Empty;
+
+    private ProjectionSettings _settings = new();
+    private string _pendingMain = string.Empty;
+    private string _pendingRef = string.Empty;
+
     public ProjectionWindow()
     {
         InitializeComponent();
+        // Os tamanhos dependem da altura/largura do ecrã: recalcula quando a janela muda de tamanho
+        SizeChanged += (s, e) => ApplySettings(_settings);
     }
 
     private void BtnClose_Click(object sender, RoutedEventArgs e) => this.Close();
-    public void UpdateText(string newText)
+    public void UpdateText(string newText, string? reference = null)
     {
         if (_isBlackout) return;
 
@@ -31,24 +42,47 @@ public partial class ProjectionWindow : Window
             return;
         }
 
-        if (TxtProjection.Text == newText && TxtProjection.Opacity > 0.8) return;
+        string main = newText;
+        string? refBottom = null;
+
+        if (!string.IsNullOrWhiteSpace(reference))
+        {
+            if (_settings.BibleRefAtBottom) refBottom = reference;
+            else main = newText + "\n\n— " + reference;
+        }
+
+        if (_settings.Uppercase) main = main.ToUpperInvariant();
+
+        TransitionTo(main, refBottom);
+    }
+
+    public void ClearScreen() => TransitionTo(string.Empty, null);
+
+    // Faz fade-out, troca o texto (e a referência) e faz fade-in. Usa sempre o último pedido,
+    // por isso mudanças rápidas de slide não deixam texto antigo no ecrã.
+    private void TransitionTo(string main, string? reference)
+    {
+        _pendingMain = main;
+        _pendingRef = reference ?? string.Empty;
+
+        if (main.Length > 0 && TxtProjection.Text == main && TxtReference.Text == _pendingRef && TextLayer.Opacity > 0.8) return;
 
         var fadeOut = new DoubleAnimation(0, _fadeDuration);
         fadeOut.Completed += (s, e) =>
         {
-            TxtProjection.Text = newText;
-            var fadeIn = new DoubleAnimation(1, _fadeDuration);
-            TxtProjection.BeginAnimation(OpacityProperty, fadeIn);
+            SetTextNow(_pendingMain, _pendingRef);
+            if (_pendingMain.Length > 0 && !_isBlackout)
+                TextLayer.BeginAnimation(OpacityProperty, new DoubleAnimation(1, _fadeDuration));
         };
-
-        TxtProjection.BeginAnimation(OpacityProperty, fadeOut);
+        TextLayer.BeginAnimation(OpacityProperty, fadeOut);
     }
 
-    public void ClearScreen()
+    private void SetTextNow(string main, string reference)
     {
-        var fadeOut = new DoubleAnimation(0, _fadeDuration);
-        fadeOut.Completed += (s, e) => { TxtProjection.Text = string.Empty; };
-        TxtProjection.BeginAnimation(OpacityProperty, fadeOut);
+        TxtProjection.Text = main;
+        TxtReference.Text = reference;
+        TextHost.Visibility = main.Length == 0 ? Visibility.Collapsed : Visibility.Visible; // a caixa só existe com texto
+        TxtReference.Visibility = reference.Length == 0 ? Visibility.Collapsed : Visibility.Visible;
     }
 
     public void SetMediaBackground(string? filePath)
@@ -131,13 +165,13 @@ public partial class ProjectionWindow : Window
 
         if (_isBlackout)
         {
-            FadeOutElement(TxtProjection);
+            FadeOutElement(TextLayer);
             FadeOutElement(MediaBgVideo);
             FadeOutElement(MediaBgImage);
         }
         else
         {
-            FadeInElement(TxtProjection);
+            FadeInElement(TextLayer);
             if (MediaBgVideo.Source != null) FadeInElement(MediaBgVideo);
             if (MediaBgImage.Source != null) FadeInElement(MediaBgImage);
         }
@@ -151,6 +185,7 @@ public partial class ProjectionWindow : Window
 
     public void ShowAlert(string message, bool showClock = false, int countdownMinutes = 0)
     {
+        IsAlertActive = true;
         TxtProjectionAlert.Text = message;
         _isCountdown = countdownMinutes > 0;
 
@@ -188,6 +223,7 @@ public partial class ProjectionWindow : Window
 
     public void HideAlert()
     {
+        IsAlertActive = false;
         _clockTimer?.Stop();
 
         // Faz o Fade Out e, quando terminar, esconde a Grid completamente
@@ -233,26 +269,66 @@ public partial class ProjectionWindow : Window
 
     public void ApplySettings(ProjectionSettings settings)
     {
-        TxtProjection.FontFamily = new System.Windows.Media.FontFamily(settings.FontFamily);
-        TxtProjection.FontWeight = settings.IsBold ? FontWeights.Bold : FontWeights.Normal;
+        _settings = settings;
+
+        double w = ActualWidth > 0 ? ActualWidth : 1920;
+        double h = ActualHeight > 0 ? ActualHeight : 1080;
+        double scale = h / 1080.0;                 // todos os tamanhos são definidos para 1080p
+        double fontSize = Math.Max(10, settings.TextFontSize * scale);
+
+        var fontFamily = new System.Windows.Media.FontFamily(settings.FontFamily);
+        var weight = settings.IsBold ? FontWeights.Bold : FontWeights.Normal;
+
+        TxtProjection.FontFamily = fontFamily;
+        TxtProjection.FontWeight = weight;
         TxtProjection.TextAlignment = settings.TextAlignment;
+        TxtProjection.FontSize = fontSize;
+        TxtProjection.LineHeight = fontSize * Math.Max(0.8, settings.LineSpacing);
+        TxtProjection.StrokeThickness = settings.OutlineEnabled ? Math.Max(0, settings.OutlineThickness * scale) : 0;
 
         var converter = new BrushConverter();
-        if (converter.ConvertFromString(settings.FontColorHex) is SolidColorBrush brush)
-        {
-            TxtProjection.Foreground = brush;
-        }
+        System.Windows.Media.Brush? textBrush = null;
+        try { textBrush = converter.ConvertFromString(settings.FontColorHex) as System.Windows.Media.Brush; } catch { }
+        textBrush ??= System.Windows.Media.Brushes.White;
+        TxtProjection.Foreground = textBrush;
 
         if (TxtProjection.Effect is System.Windows.Media.Effects.DropShadowEffect shadow)
         {
-            shadow.BlurRadius = settings.ShadowBlurRadius;
+            shadow.BlurRadius = settings.ShadowBlurRadius * scale;
+            shadow.ShadowDepth = 4 * scale;
             shadow.Opacity = settings.ShadowOpacity;
         }
 
-        ViewboxContent.VerticalAlignment = settings.VerticalAlignment;
+        // Caixa semitransparente atrás do texto
+        if (settings.BackBoxEnabled)
+        {
+            byte alpha = (byte)Math.Round(255 * Math.Clamp(settings.BackBoxOpacity, 0, 1));
+            TextHost.Background = new SolidColorBrush(System.Windows.Media.Color.FromArgb(alpha, 0, 0, 0));
+            TextHost.Padding = new Thickness(fontSize * 0.5, fontSize * 0.25, fontSize * 0.5, fontSize * 0.25);
+            TextHost.CornerRadius = new CornerRadius(fontSize * 0.25);
+        }
+        else
+        {
+            TextHost.Background = null;
+            TextHost.Padding = new Thickness(0);
+            TextHost.CornerRadius = new CornerRadius(0);
+        }
 
-        double baseWidth = this.ActualWidth > 0 ? this.ActualWidth : 1920;
-        double marginPixels = baseWidth * (settings.MarginPercent / 100.0);
-        ViewboxContent.Margin = new Thickness(marginPixels);
+        OverlayDimmer.Opacity = Math.Clamp(settings.DimmerOpacity, 0, 0.9);
+
+        // Margens de segurança e largura máxima do texto (o texto quebra aqui; se ficar alto demais, reduz)
+        double marginPixels = w * (settings.MarginPercent / 100.0);
+        double bottomExtra = (settings.BibleRefAtBottom && settings.VerticalAlignment == VerticalAlignment.Bottom) ? h * 0.07 : 0; // espaço para a referência
+        ViewboxContent.VerticalAlignment = settings.VerticalAlignment;
+        ViewboxContent.Margin = new Thickness(marginPixels, marginPixels, marginPixels, marginPixels + bottomExtra);
+        double boxPad = settings.BackBoxEnabled ? fontSize : 0;
+        TxtProjection.MaxWidth = Math.Max(200, w - 2 * marginPixels - boxPad);
+
+        // Referência bíblica
+        TxtReference.FontFamily = fontFamily;
+        TxtReference.FontSize = Math.Max(12, settings.TextFontSize * 0.42 * scale);
+        TxtReference.Foreground = textBrush;
+        TxtReference.MaxWidth = Math.Max(200, w - 2 * marginPixels);
+        TxtReference.Margin = new Thickness(0, 0, 0, h * 0.04);
     }
 }
